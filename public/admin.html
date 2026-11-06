@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Juegos de Reto — Aprende jugando</title>
-<link rel="stylesheet" href="/css/app.css">
+<link rel="stylesheet" href="/css/app.css"><style>.subject-picker{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}.subject-picker label{display:inline-flex;align-items:center;gap:5px;background:#f1f5f9;border:1px solid #cbd5e1;border-radius:8px;padding:7px 9px;color:#172033;cursor:pointer}.subject-picker input{width:auto;accent-color:#2563eb}.danger-zone{margin-top:8px;border-top:1px solid #fecaca;padding-top:8px}</style>
 </head>
 <body>
 <header><h1>Administración</h1>
@@ -45,7 +45,7 @@
         <div><label>Correo</label><input id="nEmail" type="email"></div>
         <div><label>Contraseña temporal</label><div class="password-wrap"><input id="nPass" type="password" autocomplete="new-password"><button type="button" class="password-toggle" onclick="togglePassword('nPass',this)" aria-label="Mostrar la contraseña">Mostrar</button></div></div>
         <div><label>Colegio</label><input id="nSchool"></div>
-        <div><label>Días de acceso</label><input id="nDays" type="number" value="30"></div><div><label>Materias contratadas (Ctrl/Cmd + clic para varias)</label><select id="nSubjects" multiple size="4"><option value="fisica">Física</option><option value="quimica">Química</option><option value="biologia">Biología</option><option value="matematicas">Matemáticas</option></select></div>
+        <div><label>Días de acceso</label><input id="nDays" type="number" value="30"></div><div><label>Materias contratadas (Ctrl/Cmd + clic para varias)</label><div id="nSubjects" class="subject-picker"><label><input type="checkbox" value="fisica"> Física</label><label><input type="checkbox" value="quimica"> Química</label><label><input type="checkbox" value="biologia"> Biología</label><label><input type="checkbox" value="matematicas"> Matemáticas</label></div></div>
       </div>
       <button class="btn btn-ok" type="button" onclick="createTeacher()">Crear y activar</button>
       <div class="ok" id="ok"></div>
@@ -107,7 +107,7 @@ async function loadTeachers(){
     const subjects = Array.isArray(t.subjects) && t.subjects.length ? t.subjects : ['fisica'];
     const subjectLabels = {fisica:'Física',quimica:'Química',biologia:'Biología',matematicas:'Matemáticas'};
     const subjectText = subjects.map(x=>subjectLabels[x]||x).join(', ');
-    const subjectSelect = '<select id="subjects-'+t.id+'" multiple size=4>'+Object.keys(subjectLabels).map(x=>'<option value="'+x+'" '+(subjects.includes(x)?'selected':'')+'>'+subjectLabels[x]+'</option>').join('')+'</select>';
+    const subjectSelect = '<div id="subjects-'+t.id+'" class="subject-picker">'+Object.keys(subjectLabels).map(x=>'<label><input type="checkbox" value="'+x+'" '+(subjects.includes(x)?'checked':'')+'> '+subjectLabels[x]+'</label>').join('')+'</div>';
     const tr=document.createElement('tr');
     tr.innerHTML=`<td>${esc(t.name)}</td><td>${esc(t.email)}</td><td>${plan}</td><td>${esc(subjectText)}<br>${subjectSelect}</td><td>${st}</td><td>${t.validUntil?new Date(t.validUntil).toLocaleDateString():'—'}</td><td><b>${esc(t.classCode||'')}</b></td>
       <td>
@@ -117,10 +117,15 @@ async function loadTeachers(){
         <button class="btn btn-ok" type="button" onclick="activateFromRow('${t.id}')">Activar por días</button>
         <button class="btn btn-ok" type="button" onclick="activate('${t.id}',30)">+30 días</button>
         <button class="btn btn-gold" type="button" onclick="activate('${t.id}',365)">+1 año</button>
-        <button class="btn btn-bad" type="button" onclick="suspend('${t.id}')">Suspender</button>
+        <button class="btn btn-bad" type="button" onclick="suspend('${t.id}')">Suspender</button><button class="btn btn-bad" type="button" onclick="deleteTeacher('${t.id}', '${esc(t.name).replace(/'/g, '&#39;')}')">Eliminar</button>
       </td>`;
     tbody.appendChild(tr);
   });
+}
+function selectedSubjects(id){ return Array.from(document.querySelectorAll('#'+id+' input[type="checkbox"]:checked')).map(function(x){return x.value;}); }
+async function deleteTeacher(id,name){
+  if(!confirm('¿Eliminar definitivamente a '+name+'? Se borrarán su licencia, sesiones y resultados asociados. Esta acción no se puede deshacer.')) return;
+  try{ await API.req('/api/admin/teachers/'+id,{method:'DELETE'}); alert('Profesor eliminado correctamente.'); loadTeachers(); }catch(e){ alert(e.message); }
 }
 async function resetTeacherPassword(id){
   const field=document.getElementById('resetPass-'+id);
@@ -135,7 +140,7 @@ async function resetTeacherPassword(id){
 async function activateFromRow(id){
   const field=document.getElementById('licenseDays-'+id);
   const days=Math.max(1,Math.min(3650,parseInt(field && field.value,10)||30));
-  const subjects=Array.from(document.getElementById('subjects-'+id).selectedOptions).map(o=>o.value);
+  const subjects=selectedSubjects('subjects-'+id);
   if(!subjects.length){ alert('Selecciona al menos una materia.'); return; }
   try{
     await activate(id,days,subjects);
@@ -156,12 +161,12 @@ async function suspend(id){
 async function createTeacher(){
   hide(ok); hide(err2);
   try{
-    const subjects=Array.from(nSubjects.selectedOptions).map(o=>o.value);
+    const subjects=selectedSubjects('nSubjects');
     if(!subjects.length){ show(err2,'Selecciona al menos una materia.'); return; }
     const body={name:nName.value,email:nEmail.value,password:nPass.value,school:nSchool.value,days:parseInt(nDays.value,10)||30,plan:'paid',subjects};
     const data=await API.req('/api/admin/teachers',{method:'POST',body:JSON.stringify(body)});
     show(ok,'Creado: '+data.teacher.email+' · Código clase: '+data.teacher.classCode);
-    nName.value=nEmail.value=nPass.value=nSchool.value=''; Array.from(nSubjects.options).forEach(o=>o.selected=false);
+    nName.value=nEmail.value=nPass.value=nSchool.value=''; nSubjects.querySelectorAll('input').forEach(function(o){o.checked=false});
     loadTeachers();
   }catch(e){ show(err2,e.message); }
 }

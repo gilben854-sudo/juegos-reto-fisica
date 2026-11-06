@@ -212,6 +212,10 @@ app.get('/api/admin/teachers', (req, res) => {
   res.json({ teachers: list });
 });
 
+app.delete('/api/admin/teachers/:id', (req, res) => {
+  const a=authAdmin(req); if(!a) return res.status(401).json({error:'No autorizado'}); const id=req.params.id; if(!a.db.teachers[id]) return res.status(404).json({error:'Profesor no encontrado'});
+  delete a.db.teachers[id]; Object.keys(a.db.sessions).forEach(k=>{if(a.db.sessions[k].teacherId===id) delete a.db.sessions[k]}); Object.keys(a.db.studentSessions).forEach(k=>{if(a.db.studentSessions[k].teacherId===id) delete a.db.studentSessions[k]}); a.db.results=(a.db.results||[]).filter(r=>r.teacherId!==id); saveDb(a.db); res.json({ok:true});
+});
 app.post('/api/admin/teachers/:id/password', (req, res) => {
   const a = authAdmin(req);
   if (!a) return res.status(401).json({ error: 'No autorizado' });

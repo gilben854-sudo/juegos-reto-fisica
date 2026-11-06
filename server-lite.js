@@ -248,6 +248,11 @@ const server = http.createServer(async (req, res) => {
       return send(res, 200, { teachers: Object.values(a.db.teachers).map(publicTeacher) });
     }
 
+    if (p.startsWith('/api/admin/teachers/') && req.method === 'DELETE') {
+      const a=auth(req,'admin'); if(!a) return send(res,401,{error:'No autorizado'});
+      const id=p.split('/')[4]; if(!a.db.teachers[id]) return send(res,404,{error:'Profesor no encontrado'});
+      delete a.db.teachers[id]; Object.keys(a.db.sessions).forEach(k=>{if(a.db.sessions[k].teacherId===id) delete a.db.sessions[k]}); Object.keys(a.db.studentSessions).forEach(k=>{if(a.db.studentSessions[k].teacherId===id) delete a.db.studentSessions[k]}); a.db.results=(a.db.results||[]).filter(r=>r.teacherId!==id); saveDb(a.db); return send(res,200,{ok:true});
+    }
     if (p.startsWith('/api/admin/teachers/') && p.endsWith('/password') && req.method === 'POST') {
       const a = auth(req, 'admin');
       if (!a) return send(res, 401, { error: 'No autorizado' });
