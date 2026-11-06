@@ -13,7 +13,7 @@
   .msg.ok{background:#052e16;border:1px solid #166534;color:#86efac}
   .msg.bad{background:#450a0a;border:1px solid #7f1d1d;color:#fca5a5}
 </style>
-</head>
+<link rel="manifest" href="/manifest.webmanifest"><meta name="theme-color" content="#2563eb"><link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png"></head>
 <body>
 <header>
   <h1>Panel del profesor</h1>
@@ -153,5 +153,5 @@
 })();
 </script>
 <footer style="text-align:center;color:#94a3b8;padding:24px"><a href="/terminos.html" style="color:#7dd3fc">Términos de uso</a> · <a href="/privacidad.html" style="color:#7dd3fc">Privacidad</a></footer>
-</body>
+<script>if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("/sw.js").catch(()=>{}));}</script></body>
 </html>

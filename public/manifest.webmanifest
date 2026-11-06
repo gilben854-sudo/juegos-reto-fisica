@@ -1,0 +1,16 @@
+{
+  "name": "Juegos de Reto — Aprende jugando",
+  "short_name": "Juegos de Reto",
+  "description": "Portal educativo de Física, Química, Biología y Matemáticas.",
+  "lang": "es",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#eff6ff",
+  "theme_color": "#2563eb",
+  "icons": [
+    {"src":"/icons/icon-192.png","sizes":"192x192","type":"image/png","purpose":"any maskable"},
+    {"src":"/icons/icon-512.png","sizes":"512x512","type":"image/png","purpose":"any maskable"}
+  ]
+}

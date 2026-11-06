@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Juegos de Reto — Aprende jugando</title>
 <link rel="stylesheet" href="/css/app.css">
-</head>
+<link rel="manifest" href="/manifest.webmanifest"><meta name="theme-color" content="#2563eb"><link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png"></head>
 <body>
 <header><h1>Entrada de alumno</h1>
   <p class="slogan" style="color:#7dd3fc;font-weight:600;margin:8px 0 0">Aprende jugando</p><p>Usa el código de clase de tu profesor</p></header>
@@ -56,5 +56,5 @@ async function checkAccess(){
   }catch(e){ show(err,e.message); }
 }
 </script>
-</body>
+<script>if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("/sw.js").catch(()=>{}));}</script></body>
 </html>

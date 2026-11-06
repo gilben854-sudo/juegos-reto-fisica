@@ -37,7 +37,7 @@ input{width:100%;max-width:420px;padding:11px 12px;border-radius:10px;border:2px
 footer{text-align:center;color:#64748b;font-size:.8rem;padding:24px 12px}
 .muted{color:var(--muted);font-size:.9rem;line-height:1.5}
 </style>
-</head>
+<link rel="manifest" href="/manifest.webmanifest"><meta name="theme-color" content="#2563eb"><link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png"></head>
 <body>
 <header>
   <h1>Juegos de Reto</h1>
@@ -280,5 +280,5 @@ showSubject('fisica', document.querySelector('[data-subject-button="fisica"]'));
 if(localStorage.getItem('saas_classCode')) document.getElementById('classCode').value=localStorage.getItem('saas_classCode');
 if(localStorage.getItem('saas_studentName')) document.getElementById('studentName').value=localStorage.getItem('saas_studentName');
 </script>
-</body>
+<script>if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("/sw.js").catch(()=>{}));}</script></body>
 </html>
