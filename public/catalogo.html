@@ -42,7 +42,7 @@ footer{text-align:center;color:#64748b;font-size:.8rem;padding:24px 12px}
 <header>
   <h1>Juegos de Reto para Física y Química</h1>
   <p class="slogan">Aprende ciencias resolviendo retos</p>
-  <p class="sub">Física, Química y Biología · 31 módulos</p>
+  <p class="sub">Física, Química, Biología y Matemáticas · 40 módulos</p>
 </header>
 <div class="wrap">
   <div class="gate">
@@ -66,6 +66,7 @@ footer{text-align:center;color:#64748b;font-size:.8rem;padding:24px 12px}
     <button type="button" class="btn subject-btn active" data-subject-button="fisica" onclick="showSubject('fisica',this)">Física</button>
     <button type="button" class="btn subject-btn" data-subject-button="quimica" onclick="showSubject('quimica',this)">Química</button>
     <button type="button" class="btn subject-btn" data-subject-button="biologia" onclick="showSubject('biologia',this)">Biología</button>
+    <button type="button" class="btn subject-btn" data-subject-button="matematicas" onclick="showSubject('matematicas',this)">Matemáticas</button>
   </div>
   <div class="grid locked-overlay" id="grid">
     <div class="section-title" data-subject="fisica">Juegos de Física</div>
@@ -154,9 +155,19 @@ footer{text-align:center;color:#64748b;font-size:.8rem;padding:24px 12px}
     <a class="card-mod" href="games/reproduccion-saas/index.html" data-module="biologia-reproduccion"><div class="card-title">Reproducción</div><div class="card-desc">Reproducción y desarrollo</div><div class="card-go">Entrar →</div></a>
     <a class="card-mod" href="games/evolucion-saas/index.html" data-module="biologia-evolucion"><div class="card-title">Evolución y adaptación</div><div class="card-desc">Cambios en poblaciones a través del tiempo</div><div class="card-go">Entrar →</div></a>
     <a class="card-mod" href="games/simulador-biologia-saas/index.html" data-module="biologia-simulador"><div class="card-title">Simulador de laboratorio biológico</div><div class="card-desc">Microscopía, observación y seguridad</div><div class="card-go">Entrar →</div></a>
+    <div class="section-title" data-subject="matematicas">Juegos de Matemáticas</div>
+    <a class="card-mod" href="games/operaciones-saas/index.html" data-module="matematicas-operaciones"><div class="card-title">Operaciones básicas</div><div class="card-desc">Cálculo y jerarquía de operaciones</div><div class="card-go">Entrar →</div></a>
+    <a class="card-mod" href="games/fracciones-saas/index.html" data-module="matematicas-fracciones"><div class="card-title">Fracciones</div><div class="card-desc">Operaciones y problemas con fracciones</div><div class="card-go">Entrar →</div></a>
+    <a class="card-mod" href="games/algebra-saas/index.html" data-module="matematicas-algebra"><div class="card-title">Álgebra</div><div class="card-desc">Expresiones y simplificación algebraica</div><div class="card-go">Entrar →</div></a>
+    <a class="card-mod" href="games/ecuaciones-saas/index.html" data-module="matematicas-ecuaciones"><div class="card-title">Ecuaciones</div><div class="card-desc">Ecuaciones lineales y problemas</div><div class="card-go">Entrar →</div></a>
+    <a class="card-mod" href="games/proporciones-saas/index.html" data-module="matematicas-proporciones"><div class="card-title">Proporciones y porcentajes</div><div class="card-desc">Regla de tres, porcentajes y descuentos</div><div class="card-go">Entrar →</div></a>
+    <a class="card-mod" href="games/geometria-saas/index.html" data-module="matematicas-geometria"><div class="card-title">Geometría</div><div class="card-desc">Áreas, perímetros, volúmenes y ángulos</div><div class="card-go">Entrar →</div></a>
+    <a class="card-mod" href="games/funciones-saas/index.html" data-module="matematicas-funciones"><div class="card-title">Funciones y gráficas</div><div class="card-desc">Relaciones, tablas y pendientes</div><div class="card-go">Entrar →</div></a>
+    <a class="card-mod" href="games/estadistica-saas/index.html" data-module="matematicas-estadistica"><div class="card-title">Estadística y probabilidad</div><div class="card-desc">Datos, gráficos y probabilidad</div><div class="card-go">Entrar →</div></a>
+    <a class="card-mod" href="games/simulador-matematico-saas/index.html" data-module="matematicas-simulador"><div class="card-title">Simulador matemático</div><div class="card-desc">Retos integrados de cálculo y lógica</div><div class="card-go">Entrar →</div></a>
   </div>
 </div>
-<footer>Juegos de Reto para Física, Química y Biología · Aprende ciencias resolviendo retos · Producido por GILAST</footer>
+<footer>Juegos de Reto para Física, Química, Biología y Matemáticas · Aprende ciencias resolviendo retos · Producido por GILAST</footer>
 <script>
 // API base: same origin when served by saas-platform; override if games on another host
 const API_BASE = localStorage.getItem('saas_api_base') || '';
@@ -216,7 +227,7 @@ function showSubject(subject, button){
   document.querySelectorAll('[data-subject-button]').forEach(b=>b.classList.toggle('active', b===button));
   document.querySelectorAll('#grid .card-mod, #grid .section-title').forEach(el=>{
     const module=(el.dataset.module||'');
-    const current=el.dataset.subject || (module.startsWith('quimica-')?'quimica':module.startsWith('biologia-')?'biologia':'fisica');
+    const current=el.dataset.subject || (module.startsWith('quimica-')?'quimica':module.startsWith('biologia-')?'biologia':module.startsWith('matematicas-')?'matematicas':'fisica');
     el.style.display=current===subject?'block':'none';
   });
 }
