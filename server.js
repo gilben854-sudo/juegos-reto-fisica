@@ -44,7 +44,13 @@ function loadDb() {
 }
 function saveDb(db) {
   fs.mkdirSync(path.dirname(DB_PATH), { recursive: true });
-  fs.writeFileSync(DB_PATH, JSON.stringify(db, null, 2), 'utf8');
+  const serialized = JSON.stringify(db, null, 2);
+  try {
+    const backupDir = path.join(path.dirname(DB_PATH), 'backups'); fs.mkdirSync(backupDir, { recursive: true });
+    if (fs.existsSync(DB_PATH)) fs.copyFileSync(DB_PATH, path.join(backupDir, 'db-' + new Date().toISOString().replace(/[:.]/g, '-') + '.json'));
+    const backups = fs.readdirSync(backupDir).filter(x => x.endsWith('.json')).sort(); while (backups.length > 10) fs.unlinkSync(path.join(backupDir, backups.shift()));
+  } catch (_) {}
+  fs.writeFileSync(DB_PATH, serialized, 'utf8');
 }
 function hashPw(pw, salt) {
   salt = salt || crypto.randomBytes(16).toString('hex');
@@ -275,6 +281,11 @@ app.post('/api/admin/teachers', (req, res) => {
   res.json({ ok: true, teacher: publicTeacher(a.db.teachers[id]) });
 });
 
+app.get('/api/admin/backup', (req, res) => {
+  const a = authAdmin(req); if (!a) return res.status(401).json({ error: 'No autorizado' });
+  const backup = JSON.parse(JSON.stringify(a.db)); backup.sessions = {}; backup.studentSessions = {};
+  res.setHeader('Content-Type', 'application/json; charset=utf-8'); res.setHeader('Content-Disposition', 'attachment; filename="juegos-reto-respaldo.json"'); res.send(JSON.stringify(backup, null, 2));
+});
 // ---------- TEACHER ----------
 app.get('/api/teacher/me', (req, res) => {
   const a = authTeacher(req);

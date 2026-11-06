@@ -46,7 +46,13 @@ function loadDb() {
 }
 function saveDb(db) {
   fs.mkdirSync(path.dirname(DB_PATH), { recursive: true });
-  fs.writeFileSync(DB_PATH, JSON.stringify(db, null, 2));
+  const serialized = JSON.stringify(db, null, 2);
+  try {
+    const backupDir = path.join(path.dirname(DB_PATH), 'backups'); fs.mkdirSync(backupDir, { recursive: true });
+    if (fs.existsSync(DB_PATH)) fs.copyFileSync(DB_PATH, path.join(backupDir, 'db-' + new Date().toISOString().replace(/[:.]/g, '-') + '.json'));
+    const backups = fs.readdirSync(backupDir).filter(x => x.endsWith('.json')).sort(); while (backups.length > 10) fs.unlinkSync(path.join(backupDir, backups.shift()));
+  } catch (_) {}
+  fs.writeFileSync(DB_PATH, serialized);
 }
 function hashPw(pw, salt) {
   salt = salt || crypto.randomBytes(16).toString('hex');
@@ -304,6 +310,11 @@ const server = http.createServer(async (req, res) => {
       return send(res, 200, { ok: true, teacher: publicTeacher(a.db.teachers[id]) });
     }
 
+    if (p === '/api/admin/backup' && req.method === 'GET') {
+      const a=auth(req,'admin'); if(!a) return send(res,401,{error:'No autorizado'});
+      const backup=JSON.parse(JSON.stringify(a.db)); backup.sessions={}; backup.studentSessions={};
+      res.writeHead(200,{'Content-Type':'application/json; charset=utf-8','Content-Disposition':'attachment; filename="juegos-reto-respaldo.json"'}); return res.end(JSON.stringify(backup,null,2));
+    }
     if (p === '/api/access/check' && req.method === 'GET') {
       const classCode = (u.searchParams.get('classCode') || '').toUpperCase();
       const studentName = (u.searchParams.get('studentName') || '').trim().slice(0, 80);
