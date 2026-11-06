@@ -115,6 +115,10 @@ function licenseActive(teacher) {
   if (!teacher.validUntil) return false;
   return new Date(teacher.validUntil).getTime() >= Date.now();
 }
+const SUBJECTS = ['fisica','quimica','biologia','matematicas'];
+function normalizeSubjects(value) { const list=Array.isArray(value)?value:[]; return [...new Set(list.map(x=>String(x).toLowerCase()).filter(x=>SUBJECTS.includes(x)))]; }
+function teacherSubjects(t) { const list=normalizeSubjects(t&&t.subjects); return list.length?list:['fisica']; }
+
 function publicTeacher(t) {
   return {
     id: t.id,
@@ -126,7 +130,8 @@ function publicTeacher(t) {
     validUntil: t.validUntil || null,
     plan: t.plan || 'trial',
     classCode: t.classCode || null,
-    licenseOk: licenseActive(t)
+    licenseOk: licenseActive(t),
+    subjects: teacherSubjects(t)
   };
 }
 
@@ -190,40 +195,8 @@ app.post('/api/teacher/login', (req, res) => {
 });
 
 app.post('/api/teacher/register', (req, res) => {
-  // Registro crea cuenta en prueba; admin debe activar/extender
-  const { name, email, password, school } = req.body || {};
-  if (!name || !email || !password || password.length < 6) {
-    return res.status(400).json({ error: 'Nombre, correo y contraseña (mín. 6) son obligatorios' });
-  }
-  const db = loadDb();
-  if (Object.values(db.teachers).some((x) => x.email.toLowerCase() === email.toLowerCase())) {
-    return res.status(409).json({ error: 'Ese correo ya está registrado' });
-  }
-  const id = uuidv4();
-  const classCode = ('C' + crypto.randomBytes(3).toString('hex')).toUpperCase();
-  const trialDays = 7;
-  const validUntil = new Date(Date.now() + trialDays * 86400000).toISOString();
-  db.teachers[id] = {
-    id,
-    name: String(name).trim(),
-    email: String(email).trim().toLowerCase(),
-    password_hash: hashPw(password),
-    school: (school || '').trim(),
-    certificateEmail: String(email).trim().toLowerCase(),
-    active: true,
-    plan: 'trial',
-    validUntil,
-    classCode,
-    createdAt: new Date().toISOString()
-  };
-  saveDb(db);
-  res.json({
-    ok: true,
-    message: 'Cuenta creada. Prueba de ' + trialDays + ' días. Un administrador puede extender o suspender el acceso.',
-    teacher: publicTeacher(db.teachers[id])
-  });
+  return res.status(403).json({ error: 'El registro de profesores está deshabilitado. Solicita tu acceso al administrador.' });
 });
-
 // ---------- ADMIN ----------
 app.get('/api/admin/teachers', (req, res) => {
   const a = authAdmin(req);
@@ -251,6 +224,7 @@ app.post('/api/admin/teachers/:id/activate', (req, res) => {
   if (!t) return res.status(404).json({ error: 'Profesor no encontrado' });
   const days = Math.max(1, parseInt(req.body.days, 10) || 30);
   const plan = req.body.plan || 'paid';
+  if (Array.isArray(req.body.subjects)) t.subjects = normalizeSubjects(req.body.subjects);
   t.active = true;
   t.plan = plan;
   t.validUntil = new Date(Date.now() + days * 86400000).toISOString();
@@ -272,6 +246,8 @@ app.post('/api/admin/teachers', (req, res) => {
   const a = authAdmin(req);
   if (!a) return res.status(401).json({ error: 'No autorizado' });
   const { name, email, password, school, days, plan } = req.body || {};
+  const subjects = normalizeSubjects(req.body && req.body.subjects);
+  if (!subjects.length) return res.status(400).json({ error: 'Selecciona al menos una materia' });
   if (!name || !email || !password) {
     return res.status(400).json({ error: 'Faltan datos' });
   }
@@ -289,6 +265,7 @@ app.post('/api/admin/teachers', (req, res) => {
     certificateEmail: String(email).trim().toLowerCase(),
     active: true,
     plan: plan || 'paid',
+    subjects,
     validUntil: new Date(Date.now() + d * 86400000).toISOString(),
     classCode: ('C' + crypto.randomBytes(3).toString('hex')).toUpperCase(),
     createdAt: new Date().toISOString()
@@ -339,7 +316,7 @@ app.get('/api/access/check', (req, res) => {
           certificateEmail: t.certificateEmail || t.email,
           school: t.school || '',
           classCode: t.classCode,
-          teacherName: t.name
+          teacherName: t.name, subjects: teacherSubjects(t)
         });
       }
       return res.json({ allowed: false, reason: 'license_inactive' });
@@ -357,7 +334,7 @@ app.get('/api/access/check', (req, res) => {
       certificateEmail: t.certificateEmail || t.email,
       school: t.school || '',
       classCode: t.classCode,
-      teacherName: t.name
+      teacherName: t.name, subjects: teacherSubjects(t)
     });
   }
 

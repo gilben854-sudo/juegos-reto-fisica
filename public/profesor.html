@@ -18,29 +18,14 @@
 <header>
   <h1>Panel del profesor</h1>
   <p style="color:#7dd3fc;font-weight:600;margin:8px 0 0">Aprende física resolviendo retos</p>
-  <p>Aquí obtienes tu código de clase</p>
+  <p>Ingresa con las credenciales que te entregó el administrador</p>
 </header>
 <div class="wrap">
 
   <div class="card" id="authBox">
     <div class="msg bad" id="msg"></div>
 
-    <h2>1. Crear cuenta (recomendado)</h2>
-    <label>Nombre</label>
-    <input id="rName" placeholder="Tu nombre">
-    <label>Correo</label>
-    <input id="rEmail" type="email" placeholder="correo@ejemplo.com">
-    <label>Contraseña (mínimo 6 caracteres)</label>
-    <div class="password-wrap"><input id="rPass" type="password" placeholder="******"><button type="button" class="password-toggle" onclick="togglePassword('rPass',this)" aria-label="Mostrar la contraseña">Mostrar</button></div>
-    <label>Colegio (opcional)</label>
-    <input id="rSchool" placeholder="Nombre del colegio">
-    <p style="margin-top:12px">
-      <button class="btn btn-primary" type="button" id="btnReg">Crear cuenta y ver código</button>
-    </p>
-
-    <hr style="border-color:#334155;margin:20px 0">
-
-    <h2>2. Ya tengo cuenta — Entrar</h2>
+    <h2>Iniciar sesión</h2>
     <label>Correo</label>
     <input id="email" type="email">
     <label>Contraseña</label>
@@ -115,37 +100,6 @@
     window._classCode = teacher.classCode || '';
     alert('Tu codigo de clase es:\n\n' + (teacher.classCode || '') + '\n\nCopialo para el catalogo.');
   }
-
-  document.getElementById('btnReg').onclick = async function(){
-    hideMsg();
-    var name = document.getElementById('rName').value.trim();
-    var email = document.getElementById('rEmail').value.trim();
-    var pass = document.getElementById('rPass').value;
-    var school = document.getElementById('rSchool').value.trim();
-    if (!name || !email || !pass) {
-      showMsg('Completa nombre, correo y contraseña', false);
-      alert('Completa nombre, correo y contraseña');
-      return;
-    }
-    if (pass.length < 6) {
-      showMsg('La contraseña debe tener al menos 6 caracteres', false);
-      alert('La contraseña debe tener al menos 6 caracteres');
-      return;
-    }
-    try {
-      showMsg('Creando cuenta...', true);
-      var data = await api('/api/teacher/register', { name: name, email: email, password: pass, school: school });
-      var code = data.teacher && data.teacher.classCode;
-      showMsg('Cuenta creada. Codigo: ' + code, true);
-      var login = await api('/api/teacher/login', { email: email, password: pass });
-      sessionStorage.setItem('saas_token', login.token);
-      sessionStorage.setItem('saas_role', 'teacher');
-      showDash(login.teacher || data.teacher);
-    } catch (e) {
-      showMsg(e.message || String(e), false);
-      alert('Error: ' + (e.message || e));
-    }
-  };
 
   document.getElementById('btnLogin').onclick = async function(){
     hideMsg();

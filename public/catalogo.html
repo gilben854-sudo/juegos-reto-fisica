@@ -202,6 +202,7 @@ async function unlockCatalog(){
     localStorage.setItem('saas_certEmail', data.certificateEmail||'');
     localStorage.setItem('saas_teacherName', data.teacherName||'');
     localStorage.setItem('saas_access_ok', '1');
+    localStorage.setItem('saas_subjects', JSON.stringify(Array.isArray(data.subjects) ? data.subjects : []));
     show(ok, 'Acceso concedido · Profesor: ' + (data.teacherName||'') + ' · Puedes entrar a los módulos');
     lockGrid(false);
     statusLine();
@@ -212,7 +213,7 @@ async function unlockCatalog(){
 }
 
 function clearAccess(){
-  ['saas_classCode','saas_studentName','saas_certEmail','saas_teacherName','saas_access_ok'].forEach(k=>localStorage.removeItem(k));
+  ['saas_classCode','saas_studentName','saas_certEmail','saas_teacherName','saas_access_ok','saas_subjects'].forEach(k=>localStorage.removeItem(k));
   document.getElementById('classCode').value='';
   document.getElementById('studentName').value='';
   lockGrid(true);
@@ -226,7 +227,13 @@ function lockGrid(locked){
   if(locked) g.classList.add('locked-overlay'); else g.classList.remove('locked-overlay');
 }
 function showSubject(subject, button){
-  document.querySelectorAll('[data-subject-button]').forEach(b=>b.classList.toggle('active', b===button));
+  const allowed=JSON.parse(localStorage.getItem('saas_subjects')||'[]');
+  document.querySelectorAll('[data-subject-button]').forEach(b=>{
+    const id=b.getAttribute('data-subject-button');
+    b.style.display=(!allowed.length || allowed.includes(id))?'':'none';
+    b.classList.toggle('active', b===button);
+  });
+  if(allowed.length && !allowed.includes(subject)){ const first=allowed[0]; const b=document.querySelector('[data-subject-button="'+first+'"]'); return showSubject(first,b); }
   document.querySelectorAll('#grid .card-mod, #grid .section-title').forEach(el=>{
     const module=(el.dataset.module||'');
     const current=el.dataset.subject || (module.startsWith('quimica-')?'quimica':module.startsWith('biologia-')?'biologia':module.startsWith('matematicas-')?'matematicas':'fisica');

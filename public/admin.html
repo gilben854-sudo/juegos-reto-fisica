@@ -45,7 +45,7 @@
         <div><label>Correo</label><input id="nEmail" type="email"></div>
         <div><label>Contraseña temporal</label><div class="password-wrap"><input id="nPass" type="password" autocomplete="new-password"><button type="button" class="password-toggle" onclick="togglePassword('nPass',this)" aria-label="Mostrar la contraseña">Mostrar</button></div></div>
         <div><label>Colegio</label><input id="nSchool"></div>
-        <div><label>Días de acceso</label><input id="nDays" type="number" value="30"></div>
+        <div><label>Días de acceso</label><input id="nDays" type="number" value="30"></div><div><label>Materias contratadas (Ctrl/Cmd + clic para varias)</label><select id="nSubjects" multiple size="4"><option value="fisica">Física</option><option value="quimica">Química</option><option value="biologia">Biología</option><option value="matematicas">Matemáticas</option></select></div>
       </div>
       <button class="btn btn-ok" type="button" onclick="createTeacher()">Crear y activar</button>
       <div class="ok" id="ok"></div>
@@ -55,7 +55,7 @@
       <h2>Profesores y licencias</h2>
       <div style="overflow:auto">
         <table>
-          <thead><tr><th>Nombre</th><th>Correo</th><th>Plan</th><th>Estado</th><th>Vence</th><th>Código clase</th><th>Acciones</th></tr></thead>
+          <thead><tr><th>Nombre</th><th>Correo</th><th>Plan</th><th>Materias</th><th>Estado</th><th>Vence</th><th>Código clase</th><th>Acciones</th></tr></thead>
           <tbody id="tbody"></tbody>
         </table>
       </div>
@@ -99,8 +99,12 @@ async function loadTeachers(){
   data.teachers.forEach(t=>{
     const st = t.licenseOk ? '<span class="badge badge-ok">ACTIVA</span>' : '<span class="badge badge-bad">BLOQUEADA</span>';
     const plan = t.plan==='trial' ? '<span class="badge badge-trial">prueba</span>' : t.plan;
+    const subjects = Array.isArray(t.subjects) && t.subjects.length ? t.subjects : ['fisica'];
+    const subjectLabels = {fisica:'Física',quimica:'Química',biologia:'Biología',matematicas:'Matemáticas'};
+    const subjectText = subjects.map(x=>subjectLabels[x]||x).join(', ');
+    const subjectSelect = '<select id="subjects-'+t.id+'" multiple size=4>'+Object.keys(subjectLabels).map(x=>'<option value="'+x+'" '+(subjects.includes(x)?'selected':'')+'>'+subjectLabels[x]+'</option>').join('')+'</select>';
     const tr=document.createElement('tr');
-    tr.innerHTML=`<td>${esc(t.name)}</td><td>${esc(t.email)}</td><td>${plan}</td><td>${st}</td><td>${t.validUntil?new Date(t.validUntil).toLocaleDateString():'—'}</td><td><b>${esc(t.classCode||'')}</b></td>
+    tr.innerHTML=`<td>${esc(t.name)}</td><td>${esc(t.email)}</td><td>${plan}</td><td>${esc(subjectText)}<br>${subjectSelect}</td><td>${st}</td><td>${t.validUntil?new Date(t.validUntil).toLocaleDateString():'—'}</td><td><b>${esc(t.classCode||'')}</b></td>
       <td>
         <input id="resetPass-${t.id}" type="password" placeholder="Nueva clave (8+)" autocomplete="new-password">
         <button class="btn btn-gold" type="button" onclick="resetTeacherPassword('${t.id}')">Cambiar clave</button>
@@ -126,13 +130,17 @@ async function resetTeacherPassword(id){
 async function activateFromRow(id){
   const field=document.getElementById('licenseDays-'+id);
   const days=Math.max(1,Math.min(3650,parseInt(field && field.value,10)||30));
+  const subjects=Array.from(document.getElementById('subjects-'+id).selectedOptions).map(o=>o.value);
+  if(!subjects.length){ alert('Selecciona al menos una materia.'); return; }
   try{
-    await activate(id,days);
+    await activate(id,days,subjects);
     alert('Profesor activado por '+days+' días.');
   }catch(e){ alert(e.message); }
 }
-async function activate(id,days){
-  await API.req('/api/admin/teachers/'+id+'/activate',{method:'POST',body:JSON.stringify({days,plan:'paid'})});
+async function activate(id,days,subjects){
+  const payload={days,plan:'paid'};
+  if(Array.isArray(subjects)) payload.subjects=subjects;
+  await API.req('/api/admin/teachers/'+id+'/activate',{method:'POST',body:JSON.stringify(payload)});
   loadTeachers();
 }
 async function suspend(id){
@@ -143,10 +151,12 @@ async function suspend(id){
 async function createTeacher(){
   hide(ok); hide(err2);
   try{
-    const body={name:nName.value,email:nEmail.value,password:nPass.value,school:nSchool.value,days:parseInt(nDays.value,10)||30,plan:'paid'};
+    const subjects=Array.from(nSubjects.selectedOptions).map(o=>o.value);
+    if(!subjects.length){ show(err2,'Selecciona al menos una materia.'); return; }
+    const body={name:nName.value,email:nEmail.value,password:nPass.value,school:nSchool.value,days:parseInt(nDays.value,10)||30,plan:'paid',subjects};
     const data=await API.req('/api/admin/teachers',{method:'POST',body:JSON.stringify(body)});
     show(ok,'Creado: '+data.teacher.email+' · Código clase: '+data.teacher.classCode);
-    nName.value=nEmail.value=nPass.value=nSchool.value='';
+    nName.value=nEmail.value=nPass.value=nSchool.value=''; Array.from(nSubjects.options).forEach(o=>o.selected=false);
     loadTeachers();
   }catch(e){ show(err2,e.message); }
 }

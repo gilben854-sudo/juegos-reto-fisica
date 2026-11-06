@@ -76,6 +76,10 @@ function token() { return crypto.randomBytes(32).toString('hex'); }
 function licenseActive(t) {
   return !!(t && t.active && t.validUntil && new Date(t.validUntil).getTime() >= Date.now());
 }
+const SUBJECTS = ['fisica','quimica','biologia','matematicas'];
+function normalizeSubjects(value) { const list=Array.isArray(value)?value:[]; return [...new Set(list.map(x=>String(x).toLowerCase()).filter(x=>SUBJECTS.includes(x)))]; }
+function teacherSubjects(t) { const list=normalizeSubjects(t&&t.subjects); return list.length?list:['fisica']; }
+
 const loginAttempts = new Map();
 function loginAllowed(key) {
   const now = Date.now();
@@ -90,7 +94,7 @@ function publicTeacher(t) {
     id: t.id, name: t.name, email: t.email, school: t.school || '',
     certificateEmail: t.certificateEmail || t.email, active: !!t.active,
     validUntil: t.validUntil, plan: t.plan || 'trial', classCode: t.classCode,
-    licenseOk: licenseActive(t)
+    licenseOk: licenseActive(t), subjects: teacherSubjects(t)
   };
 }
 function uuid() {
@@ -186,6 +190,8 @@ const server = http.createServer(async (req, res) => {
       return send(res, 200, { ok: true });
     }
     if (p === '/api/teacher/register' && req.method === 'POST') {
+      return send(res, 403, { error: 'El registro de profesores está deshabilitado. Solicita tu acceso al administrador.' });
+      /* registro antiguo deshabilitado */
       const body = await readBody(req);
       if (!body.name || !body.email || !body.password || String(body.password).length < 6)
         return send(res, 400, { error: 'Datos incompletos' });
@@ -257,6 +263,7 @@ const server = http.createServer(async (req, res) => {
       if (!t) return send(res, 404, { error: 'No encontrado' });
       const body = await readBody(req);
       const days = Math.max(1, parseInt(body.days, 10) || 30);
+      if (Array.isArray(body.subjects)) t.subjects = normalizeSubjects(body.subjects);
       t.active = true; t.plan = body.plan || 'paid';
       t.validUntil = new Date(Date.now() + days * 86400000).toISOString();
       saveDb(a.db);
@@ -278,6 +285,8 @@ const server = http.createServer(async (req, res) => {
       if (!a) return send(res, 401, { error: 'No autorizado' });
       const body = await readBody(req);
       if (!body.name || !body.email || !body.password) return send(res, 400, { error: 'Faltan datos' });
+      const subjects = normalizeSubjects(body.subjects);
+      if (!subjects.length) return send(res, 400, { error: 'Selecciona al menos una materia' });
       const id = uuid();
       const days = Math.max(1, parseInt(body.days, 10) || 30);
       a.db.teachers[id] = {
@@ -285,6 +294,7 @@ const server = http.createServer(async (req, res) => {
         password_hash: hashPw(body.password), school: (body.school || '').trim(),
         certificateEmail: body.email.trim().toLowerCase(), active: true,
         plan: body.plan || 'paid',
+        subjects,
         validUntil: new Date(Date.now() + days * 86400000).toISOString(),
         classCode: ('C' + crypto.randomBytes(3).toString('hex')).toUpperCase(),
         createdAt: new Date().toISOString()
@@ -303,7 +313,7 @@ const server = http.createServer(async (req, res) => {
       return send(res, 200, {
         allowed: true, mode: 'student',
         certificateEmail: t.certificateEmail || t.email,
-        school: t.school || '', classCode: t.classCode, teacherName: t.name
+        school: t.school || '', classCode: t.classCode, teacherName: t.name, subjects: teacherSubjects(t)
       });
     }
 

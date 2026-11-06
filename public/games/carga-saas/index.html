@@ -223,7 +223,7 @@
 
 <div class="container">
   <header>
-    <p class="teacher">Profesor GILAST</p>
+    <p class="teacher">Profesor</p>
     <h1>⚡ Carga Eléctrica y Ley de Coulomb</h1>
     <p>Simulador y desafíos: interacciones, carga elemental y fuerza eléctrica</p>
   </header>
@@ -368,51 +368,13 @@
   <div id="panelGame" class="panel">
 
     <div id="levelSelectScreen">
-      <p style="text-align:center; color:#fbbf24; font-weight:bold; margin-bottom:10px; font-size:1.05em;">5to año — Sección B</p>
-      <div class="form-row" style="margin-bottom:12px;">
-        <label>Tu nombre:</label>
-        <select id="studentNameSelect">
-          <option value="">— Elige tu nombre —</option>
-          <option value="0">ACOSTA PADROS, ABRAHAM JOSUÉ</option>
-          <option value="1">ÁLVAREZ PÁEZ, DENISMAR VALENTINA</option>
-          <option value="2">APONTE GUEVARA, ORIANNE ISABEL</option>
-          <option value="3">ARAQUE SUBERO, LUIYIMBER EDUARDO</option>
-          <option value="4">BELLO MEDINA, ALEJANDRA NAZARETH</option>
-          <option value="5">BRICEÑO RODRÍGUEZ, DUARNIELYS VALENTINA</option>
-          <option value="6">BURGOS GARCÍA, DANIELA STEFANIA</option>
-          <option value="7">BUSTAMANTE SALCEDO, YUSLEIDI BEALI</option>
-          <option value="8">CAMACHO RAMOS, AMANDA MICHELLE</option>
-          <option value="9">CARABALLO PIÑERO, ABIMAEL ABRAHAM</option>
-          <option value="10">CASTILLO PEDRÓN, VICTORIA JOHSIRE</option>
-          <option value="11">DURAND MORALES, KEYBER ALEJANDRO</option>
-          <option value="12">ECHEZURÍA ORDOÑEZ, IAN MARCUS</option>
-          <option value="13">GONZÁLEZ BLANCO, ÁNGEL DAVID</option>
-          <option value="14">GUEVARA INFANTE, GABRIEL ALEXANDER</option>
-          <option value="15">HENRÍQUEZ MARTÍNEZ, JEANISABEL CRISTINA</option>
-          <option value="16">HERNÁNDEZ ARANGUREN, SEBASTIÁN ISAAC</option>
-          <option value="17">LIMA PÉREZ, FABIANA VICTORIA</option>
-          <option value="18">LINARES MORENO, WILMARY VALENTINA</option>
-          <option value="19">MACÍAS BURGOS, JUAN CARLOS</option>
-          <option value="20">MARÍN CARABALLO, MARIANA ESTER</option>
-          <option value="21">MARTÍNEZ RODRÍGUEZ, GILBERLIS ARAIKA</option>
-          <option value="22">MEDINA HERNÁNDEZ, JONATHAN MANUEL</option>
-          <option value="23">NIÑO MERCADO, VÍCTOR MANUEL</option>
-          <option value="24">QUINTERO CALDERÍN, ALESKA DAVIERLYS</option>
-          <option value="25">RAMOS NARVARTE, DIEGO ABRAHAM</option>
-          <option value="26">RODRÍGUEZ FERNÁNDEZ, ISSI VICTORIA</option>
-          <option value="27">SEGOVIA PIAR, SAULYMAR ANAVIC</option>
-          <option value="28">SEQUERA ORDOÑEZ, SAMANTHA STEPHANIA</option>
-          <option value="29">SERRANO SOLÓRZANO, CAMILA ANAILETH</option>
-          <option value="30">TINEO PERDOMO, SOFÍA VALENTINA</option>
-          <option value="31">TISOY TANDIOT, ANDERSON OSMAR</option>
-          <option value="32">TORRES VARGAS, ASHLEY FABIANA</option>
-          <option value="33">URBINA MONTILLA, LEIDIMAR GABRIELA</option>
-          <option value="34">VILLANUEVA PIÑERO, JESÚS GABRIEL</option>
-          <option value="35">VOLCÁN GUDIÑO, BÁRBARA</option>
-          <option value="36">ZAMBRANO TAVAREZ, GEORDALIS GUADALUPE</option>
-        </select>
+      <div class="form-row" style="margin-bottom:12px; gap:10px; flex-wrap:wrap;">
+        <label for="studentNameInput">Tu nombre:</label>
+        <input id="studentNameInput" type="text" placeholder="Escribe tu nombre y apellido" maxlength="80" autocomplete="name" style="flex:1;min-width:220px;">
+        <label for="studentSectionInput">Sección:</label>
+        <input id="studentSectionInput" type="text" placeholder="Escribe tu sección" maxlength="40" autocomplete="organization-section" style="flex:1;min-width:140px;">
       </div>
-      <p style="text-align:center; color:#94a3b8; margin-bottom:14px; font-size:0.9em;">Elige tu nombre de la lista. No se escribe a mano.</p>
+      <p style="text-align:center; color:#94a3b8; margin-bottom:14px; font-size:0.9em;">Escribe manualmente tu nombre y sección. No hay listas precargadas.</p>
       <h3 style="text-align:center; margin-bottom:14px;">Elige tu nivel</h3>
       <div class="level-select">
         <button class="level-btn" data-level="1" onclick="selectLevel(1)">Nivel 1<br><small>Interacciones</small></button>
@@ -480,17 +442,7 @@
     </div>
   </div>
 
-  <div class="panel visible" style="text-align:center; margin-top:20px;">
-    <h3 style="margin-bottom:10px;">📲 Descarga este juego</h3>
-    <p class="hint" style="margin-bottom:14px;">Escanea el código con la cámara de tu teléfono para descargar el archivo y jugar sin conexión.<br><b>Importante:</b> el enlace debe descargar el archivo directamente. Si en cambio se abre una vista previa dentro de Drive, el juego no funcionará (los botones no responden); en ese caso, busca la opción "Descargar" (ícono ⬇ o menú ⋮) y luego abre el archivo ya descargado.</p>
-    <img src="https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=https%3A%2F%2Fdrive.google.com%2Fuc%3Fexport%3Ddownload%26id%3D13HVGS3da3A81pOlUnjochyKvNvH59-FR"
-         alt="Código QR para descargar el juego Carga Eléctrica y Ley de Coulomb"
-         width="220" height="220"
-         style="background:#fff; padding:10px; border-radius:12px; border:2px solid #fbbf24;">
-    <p class="hint" style="margin-top:10px;">O accede directamente: <a href="https://drive.google.com/uc?export=download&id=13HVGS3da3A81pOlUnjochyKvNvH59-FR" target="_blank" style="color:#fbbf24;">enlace de Google Drive</a></p>
-  </div>
-
-  <footer>Carga Eléctrica y Ley de Coulomb · Juego educativo offline · Producido por GILAST</footer>
+  <footer>Carga Eléctrica y Ley de Coulomb · Juego educativo offline</footer>
 </div>
 
 <script>
@@ -1042,78 +994,9 @@ function genGeoVectorQ() {
 }
 
 /* ---- Flujo del juego ---- */
-const STUDENT_ROSTER = {
-  "B": [
-    {name: 'ACOSTA PADROS, ABRAHAM JOSUÉ', code: 'MD5-HM3-HJR'},
-    {name: 'ÁLVAREZ PÁEZ, DENISMAR VALENTINA', code: '5PV-92H-CGN'},
-    {name: 'APONTE GUEVARA, ORIANNE ISABEL', code: 'XU4-RFK-8LH'},
-    {name: 'ARAQUE SUBERO, LUIYIMBER EDUARDO', code: '79X-5R9-82Y'},
-    {name: 'BELLO MEDINA, ALEJANDRA NAZARETH', code: 'RG4-G5J-BDH'},
-    {name: 'BRICEÑO RODRÍGUEZ, DUARNIELYS VALENTINA', code: 'ACS-4LA-26T'},
-    {name: 'BURGOS GARCÍA, DANIELA STEFANIA', code: 'JQ6-QHU-2QV'},
-    {name: 'BUSTAMANTE SALCEDO, YUSLEIDI BEALI', code: 'C7C-VA7-FE9'},
-    {name: 'CAMACHO RAMOS, AMANDA MICHELLE', code: 'LRX-L36-R4E'},
-    {name: 'CARABALLO PIÑERO, ABIMAEL ABRAHAM', code: 'R6H-9CL-J65'},
-    {name: 'CASTILLO PEDRÓN, VICTORIA JOHSIRE', code: '84Q-EA8-3UK'},
-    {name: 'DURAND MORALES, KEYBER ALEJANDRO', code: '6SF-ZJD-GHT'},
-    {name: 'ECHEZURÍA ORDOÑEZ, IAN MARCUS', code: '5AU-NGA-VRK'},
-    {name: 'GONZÁLEZ BLANCO, ÁNGEL DAVID', code: 'K95-VVP-HM9'},
-    {name: 'GUEVARA INFANTE, GABRIEL ALEXANDER', code: 'EJ9-94Y-5NV'},
-    {name: 'HENRÍQUEZ MARTÍNEZ, JEANISABEL CRISTINA', code: 'WA3-H53-GMA'},
-    {name: 'HERNÁNDEZ ARANGUREN, SEBASTIÁN ISAAC', code: 'FDL-JFX-NLC'},
-    {name: 'LIMA PÉREZ, FABIANA VICTORIA', code: 'PKV-ZME-HXQ'},
-    {name: 'LINARES MORENO, WILMARY VALENTINA', code: 'Y59-7S5-UGE'},
-    {name: 'MACÍAS BURGOS, JUAN CARLOS', code: 'BGS-Z8B-RFE'},
-    {name: 'MARÍN CARABALLO, MARIANA ESTER', code: 'YSL-6XV-75N'},
-    {name: 'MARTÍNEZ RODRÍGUEZ, GILBERLIS ARAIKA', code: '8CM-MVF-SZX'},
-    {name: 'MEDINA HERNÁNDEZ, JONATHAN MANUEL', code: 'EVV-RNF-92E'},
-    {name: 'NIÑO MERCADO, VÍCTOR MANUEL', code: 'ZMD-DW5-UJX'},
-    {name: 'QUINTERO CALDERÍN, ALESKA DAVIERLYS', code: '9XU-T3N-R9V'},
-    {name: 'RAMOS NARVARTE, DIEGO ABRAHAM', code: 'CPB-SQM-92E'},
-    {name: 'RODRÍGUEZ FERNÁNDEZ, ISSI VICTORIA', code: 'HVZ-FCV-QAW'},
-    {name: 'SEGOVIA PIAR, SAULYMAR ANAVIC', code: 'BA5-TDB-KTN'},
-    {name: 'SEQUERA ORDOÑEZ, SAMANTHA STEPHANIA', code: 'YEH-PE9-YDP'},
-    {name: 'SERRANO SOLÓRZANO, CAMILA ANAILETH', code: 'N8X-8JV-P9C'},
-    {name: 'TINEO PERDOMO, SOFÍA VALENTINA', code: 'G9M-RBD-2NZ'},
-    {name: 'TISOY TANDIOT, ANDERSON OSMAR', code: '2NK-DXW-LR9'},
-    {name: 'TORRES VARGAS, ASHLEY FABIANA', code: 'F9Y-K9C-7G4'},
-    {name: 'URBINA MONTILLA, LEIDIMAR GABRIELA', code: 'F95-YB4-USE'},
-    {name: 'VILLANUEVA PIÑERO, JESÚS GABRIEL', code: 'M78-RL3-FK6'},
-    {name: 'VOLCÁN GUDIÑO, BÁRBARA', code: '2QU-QWM-649'},
-    {name: 'ZAMBRANO TAVAREZ, GEORDALIS GUADALUPE', code: '2YZ-74Y-FN9'},
-  ],
-};
-
 let studentCode = '';
-
-function fillNameSelect() {
-  const sel = document.getElementById('studentNameSelect');
-  if (!sel) return;
-  sel.innerHTML = '';
-  const list = (STUDENT_ROSTER && STUDENT_ROSTER['B']) || [];
-  const opt0 = document.createElement('option');
-  opt0.value = '';
-  opt0.textContent = '— Elige tu nombre —';
-  sel.appendChild(opt0);
-  list.forEach(function(st, idx) {
-    const opt = document.createElement('option');
-    opt.value = String(idx);
-    opt.textContent = st.name;
-    sel.appendChild(opt);
-  });
-}
-
-function getSelectedStudent() {
-  const sel = document.getElementById('studentNameSelect');
-  if (!sel || sel.value === '') return null;
-  const list = (STUDENT_ROSTER && STUDENT_ROSTER['B']) || [];
-  const idx = parseInt(sel.value, 10);
-  if (isNaN(idx) || idx < 0 || idx >= list.length) return null;
-  return { section: 'B', name: list[idx].name, code: list[idx].code };
-}
-
-let studentName = 'Estudiante';
-let studentSection = 'B';
+let studentName = '';
+let studentSection = '';
 let lastHintAnswer = '';
 
 function startGame() {
@@ -1122,21 +1005,12 @@ function startGame() {
     if (msg) msg.textContent = `🔒 Ese nivel está bloqueado. Completa el Nivel ${maxUnlockedLevel} primero.`;
     return;
   }
-  const st = getSelectedStudent();
-  if (!st) {
-    const msg = document.getElementById('unlockMessage');
-    if (msg) msg.textContent = '⚠️ Elige tu nombre de la lista antes de comenzar.';
-    alert('Elige tu nombre de la lista.');
-    return;
-  }
-  studentName = st.name;
-  studentSection = 'B';
-  studentCode = st.code;
-  lastVerifyCode = st.code;
-  try {
-    const ni = document.getElementById('studentNameSelect');
-    if (ni) ni.disabled = true;
-  } catch (e) {}
+  const nameInput = document.getElementById('studentNameInput');
+  const sectionInput = document.getElementById('studentSectionInput');
+  const name = (nameInput && nameInput.value || '').trim();
+  const section = (sectionInput && sectionInput.value || '').trim();
+  if (!name || !section) { const msg=document.getElementById('unlockMessage'); if(msg) msg.textContent='⚠️ Escribe tu nombre y sección antes de comenzar.'; alert('Escribe tu nombre y sección.'); return; }
+  studentName=name; studentSection=section; studentCode=''; lastVerifyCode='';
   score = 0; lives = 3; questionIndex = 0; answered = false;
   document.getElementById('levelSelectScreen').style.display = 'none';
   document.getElementById('endScreen').style.display = 'none';
@@ -1430,7 +1304,7 @@ function backToLevels() {
   updateLevelButtons();
   // Mantener el nombre ya elegido (deshabilitado) para no perder el código
   try {
-    const sel = document.getElementById('studentNameSelect');
+    const sel = document.getElementById('studentNameInput');
     if (sel && (!sel.options || sel.options.length <= 1)) fillNameSelect();
   } catch (e) {}
 }
@@ -1439,7 +1313,7 @@ function backToLevels() {
 /* ============================================================
    VERIFICACIÓN ANTI-PLAGIO (código + QR)
    ============================================================ */
-const VERIFY_SECRET = 'JMC-GILBERTO-FISICA-2026';
+const VERIFY_SECRET = 'carga-electrica-verificacion';
 
 function simpleHash(str) {
   let h = 2166136261;
@@ -1460,8 +1334,6 @@ function makeVerificationCode(gameId, name, section, points, grade) {
 function buildVerifyPayload(gameTitle, name, section, yearLabel, points, grade, badge, code) {
   return [
     'VERIFICACION DE LOGRO',
-    'Colegio: U.E.P. Jose Maria Carreno',
-    'Profesor: GILAST',
     'Juego: ' + gameTitle,
     'Estudiante: ' + name,
     'Curso: ' + yearLabel,
@@ -1482,7 +1354,7 @@ function drawCertificateChrome(ctx, w, h, accent) {
   ctx.font = '12px Arial';
   for (let y = 40; y < h; y += 28) {
     for (let x = 20; x < w; x += 120) {
-      ctx.fillText('JMC', x + ((y / 28) % 2) * 40, y);
+      ctx.fillText('CIENCIA', x + ((y / 28) % 2) * 40, y);
     }
   }
   ctx.restore();
@@ -1492,7 +1364,7 @@ function loadQrImage(text, size) {
   return new Promise(function(resolve) {
     const img = new Image();
     img.crossOrigin = 'anonymous';
-    const url = 'https://api.qrserver.com/v1/create-qr-code/?size=' + size + 'x' + size + '&margin=8&data=' + encodeURIComponent(text);
+    const url = ''; // QR eliminado
     img.onload = function() { resolve(img); };
     img.onerror = function() { resolve(null); };
     img.src = url;
@@ -1507,7 +1379,6 @@ function loadQrImage(text, size) {
 async function downloadAchievement() {
   computeGrade20();
   lastVerifyCode = studentCode || makeVerificationCode('COU', studentName, studentSection, totalPointsAllLevels, finalGrade20);
-  const payload = buildVerifyPayload('Carga Eléctrica y Ley de Coulomb', studentName, studentSection, '5to Año', totalPointsAllLevels, finalGrade20, lastBadge, lastVerifyCode);
 
   const canvas = document.createElement('canvas');
   canvas.width = 900;
@@ -1539,7 +1410,7 @@ async function downloadAchievement() {
 
   ctx.fillStyle = 'rgba(255,255,255,0.85)';
   ctx.font = '16px Arial';
-  ctx.fillText('GILAST — Producido por GILAST', 450, 155);
+  ctx.fillText('Resultado educativo', 450, 155);
 
   ctx.fillStyle = 'rgba(255,255,255,0.85)';
   ctx.font = '18px Arial';
@@ -1572,18 +1443,6 @@ async function downloadAchievement() {
   ctx.fillStyle = 'rgba(255,255,255,0.7)';
   ctx.font = '14px Arial';
   ctx.fillText(fecha, 450, 475);
-
-  // QR con información completa
-  const qrImg = await loadQrImage(payload, 140);
-  if (qrImg) {
-    ctx.fillStyle = '#ffffff';
-    ctx.fillRect(378, 490, 144, 144);
-    ctx.drawImage(qrImg, 380, 492, 140, 140);
-  } else {
-    ctx.fillStyle = 'rgba(255,255,255,0.85)';
-    ctx.font = '12px Arial';
-    ctx.fillText('(QR no disponible sin conexión — use el código de verificación)', 450, 530);
-  }
 
   const link = document.createElement('a');
   const safeName = studentName.replace(/[^a-zA-Z0-9À-ÿ ]/g, '').trim().replace(/\s+/g, '_') || 'estudiante';
@@ -1651,7 +1510,7 @@ function buildResultCanvas() {
   ctx.fillText(fecha, 450, 475);
   ctx.fillStyle = 'rgba(255,255,255,0.85)';
   ctx.font = 'italic 18px Arial';
-  ctx.fillText('Profesor GILAST', 450, 510);
+  ctx.fillText('Profesor', 450, 510);
 
   return canvas;
 }
@@ -1712,7 +1571,7 @@ async function notifyTeacher() {
   alert('1) Se descargó la imagen del resultado.\n2) Se abrió el correo.\n\nAdjunta esa imagen y pulsa ENVIAR.');
 }
 
-// Inicializar lista de nombres (después de definir STUDENT_ROSTER)
+// Inicializar formulario manual
 function initStudentNameList() {
   try { fillNameSelect(); } catch (e) { console.warn('fillNameSelect', e); }
 }
