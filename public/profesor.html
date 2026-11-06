@@ -69,14 +69,14 @@
 </div>
 <script>
 (function(){
-  function togglePassword(id, button){
+  window.togglePassword = function(id, button){
     var input = document.getElementById(id);
     if (!input) return;
     var visible = input.type === 'text';
     input.type = visible ? 'password' : 'text';
     button.textContent = visible ? 'Mostrar' : 'Ocultar';
     button.setAttribute('aria-label', (visible ? 'Mostrar' : 'Ocultar') + ' la contraseña');
-  }
+  };
   function showMsg(text, ok){
     var el = document.getElementById('msg');
     el.className = 'msg show ' + (ok ? 'ok' : 'bad');
