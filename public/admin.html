@@ -104,6 +104,8 @@ async function loadTeachers(){
       <td>
         <input id="resetPass-${t.id}" type="password" placeholder="Nueva clave (8+)" autocomplete="new-password">
         <button class="btn btn-gold" type="button" onclick="resetTeacherPassword('${t.id}')">Cambiar clave</button>
+        <input id="licenseDays-${t.id}" type="number" min="1" max="3650" value="30" placeholder="Días de acceso">
+        <button class="btn btn-ok" type="button" onclick="activateFromRow('${t.id}')">Activar por días</button>
         <button class="btn btn-ok" type="button" onclick="activate('${t.id}',30)">+30 días</button>
         <button class="btn btn-gold" type="button" onclick="activate('${t.id}',365)">+1 año</button>
         <button class="btn btn-bad" type="button" onclick="suspend('${t.id}')">Suspender</button>
@@ -119,6 +121,14 @@ async function resetTeacherPassword(id){
     await API.req('/api/admin/teachers/'+id+'/password',{method:'POST',body:JSON.stringify({password})});
     field.value='';
     alert('Clave del profesor actualizada.');
+  }catch(e){ alert(e.message); }
+}
+async function activateFromRow(id){
+  const field=document.getElementById('licenseDays-'+id);
+  const days=Math.max(1,Math.min(3650,parseInt(field && field.value,10)||30));
+  try{
+    await activate(id,days);
+    alert('Profesor activado por '+days+' días.');
   }catch(e){ alert(e.message); }
 }
 async function activate(id,days){
