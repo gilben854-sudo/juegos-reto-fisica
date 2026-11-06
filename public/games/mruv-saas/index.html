@@ -412,17 +412,11 @@ function renderSetup(){
   setHeader("Misión MRUV","3er año — Ingresa tus datos",false);
   document.getElementById("tabbar").classList.add("hidden");
   document.getElementById("main").innerHTML=`
-    <div class="intro-box">Elige tu <b>sección</b> y luego tu <b>nombre</b> de la lista (no se escribe a mano).</div>
+    <div class="intro-box">Escribe tu <b>sección</b> y tu <b>nombre</b> manualmente.</div>
     <div class="form-box">
       <p style="text-align:center;color:#E8763B;font-weight:bold;margin:0 0 12px;">3er año</p>
       <label>Tu sección</label>
-      <select id="studentSectionInput">
-        <option value="">— Elige tu sección —</option>
-        <option value="A">3ero A</option>
-        <option value="B">3ero B</option>
-        <option value="C">3ero C</option>
-        <option value="D">3ero D</option>
-      </select>
+      <input id="studentSectionInput" type="text" placeholder="Escribe tu sección" autocomplete="organization-section">
       <label>Tu nombre</label>
       <input id="studentNameSelect" type="text" placeholder="Escribe tu nombre" autocomplete="name">
       <p style="font-size:12px;color:#7a8a99;margin-top:8px;">Escribe tu nombre para identificar tu progreso.</p>
@@ -430,9 +424,8 @@ function renderSetup(){
     </div>`;
   const secSel=document.getElementById("studentSectionInput");
   const nameSel=document.getElementById("studentNameSelect");
-  secSel.onchange=function(){ nameSel.disabled=false; };
-  document.getElementById("startSetupBtn").onclick=()=>{
-    if(!secSel.value){ alert("Elige tu sección."); return; }
+    document.getElementById("startSetupBtn").onclick=()=>{
+    if(!secSel.value){ alert("Escribe tu sección."); return; }
     if(!nameSel.value){ alert("Escribe tu nombre."); return; }
     studentSection=secSel.value;
     studentName=nameSel.value;

@@ -272,19 +272,13 @@
     <div id="levelSelectScreen">
       <div class="form-row" style="margin-bottom:12px;">
         <label>Tu sección:</label>
-        <select id="studentSectionInput" onchange="onSectionChange()">
-          <option value="">— Elige tu sección —</option>
-          <option value="A">3ero A</option>
-          <option value="B">3ero B</option>
-          <option value="C">3ero C</option>
-          <option value="D">3ero D</option>
-        </select>
+        <input id="studentSectionInput" type="text" placeholder="Escribe tu sección" autocomplete="organization-section">
       </div>
       <div class="form-row" style="margin-bottom:16px;">
         <label>Tu nombre:</label>
         <input id="studentNameSelect" type="text" placeholder="Escribe tu nombre" autocomplete="name">
       </div>
-      <p class="hint" style="margin-bottom:12px;">Selecciona tu sección y escribe tu nombre. Puedes escribirlo manualmente.</p>
+      <p class="hint" style="margin-bottom:12px;">Escribe tu sección y tu nombre manualmente.</p>
       <h3 style="text-align:center; margin-bottom:14px;">Elige tu nivel</h3>
       <div class="level-select">
         <button class="level-btn" data-level="1" onclick="selectLevel(1)">Nivel 1<br><small>Un paso</small></button>
@@ -784,8 +778,8 @@ function startGame() {
   const st = getSelectedStudent();
   if (!st) {
     const msg = document.getElementById('unlockMessage');
-    if (msg) msg.textContent = '⚠️ Selecciona tu sección y escribe tu nombre antes de comenzar.';
-    alert('Selecciona tu sección y escribe tu nombre.');
+    if (msg) msg.textContent = '⚠️ Escribe tu sección y tu nombre antes de comenzar.';
+    alert('Escribe tu sección y tu nombre.');
     return;
   }
   studentName = st.name;

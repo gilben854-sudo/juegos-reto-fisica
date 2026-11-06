@@ -169,9 +169,11 @@ function fillNameSelect() { /* nombres manuales */ }
 
 function getSelectedStudent() {
   const input = document.getElementById('studentNameSelect');
+  const sectionInput = document.getElementById('studentSectionInput');
   const name = input && input.value.trim();
-  if (!name) return null;
-  return { section: 'D', name: name, code: '' };
+  const section = sectionInput && sectionInput.value.trim();
+  if (!section || !name) return null;
+  return { section: section, name: name, code: '' };
 }
 
 let studentName="Estudiante", studentSection="D";
@@ -180,7 +182,7 @@ let levelScores={0:0,1:0,2:0,3:0,4:0,5:0};
 let progress=loadProgress();
 loadLevelScores();
 if(progress.studentName) studentName=progress.studentName;
-studentSection="D";
+studentSection=progress.studentSection||"D";
 
 function loadProgress(){
   try{const r=localStorage.getItem(STORAGE_KEY);if(r)return JSON.parse(r);}catch(e){}
@@ -324,9 +326,11 @@ function renderSetup(){
   setHeader("Misión MRU 4to","MRU II — Sección D",false);
   document.getElementById("tabbar").classList.add("hidden");
   document.getElementById("main").innerHTML=`
-    <div class="intro-box">Elige tu <b>nombre</b> de la lista. El curso es <b>MRU II</b> y la sección es solo <b>D</b>.</div>
+    <div class="intro-box">Escribe tu <b>sección</b> y tu <b>nombre</b> manualmente. El curso es <b>MRU II</b>.</div>
     <div class="form-box">
-      <p class="year-label">MRU II — Sección D</p>
+      <p class="year-label">MRU II</p>
+      <label>Tu sección</label>
+      <input id="studentSectionInput" type="text" placeholder="Escribe tu sección" value="D" autocomplete="organization-section">
       <label>Tu nombre</label>
       <input id="studentNameSelect" type="text" placeholder="Escribe tu nombre" autocomplete="name">
       <p style="text-align:center;color:#7a8a99;font-size:13px;">El certificado usará tu código único de la lista del profesor.</p>
@@ -336,14 +340,15 @@ function renderSetup(){
   document.getElementById("startSetupBtn").onclick=()=>{
     const st = getSelectedStudent();
     if (!st) {
-      alert('Escribe tu nombre.');
+      alert('Escribe tu sección y tu nombre.');
       return;
     }
     studentName = st.name;
-    studentSection = 'D';
+    studentSection = st.section;
     studentCode = st.code;
     lastVerifyCode = st.code;
     progress.studentName = studentName;
+    progress.studentSection = studentSection;
     progress.studentCode = studentCode;
     saveProgress(progress);
     try {

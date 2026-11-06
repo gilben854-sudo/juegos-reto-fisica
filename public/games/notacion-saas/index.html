@@ -299,7 +299,7 @@
 
     <div class="sim-result" style="text-align:left; line-height:1.8; margin-top:14px;">
       <b>🎮 Modo Desafíos:</b> aquí sí acumulas puntos y tienes vidas. <b>Importante:</b> si durante un desafío sales al Simulador o a Instrucciones, el intento se reinicia y los ejercicios cambian.<br>
-      1. Elige tu <b>sección</b> y luego tu <b>nombre</b> de la lista (no se escribe a mano).<br>
+      1. Escribe tu <b>sección</b> y tu <b>nombre</b> manualmente.<br>
       2. Elige un nivel. Solo el Nivel 1 está disponible al inicio; cada nivel se desbloquea al completar el anterior sin quedarte sin vidas.<br>
       3. Presiona "Comenzar" y responde las 10 preguntas de cada nivel. Tienes 3 vidas: si te equivocas demasiadas veces, el nivel termina.<br>
       4. Al completar los 5 niveles sin quedarte sin vidas en ninguno, se desbloquea tu certificado.<br>
@@ -361,20 +361,13 @@
     <div id="levelSelectScreen">
       <div style="display:flex; gap:10px; align-items:center; margin-bottom:12px; flex-wrap:wrap;">
         <label style="min-width:110px;">Tu sección:</label>
-        <select id="studentSectionInput" onchange="onSectionChange()" style="flex:1; padding:10px; border-radius:8px; border:2px solid #475569; font-size:1em; min-width:160px; background:#f8fafc; color:#0f172a;">
-          <option value="">— Elige tu sección —</option>
-          <option value="2A">2do A</option>
-          <option value="A">3ero A</option>
-          <option value="B">3ero B</option>
-          <option value="C">3ero C</option>
-          <option value="D">3ero D</option>
-        </select>
+        <input id="studentSectionInput" type="text" placeholder="Escribe tu sección" autocomplete="organization-section" style="flex:1; padding:10px; border-radius:8px; border:2px solid #475569; font-size:1em; min-width:160px; background:#f8fafc; color:#0f172a; box-sizing:border-box;">
       </div>
       <div style="display:flex; gap:10px; align-items:center; margin-bottom:16px; flex-wrap:wrap;">
         <label style="min-width:110px;">Tu nombre:</label>
-        <input id="studentNameSelect" type="text" placeholder="Escribe tu nombre" autocomplete="name">
+        <input id="studentNameSelect" type="text" placeholder="Escribe tu nombre" autocomplete="name" style="flex:1; padding:10px; border-radius:8px; border:2px solid #475569; font-size:1em; min-width:160px; background:#f8fafc; color:#0f172a; box-sizing:border-box;">
       </div>
-      <p style="font-size:0.85em;color:#94a3b8;margin-bottom:12px;text-align:center;">Selecciona tu sección y escribe tu nombre. Puedes escribirlo manualmente.</p>
+      <p style="font-size:0.85em;color:#94a3b8;margin-bottom:12px;text-align:center;">Escribe tu sección y tu nombre manualmente.</p>
       <h3 style="text-align:center; margin-bottom:14px;">Elige tu nivel</h3>
       <div class="level-select">
         <button class="level-btn" data-level="1" onclick="selectLevel(1)">Nivel 1<br><small>Conversión básica</small></button>

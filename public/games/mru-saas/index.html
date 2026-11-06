@@ -1179,17 +1179,11 @@ function renderSetup(){
   document.getElementById("tabbar").classList.add("hidden");
   const main = document.getElementById("main");
   main.innerHTML = `
-    <div class="intro-box">Elige tu <b>sección</b> y luego tu <b>nombre</b> de la lista (no se escribe a mano).</div>
+    <div class="intro-box">Escribe tu <b>sección</b> y tu <b>nombre</b> manualmente.</div>
     <div style="background:#fff;border-radius:12px;padding:16px;border:1px solid #e6ecf2;">
       <p style="text-align:center;color:#E8763B;font-weight:bold;margin:0 0 12px;">3er año</p>
       <label style="display:block;font-size:13px;font-weight:700;margin-bottom:4px;">Tu sección</label>
-      <select id="studentSectionInput" onchange="onSectionChange()" style="width:100%;padding:12px;border-radius:10px;border:2px solid #dbe3ea;font-size:15px;margin-bottom:12px;">
-        <option value="">— Elige tu sección —</option>
-        <option value="A">3ero A</option>
-        <option value="B">3ero B</option>
-        <option value="C">3ero C</option>
-        <option value="D">3ero D</option>
-      </select>
+      <input id="studentSectionInput" type="text" placeholder="Escribe tu sección" autocomplete="organization-section">
       <label style="display:block;font-size:13px;font-weight:700;margin-bottom:4px;">Tu nombre</label>
       <input id="studentNameSelect" type="text" placeholder="Escribe tu nombre" autocomplete="name">
       <p style="text-align:center;color:#7a8a99;font-size:13px;margin-top:8px;">El certificado usará tu código único de la lista del profesor.</p>
@@ -1199,7 +1193,7 @@ function renderSetup(){
   document.getElementById("startSetupBtn").addEventListener("click", ()=>{
     const st = getSelectedStudent();
     if (!st) {
-      alert('Selecciona tu sección y escribe tu nombre.');
+      alert('Escribe tu sección y tu nombre.');
       return;
     }
     studentName = st.name;
