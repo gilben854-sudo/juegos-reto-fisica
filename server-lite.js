@@ -59,6 +59,9 @@ function verifyPw(pw, stored) {
 }
 function needsRehash(stored) { return !String(stored || '').startsWith('scrypt:'); }
 function token() { return crypto.randomBytes(32).toString('hex'); }
+function licenseActive(t) {
+  return !!(t && t.active && t.validUntil && new Date(t.validUntil).getTime() >= Date.now());
+}
 const loginAttempts = new Map();
 function loginAllowed(key) {
   const now = Date.now();

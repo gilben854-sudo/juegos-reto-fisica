@@ -27,6 +27,18 @@
         <button class="btn btn-outline" type="button" onclick="loadTeachers()">Actualizar lista</button>
         <button class="btn btn-bad" type="button" onclick="logout()">Salir</button>
       </div>
+      <h2>Cambiar clave de administrador</h2>
+      <p class="muted">La clave nunca se muestra ni se guarda en el navegador. Debe tener al menos 8 caracteres.</p>
+      <div class="grid">
+        <div><label>Clave actual</label><input id="adminCurrentPass" type="password" autocomplete="current-password"></div>
+        <div><label>Nueva clave</label><input id="adminNewPass" type="password" autocomplete="new-password"></div>
+        <div><label>Repetir nueva clave</label><input id="adminNewPass2" type="password" autocomplete="new-password"></div>
+      </div>
+      <button class="btn btn-gold" type="button" onclick="changeAdminPassword()">Guardar nueva clave</button>
+      <div class="ok" id="passOk"></div>
+      <div class="err" id="passErr"></div>
+    </div>
+    <div class="card">
       <h2>Crear profesor (licencia pagada)</h2>
       <div class="grid">
         <div><label>Nombre</label><input id="nName"></div>
