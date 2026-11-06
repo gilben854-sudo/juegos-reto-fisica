@@ -1,0 +1,54 @@
+{
+  "admin": {
+    "username": "admin",
+    "password_hash": "652ddb9133e0a8b764632ab0d344b302:d01fc2e502a7db3341ac0a2eda5483ab8c93be80122a091916524e495c76c61e",
+    "email": "admin@tudominio.com"
+  },
+  "teachers": {
+    "d5643704b491120d-4086d560": {
+      "id": "d5643704b491120d-4086d560",
+      "name": "Profe Demo",
+      "email": "demo@test.com",
+      "password_hash": "c44217c0cbac4df6a7e6ce7db89174ff:1f3451d183ce3cb8a9bcaa66177ae1ba35106e5c4f5f159fc23a1e47576b8833",
+      "school": "Colegio Demo",
+      "certificateEmail": "demo@test.com",
+      "active": true,
+      "plan": "paid",
+      "validUntil": "2026-12-06T01:45:02.318Z",
+      "classCode": "C986D0F",
+      "createdAt": "2026-11-03T16:19:33.292Z"
+    },
+    "a6a05edf1101fdcc-d9b9571e": {
+      "id": "a6a05edf1101fdcc-d9b9571e",
+      "name": "Profe Prueba",
+      "email": "prueba@test.com",
+      "password_hash": "1e91e8664fa38ad142d465fc0bcf7a96:9a69d673952067620093d37e8062636244ef98f0684b6782a9d21d3704367c56",
+      "school": "Demo",
+      "certificateEmail": "prueba@test.com",
+      "active": true,
+      "plan": "trial",
+      "validUntil": "2026-11-13T01:44:50.866Z",
+      "classCode": "C99E4EA",
+      "createdAt": "2026-11-06T01:44:50.866Z"
+    }
+  },
+  "licenses": {},
+  "sessions": {
+    "a707e9b4e6885a3400c74cb4a039d02f0d972bb3b47a8ad2": {
+      "role": "teacher",
+      "teacherId": "d5643704b491120d-4086d560",
+      "expires": 1793765973742
+    },
+    "e44dc5f2505cd710d744279f25f2262c1ea356d2e661802c": {
+      "role": "teacher",
+      "teacherId": "a6a05edf1101fdcc-d9b9571e",
+      "expires": 1793972691276
+    },
+    "7afbc875155f34784f7a068be1785607c0a978c7855c0985": {
+      "role": "admin",
+      "expires": 1793972701503
+    }
+  },
+  "classrooms": {},
+  "results": []
+}

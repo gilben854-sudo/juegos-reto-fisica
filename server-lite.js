@@ -26,8 +26,14 @@ function findPublic() {
 }
 const PUBLIC = findPublic();
 const DB_PATH = path.join(__dirname, 'data', 'db.json');
+const DB_SEED_PATH = path.join(__dirname, 'db-template.json');
 
 function loadDb() {
+  if (!fs.existsSync(DB_PATH)) {
+    if (!fs.existsSync(DB_SEED_PATH)) throw new Error('Base de datos no inicializada');
+    fs.mkdirSync(path.dirname(DB_PATH), { recursive: true });
+    fs.copyFileSync(DB_SEED_PATH, DB_PATH);
+  }
   const db = JSON.parse(fs.readFileSync(DB_PATH, 'utf8'));
   // Compatibilidad con bases persistentes creadas antes de añadir sesiones y resultados.
   if (!db.teachers || typeof db.teachers !== 'object' || Array.isArray(db.teachers)) db.teachers = {};
