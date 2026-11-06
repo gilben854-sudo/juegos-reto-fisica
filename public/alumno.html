@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Juegos de Reto para Física — Aprende física resolviendo retos</title>
+<link rel="stylesheet" href="/css/app.css">
+</head>
+<body>
+<header><h1>Entrada de alumno</h1>
+  <p class="slogan" style="color:#7dd3fc;font-weight:600;margin:8px 0 0">Aprende física resolviendo retos</p><p>Usa el código de clase de tu profesor</p></header>
+<div class="wrap">
+  <div class="card">
+    <div class="err" id="err"></div>
+    <div class="ok" id="ok"></div>
+    <label>Código de clase</label>
+    <input id="classCode" placeholder="Ej: C1A2B3" style="text-transform:uppercase">
+    <label>Tu nombre</label>
+    <input id="studentName" placeholder="Nombre y apellido">
+    <button class="btn btn-primary" type="button" onclick="checkAccess()">Comprobar acceso</button>
+  </div>
+  <div class="card locked" id="playBox">
+    <h2>Módulos disponibles</h2>
+    <p class="muted" id="info"></p>
+    <div class="modules">
+      <p class="muted">Cuando el acceso es válido, aquí se listan los juegos. El certificado se asociará al correo configurado por tu profesor.</p>
+    </div>
+  </div>
+</div>
+<script src="/js/api.js"></script>
+<script>
+async function checkAccess(){
+  hide(err); hide(ok);
+  const code=(classCode.value||'').trim().toUpperCase();
+  const name=(studentName.value||'').trim();
+  if(!code||!name){ show(err,'Escribe código de clase y tu nombre'); return; }
+  try{
+    const data=await API.req('/api/access/check?classCode='+encodeURIComponent(code));
+    if(!data.allowed){
+      const map={license_inactive:'La licencia del profesor está vencida o suspendida. No se puede jugar.',invalid_class_code:'Código de clase inválido.',no_credentials:'Falta el código de clase.'};
+      show(err, map[data.reason]||'Acceso denegado');
+      playBox.classList.add('locked');
+      return;
+    }
+    localStorage.setItem('saas_classCode', code);
+    localStorage.setItem('saas_studentName', name);
+    localStorage.setItem('saas_certEmail', data.certificateEmail||'');
+    show(ok,'Acceso concedido. Profesor: '+(data.teacherName||'')+' · Colegio: '+(data.school||'—'));
+    info.textContent='Correo del profesor (certificados): '+(data.certificateEmail||'—')+' · Código: '+data.classCode;
+    playBox.classList.remove('locked');
+  }catch(e){ show(err,e.message); }
+}
+</script>
+</body>
+</html>

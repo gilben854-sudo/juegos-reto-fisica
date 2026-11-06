@@ -1,0 +1,6 @@
+[build]
+builder = "NIXPACKS"
+
+[deploy]
+startCommand = "node server-lite.js"
+restartPolicyType = "ON_FAILURE"

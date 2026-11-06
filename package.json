@@ -1,0 +1,12 @@
+{
+  "name": "juegos-reto-fisica",
+  "version": "1.0.0",
+  "description": "Juegos de Reto para F\u00edsica \u2014 GILAST",
+  "main": "server-lite.js",
+  "scripts": {
+    "start": "node server-lite.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

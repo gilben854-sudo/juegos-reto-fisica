@@ -1,0 +1,1347 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="color-scheme" content="light only">
+<title>Misión MRUV — 3er año</title>
+<style>
+  html { color-scheme: light only; }
+  button, input, select, textarea {
+    -webkit-appearance: none; appearance: none; color-scheme: light only;
+  }
+  :root{
+    --navy:#1F4E79; --blue:#2E75B6; --lightblue:#DEEAF6;
+    --orange:#E8763B; --green:#2E9E5B; --red:#D64545;
+    --gray:#F2F2F2; --text:#26313D; --purple:#6B4C9A;
+  }
+  *{box-sizing:border-box;}
+  html,body{
+    margin:0;padding:0;height:100%;
+    font-family:'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+    background:linear-gradient(180deg,#1a0a2e,#2d1b4e 40%,#4a2c7a);
+    color:var(--text);
+    -webkit-tap-highlight-color:transparent;
+    -webkit-user-select:none;user-select:none;
+  }
+  input,textarea,select{-webkit-user-select:text!important;user-select:text!important;}
+  #app{max-width:480px;margin:0 auto;min-height:100vh;background:#F7F9FC;display:flex;flex-direction:column;box-shadow:0 0 40px rgba(0,0,0,0.35);overflow-anchor:none;}
+  .teacher-bar{background:#1a0a2e;color:#D4C4F0;font-size:11px;font-weight:600;text-align:center;padding:5px 8px;}
+  header{background:#2d1b4e;color:#fff;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:5;}
+  header h1{font-size:17px;margin:0;font-weight:700;}
+  header .sub{font-size:11px;opacity:0.85;margin-top:2px;}
+  .icon-btn{background:rgba(255,255,255,0.15);border:none;color:#fff;width:34px;height:34px;border-radius:50%;font-size:16px;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+  .tabbar{display:flex;background:#fff;border-bottom:1px solid #e2e6ea;position:sticky;top:58px;z-index:4;}
+  .tab{flex:1;text-align:center;padding:11px 4px;font-size:13px;font-weight:600;color:#7a8a99;cursor:pointer;border-bottom:3px solid transparent;}
+  .tab.active{color:#2d1b4e;border-bottom:3px solid var(--orange);}
+  main{flex:1;padding:16px;padding-bottom:36px;overflow-anchor:none;}
+  .hidden{display:none!important;}
+  .intro-box{background:#fff;border-left:4px solid var(--orange);border-radius:8px;padding:12px 14px;font-size:13.5px;line-height:1.5;margin-bottom:14px;color:#455364;}
+  .level-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:6px;}
+  .level-card{background:#fff;border-radius:14px;padding:14px 12px;box-shadow:0 2px 8px rgba(45,27,78,0.12);border:1px solid #e6ecf2;position:relative;min-height:118px;display:flex;flex-direction:column;justify-content:space-between;cursor:pointer;}
+  .level-card.locked{opacity:0.55;cursor:not-allowed;}
+  .level-card .num{width:28px;height:28px;border-radius:50%;background:#EDE4F7;color:#2d1b4e;font-weight:800;font-size:13px;display:flex;align-items:center;justify-content:center;}
+  .level-card .title{font-size:13.5px;font-weight:700;color:#2d1b4e;margin-top:8px;line-height:1.25;}
+  .level-card .stars{font-size:14px;color:#F5A623;margin-top:6px;letter-spacing:2px;}
+  .level-card .lock-icon{position:absolute;top:10px;right:10px;font-size:15px;color:#9AA7B2;}
+  .reset-link{text-align:center;margin-top:22px;font-size:12px;color:#9AA7B2;text-decoration:underline;cursor:pointer;}
+  .progress-dots{display:flex;gap:6px;justify-content:center;margin-bottom:16px;}
+  .dot{width:10px;height:10px;border-radius:50%;background:#DCE3EA;}
+  .dot.current{background:var(--orange);}
+  .dot.done-correct{background:var(--green);}
+  .dot.done-wrong{background:var(--red);}
+  .score-pill{display:inline-block;background:#EDE4F7;color:#2d1b4e;font-size:12px;font-weight:700;padding:4px 10px;border-radius:12px;margin-bottom:10px;}
+  .question-card{background:#fff;border-radius:14px;padding:18px 16px;box-shadow:0 2px 10px rgba(45,27,78,0.12);border:1px solid #e6ecf2;}
+  .question-tag{font-size:11px;font-weight:700;color:#6B4C9A;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;}
+  .question-text{font-size:15.5px;line-height:1.55;color:var(--text);margin-bottom:14px;}
+  .question-text b{color:#2d1b4e;}
+  .formula-hint{background:#F5F0FA;border-radius:8px;padding:8px 10px;font-size:12.5px;color:#4a3a68;margin-bottom:12px;}
+  .answer-row{display:flex;gap:8px;align-items:center;}
+  .answer-row input[type=number]{flex:1;font-size:22px;padding:14px 12px;border-radius:12px;border:2px solid #6B4C9A;text-align:center;font-weight:800;color:#1a0a2e;background:#fff;}
+  .answer-row input:focus{outline:none;border-color:#6B4C9A;}
+  .unit-label{font-size:13px;font-weight:700;color:#7a8a99;min-width:48px;}
+  .btn{display:block;width:100%;border:none;border-radius:12px;padding:14px;font-size:15px;font-weight:700;cursor:pointer;margin-top:14px;color:#fff;}
+  .btn-primary{background:var(--orange);}
+  .btn-primary:active{background:#d0672e;}
+  .btn-secondary{background:#2d1b4e;}
+  .btn-outline{background:#fff;color:#2d1b4e;border:2px solid #2d1b4e;}
+  .btn-success{background:var(--green);}
+  .feedback{margin-top:14px;padding:12px 14px;border-radius:10px;font-size:14px;line-height:1.5;}
+  .feedback.ok{background:#E7F6EC;color:#1E7A44;border:1px solid #bfe6cc;}
+  .feedback.bad{background:#FCEAEA;color:#B23A3A;border:1px solid #f3c6c6;}
+  .feedback .steps{margin-top:8px;font-size:13px;color:#4a5a68;background:rgba(255,255,255,0.6);border-radius:8px;padding:8px 10px;}
+  .result-wrap{text-align:center;padding-top:10px;}
+  .big-stars{font-size:38px;color:#F5A623;letter-spacing:6px;margin:14px 0 6px;}
+  .result-title{font-size:19px;font-weight:800;color:#2d1b4e;}
+  .result-sub{font-size:14px;color:#7a8a99;margin-top:4px;margin-bottom:18px;}
+  .sim-track-wrap{background:#fff;border-radius:14px;padding:16px;box-shadow:0 2px 10px rgba(45,27,78,0.12);border:1px solid #e6ecf2;overflow:hidden;}
+  .sim-track{position:relative;height:46px;background:var(--gray);border-radius:8px;margin:14px 0 16px;overflow:hidden;border:1px solid #e2e6ea;}
+  .sim-track .marker{position:absolute;top:0;bottom:0;width:1px;background:#d3dae1;}
+  .sim-track .marker span{position:absolute;bottom:2px;left:2px;font-size:9px;color:#9AA7B2;}
+  .sim-car{position:absolute;top:8px;width:30px;height:30px;line-height:30px;text-align:center;font-size:18px;transform:translateX(-15px);z-index:2;}
+  .sim-readout{display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px;background:#F4F6F9;border-radius:10px;padding:10px 12px;margin-bottom:14px;font-size:12px;font-weight:700;color:#2d1b4e;}
+  .sim-readout .c-t{color:#455364;}
+  .sim-readout .c-v{color:#1D6FBF;}
+  .sim-readout .c-x{color:#C45C1A;}
+  .sim-readout .c-a{color:#2E9E5B;}
+  #simGraph{
+    display:block;width:100%;max-width:100%;height:180px;
+    background:#FAFBFC;border:1px solid #e2e6ea;border-radius:10px;
+    margin:0 0 8px;
+  }
+  .graph-legend{display:flex;gap:14px;justify-content:center;font-size:12px;font-weight:700;margin-bottom:8px;}
+  .graph-legend span{display:inline-flex;align-items:center;gap:6px;}
+  .graph-legend i{display:inline-block;width:14px;height:3px;border-radius:2px;}
+  .sim-controls{margin-top:4px;}
+  .ctrl-box{
+    border-radius:10px;padding:10px 12px;margin-top:10px;
+    border:2px solid #dbe3ea;background:#F8FAFC;
+  }
+  .ctrl-box.ctrl-v{border-color:#1D6FBF;background:#EAF3FB;}
+  .ctrl-box.ctrl-a{border-color:#2E9E5B;background:#E8F6EE;}
+  .ctrl-box.ctrl-x{border-color:#C45C1A;background:#FBF0E8;}
+  .ctrl-box label{
+    display:flex;justify-content:space-between;align-items:center;
+    font-size:13px;font-weight:800;margin:0 0 8px;color:#26313D;
+  }
+  .ctrl-box .valdisp{
+    font-size:13px;font-weight:800;padding:3px 10px;border-radius:8px;
+    background:#fff;border:1px solid rgba(0,0,0,0.08);
+  }
+  .ctrl-v .valdisp{color:#1D6FBF;border-color:#1D6FBF;}
+  .ctrl-a .valdisp{color:#1E7A44;border-color:#2E9E5B;}
+  .ctrl-x .valdisp{color:#C45C1A;border-color:#C45C1A;}
+  .ctrl-box input[type=range]{
+    -webkit-appearance:none;appearance:none;width:100%;height:10px;
+    border-radius:6px;outline:none;cursor:pointer;margin:0;
+  }
+  .ctrl-v input[type=range]{background:linear-gradient(90deg,#A8D0F0,#1D6FBF);}
+  .ctrl-a input[type=range]{background:linear-gradient(90deg,#A8E0BC,#2E9E5B);}
+  .ctrl-x input[type=range]{background:linear-gradient(90deg,#F0C4A0,#C45C1A);}
+  .ctrl-box input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none;appearance:none;
+    width:22px;height:22px;border-radius:50%;
+    background:#fff;border:3px solid #26313D;cursor:pointer;
+    box-shadow:0 1px 4px rgba(0,0,0,0.25);
+  }
+  .ctrl-v input[type=range]::-webkit-slider-thumb{border-color:#1D6FBF;}
+  .ctrl-a input[type=range]::-webkit-slider-thumb{border-color:#2E9E5B;}
+  .ctrl-x input[type=range]::-webkit-slider-thumb{border-color:#C45C1A;}
+  .ctrl-box input[type=range]::-moz-range-thumb{
+    width:22px;height:22px;border-radius:50%;
+    background:#fff;border:3px solid #26313D;cursor:pointer;
+  }
+  .ctrl-v input[type=range]::-moz-range-thumb{border-color:#1D6FBF;}
+  .ctrl-a input[type=range]::-moz-range-thumb{border-color:#2E9E5B;}
+  .ctrl-x input[type=range]::-moz-range-thumb{border-color:#C45C1A;}
+  .sim-final-box{
+    margin-top:12px;padding:12px 14px;border-radius:10px;
+    background:#EAF3FB;border:2px solid #1D6FBF;
+    font-size:13.5px;font-weight:700;color:#1a3a5c;line-height:1.55;
+    min-height:72px;box-sizing:border-box;
+  }
+  .sim-final-box .vf{color:#1D6FBF;font-size:1.15em;}
+  .sim-final-box .xf{color:#C45C1A;}
+  .sim-final-box .muted{color:#7a8a99;font-weight:600;font-size:12.5px;}
+  .sim-btns{display:flex;gap:8px;margin-top:16px;}
+  .sim-btns .btn{margin-top:0;flex:1;}
+  .form-box{background:#fff;border-radius:12px;padding:16px;border:1px solid #e6ecf2;}
+  .form-box label{display:block;font-size:13px;font-weight:700;margin-bottom:4px;}
+  .form-box input,.form-box select{width:100%;padding:12px;border-radius:10px;border:2px solid #dbe3ea;font-size:15px;margin-bottom:8px;}
+
+  .reaction-wrap{text-align:center;margin:12px 0 8px;position:relative;}
+  .reaction-avatar{font-size:64px;line-height:1;display:inline-block;animation:popIn .45s ease;}
+  .reaction-msg{font-size:1.05rem;font-weight:800;margin-top:6px;}
+  .reaction-msg.ok{color:#1E7A44;}
+  .reaction-msg.bad{color:#B23A3A;}
+  @keyframes popIn{0%{transform:scale(0.3);opacity:0;}60%{transform:scale(1.15);}100%{transform:scale(1);opacity:1;}}
+  @keyframes shakeSad{0%,100%{transform:translateX(0);}25%{transform:translateX(-6px);}75%{transform:translateX(6px);}}
+  .reaction-avatar.sad{animation:popIn .45s ease, shakeSad .5s ease .2s;}
+  .confetti-layer{pointer-events:none;position:fixed;inset:0;overflow:hidden;z-index:9999;}
+  .confetti-piece{position:absolute;top:-12px;width:8px;height:12px;border-radius:2px;opacity:0.95;
+    animation:confettiFall linear forwards;}
+  @keyframes confettiFall{
+    0%{transform:translateY(0) rotate(0deg);opacity:1;}
+    100%{transform:translateY(110vh) rotate(720deg);opacity:0.2;}
+  }
+  .btn-sign{
+    flex:0 0 auto;min-width:52px;height:52px;padding:0 12px;border-radius:12px;
+    border:2px solid #0f766e;background:#ccfbf1;color:#0f766e;font-size:26px;font-weight:900;
+    cursor:pointer;line-height:1;touch-action:manipulation;-webkit-tap-highlight-color:transparent;
+  }
+  .btn-negative{
+    display:block;width:100%;margin:10px 0 6px;padding:14px 12px;border-radius:12px;
+    border:2px dashed #0f766e;background:#f0fdfa;color:#0f766e;font-size:0.95rem;font-weight:800;
+    cursor:pointer;touch-action:manipulation;
+  }
+  .btn-negative.is-neg{border-style:solid;background:#0f766e;color:#ecfdf5;}
+  #answerInput.is-neg{
+    border-color:#0f766e !important;
+    background:#ecfdf5 !important;
+    color:#065f46 !important;
+  }
+  .answer-row input#answerInput{
+    flex:1;
+    min-width:0;
+    font-size:22px;
+    padding:14px 12px;
+    border-radius:12px;
+    border:2px solid #6B4C9A;
+    text-align:center;
+    font-weight:800;
+    color:#1a0a2e !important;
+    background:#ffffff !important;
+    -webkit-text-fill-color:#1a0a2e;
+    caret-color:#6B4C9A;
+    color-scheme: light;
+  }
+  .answer-row input#answerInput::placeholder{
+    color:#94a3b8;
+    font-weight:600;
+    opacity:1;
+    -webkit-text-fill-color:#94a3b8;
+  }
+  .answer-row input#answerInput:focus{
+    outline:none;
+    border-color:#E8763B;
+    box-shadow:0 0 0 3px rgba(232,118,59,0.25);
+    background:#fffbeb !important;
+  }
+  .answer-row input#answerInput:disabled{
+    background:#f1f5f9 !important;
+    color:#475569 !important;
+    -webkit-text-fill-color:#475569;
+  }
+  .unit-label{
+    font-size:14px;
+    font-weight:800;
+    color:#2d1b4e;
+    min-width:48px;
+  }
+  .lives-bar{display:flex;justify-content:space-between;align-items:center;font-size:13px;
+    background:#fff;border-radius:10px;padding:8px 12px;margin-bottom:10px;border:1px solid #e6ecf2;}
+
+
+.license-gate{background:#0f172a;border:1px solid #334155;border-radius:14px;padding:14px;margin:10px 0}.license-gate.blocked{border-color:#7f1d1d;background:#450a0a}.license-gate.ok{border-color:#166534;background:#052e16}</style>
+</head>
+<body>
+<div id="licenseGate" class="license-gate"><div id="licenseStatus" class="muted">Comprobando acceso…</div></div>
+
+<div id="app">
+  <div class="teacher-bar">Producido por GILAST — U.E.P. "GILAST" · 3er año</div>
+  <header>
+    <div>
+      <h1 id="headerTitle">Misión MRUV</h1>
+      <div class="sub" id="headerSub">Movimiento Rectilíneo Uniformemente Variado</div>
+    </div>
+    <button class="icon-btn hidden" id="backBtn">←</button>
+  </header>
+  <div class="tabbar" id="tabbar">
+    <div class="tab" data-tab="instr">📖 Instrucciones</div>
+    <div class="tab active" data-tab="levels">🎯 Niveles</div>
+    <div class="tab" data-tab="sim">🚗 Simulador</div>
+  </div>
+  <main id="main"></main>
+</div>
+
+<script>
+(function(){
+  document.addEventListener('contextmenu',e=>{e.preventDefault();return false;},true);
+  document.addEventListener('keydown',e=>{
+    const k=(e.key||'').toLowerCase(), ctrl=e.ctrlKey||e.metaKey, shift=e.shiftKey;
+    if((ctrl&&(k==='u'||k==='s'||k==='p'))||(ctrl&&shift&&(k==='i'||k==='j'||k==='c'))||k==='f12'||(ctrl&&k==='a')){
+      e.preventDefault();e.stopPropagation();return false;
+    }
+  },true);
+})();
+
+const STORAGE_KEY="mruv3ero_progress_v1";
+const SCORES_KEY="mruv3ero_scores_v1";
+const QUESTIONS_PER_LEVEL=5;
+const PASS_RATIO=0.6;
+const MAX_TOTAL_POINTS=1500;
+
+const LEVELS=[
+  {id:0,title:"Aceleración básica",tag:"Nivel 1 · a = Δv / Δt",desc:"Calcula la aceleración con el cambio de velocidad y el tiempo."},
+  {id:1,title:"Velocidad final",tag:"Nivel 2 · v = v₀ + a·t",desc:"Halla la velocidad final con aceleración constante."},
+  {id:2,title:"Distancia recorrida",tag:"Nivel 3 · d = v₀t + ½at²",desc:"Calcula el desplazamiento en MRUV."},
+  {id:3,title:"Sin tiempo",tag:"Nivel 4 · v² = v₀² + 2ad",desc:"Relaciona velocidades, aceleración y distancia."},
+  {id:4,title:"Reto mixto MRUV",tag:"Nivel 5 · desafío final",desc:"Problemas combinados de aceleración, velocidad y distancia."},
+];
+
+const STUDENT_ROSTER = {
+  "A": [
+    {name: 'ARISTIZÁBAL HERRERA, SERGIO ISMAEL', code: '3H5-D94-73E'},
+    {name: 'BLANCO RODRÍGUEZ, ROIDELYS EUDEMAR', code: 'T6G-J45-CSB'},
+    {name: 'BLANCO SEIJAS, MÍA VALENTINA DE PAULA', code: 'YGP-8LL-FEF'},
+    {name: 'BOLÍVAR ALFONZO, EMILIANNYS DARIELA', code: 'RE8-XNH-NLE'},
+    {name: 'CALZADILLA CARRILLO, CAMILA ALEJANDRA', code: 'LW2-MT9-P5B'},
+    {name: 'CARRERO MORA, VALERIA ALEJANDRA', code: 'Q2J-ALV-HG5'},
+    {name: 'CEBALLOS ANCHETA, DANIELA ALEJANDRA', code: 'VFC-LMZ-ZYE'},
+    {name: 'CHACOA ECHEZURÍA, EMMARI VICTORIA', code: '3FN-EAY-RGA'},
+    {name: 'CHACÓN TOVAR, SAMUEL ERNESTO', code: 'HGW-BQF-LSX'},
+    {name: 'COLINA CARDOZO, JHOINNER DAVID', code: '7KL-3B5-QFY'},
+    {name: 'CORREA REYES, MARIELENA', code: 'RAF-HTL-29T'},
+    {name: 'CRESPO GUARAMATA, FERNANDO ABRAHAM', code: 'W5A-T2K-FT6'},
+    {name: 'DA CRUZ MIJARES, SAMUEL DAVID', code: '7FK-BCT-89G'},
+    {name: 'DA CRUZ MIJARES, SEBASTIÁN ALEJANDRO', code: 'E2F-P6W-GQG'},
+    {name: 'DUARTE ROJAS, KARIANYELIS BETANIA', code: 'QED-AFG-6C9'},
+    {name: 'ESCALONA FARÍA, VICTORIA VALENTINA', code: 'DKX-BNV-FFR'},
+    {name: 'FERNÁNDEZ ESCALONA, LEANDRO MIGUEL', code: '35E-JP9-Q3J'},
+    {name: 'GARCÍA MAVÁREZ, EDWIN JESÚS', code: '6FH-PTL-5QN'},
+    {name: 'GEORGERIN LANDAETA, FREIKERLYN INÉS', code: 'X4L-PQP-9Y9'},
+    {name: 'GONZÁLEZ SOSA, GABRIEL JOSÉ', code: '5ZB-4RR-A3V'},
+    {name: 'HERRERA BLANCO, ABRAHÁN DE JESÚS', code: '2YG-UNE-2CZ'},
+    {name: 'LEÓN PÉREZ, NICOLLE ELINNYS', code: 'DVX-YL8-658'},
+    {name: 'MEDINA ROJAS, KIMBERLY ANGÉLICA', code: '32N-ERK-YL6'},
+    {name: 'MENDOZA LIOTTA, SAMUEL ANDRÉS', code: 'AUN-VG4-LBC'},
+    {name: 'MORENO ROJAS, GUILLERMO HANIEL', code: 'CGH-VT3-SA8'},
+    {name: 'MUÑOZ CABRILES, VALERIA ANTONELLA', code: 'B2W-7F4-BJA'},
+    {name: 'PADRÓN FERNÁNDEZ, JOHANNYS NAZARETH', code: 'RRS-LXV-FVL'},
+    {name: 'POLO, ORIANYELIS', code: 'DXF-Y6Z-B5T'},
+    {name: 'PRADO, CÉSAR', code: 'QDE-L92-ZWP'},
+    {name: 'RANGEL VILLASANA, ASHLEY ANTONELLA', code: 'WM8-BLL-ZCD'},
+    {name: 'REYES DUQUE, ODLANYER ALBERTO', code: 'VKN-YFQ-G9N'},
+    {name: 'RIVERO ESPINOZA, FABIANA DANIELA', code: 'T8J-A7B-GEZ'},
+    {name: 'UCROS PÉREZ, ESTEBAN JOSUÉ', code: 'H9A-27H-MJU'},
+    {name: 'VILLANUEVA CARREÑO, IZABELLA AMELIE', code: 'DLB-F2N-B37'},
+    {name: 'YÁNEZ GONZÁLEZ, DIEGO ARMANDO', code: '6Q7-VWU-BUL'},
+  ],
+  "B": [
+    {name: 'ARANGUREN RONDÓN, MARÍA FERNANDA', code: '999-KYT-Q28'},
+    {name: 'ARTEAGA ÁLVAREZ, LEONELA DAYMARY', code: 'R6P-MJ5-W3Y'},
+    {name: 'AULAR ZAMBRANO, YOSUENI ALEXANDRA', code: 'ZVA-A35-EJW'},
+    {name: 'BARRIOS ACEVEDO, ANTONELLA MERCEDES', code: 'NMW-WSA-GLT'},
+    {name: 'BARRIOS SAVARESE, CARMEN LUISA DE JESÚS', code: 'ESH-BGU-U6R'},
+    {name: 'CALOGERO GONZÁLEZ, YONATHAN JOSUÉ', code: '56M-CGY-C8T'},
+    {name: 'CÓRDOVA MORALES, JOHANNY VALENTINA', code: 'JTE-3LE-RKF'},
+    {name: 'DOMÍNGUEZ ESCOBAR, HELI JULIET', code: 'YKK-3FS-P4U'},
+    {name: 'DÍAZ GÓMEZ, BRITHANY STEPHANIA', code: 'BM2-8M5-CK4'},
+    {name: 'DÍAZ RASQUIN, VICTORIA NAZARETH', code: '4NM-3CU-BLQ'},
+    {name: 'GARAY GUERRERO, BIANCA VICTORIA', code: 'VVS-NZQ-RSY'},
+    {name: 'GARCÍA RAMOS, ANGELINA SOFÍA', code: '9GL-GHG-JR3'},
+    {name: 'GUEVARA RAMÍREZ, DIEGO ALEJANDRO', code: 'J9M-6R9-SS6'},
+    {name: 'LISCANO TOVAR, GUILLERMO ANTONIO', code: 'G4F-M28-ADQ'},
+    {name: 'LOZADA CONTRERAS, ASHLEY', code: 'DVA-W9F-8P9'},
+    {name: 'MALDONADO SEGOVIA, ENZO ISMAEL', code: 'BNS-ENY-2CH'},
+    {name: 'MONTENEGRO LÓPEZ, LUIS ÁNGEL', code: 'QKX-7NF-2YF'},
+    {name: 'NIEVES DELGADO, SAÚL DAVID', code: 'F29-JR4-5TU'},
+    {name: 'OLIVAR HERNÁNDEZ, DYLAN EMMANUEL', code: 'GJP-5HF-4DJ'},
+    {name: 'PACHECO LA ROSA, ADRIÁN MISAEL', code: '4FT-V96-SNK'},
+    {name: 'PALACIOS HENRÍQUEZ, WILESKA VALENTINA', code: '5JZ-3YC-EGM'},
+    {name: 'PORTABARRIA SAAVEDRA, SEBASTIÁN JOSUÉ', code: '9HZ-L3B-QZ9'},
+    {name: 'PRIETO PARADA, AARÓN JOSÉ', code: 'HG7-32F-4RK'},
+    {name: 'PURROY LANDAETA, DAIRON JESÚS', code: 'X3B-GZC-DJA'},
+    {name: 'QUEVEDO FLORES, SEBASTIÁN ALEJANDRO', code: 'FDU-HQQ-BT2'},
+    {name: 'REQUENA PÉREZ, ARANTZA SOPHIA', code: 'CTP-SRS-R43'},
+    {name: 'RONDÓN AQUINO, ESTEFANI EVAGELIN', code: 'YJA-SBU-KX4'},
+    {name: 'SALAZAR HERNÁNDEZ, SOPHIE ANTHONELLA', code: 'BCQ-ZKR-45L'},
+    {name: 'SAVARESE CASTRO, CHRISYERLI NAZARETH', code: 'X6T-DF9-P34'},
+    {name: 'SILVEIRA ROJAS, LUISANA SOFÍA', code: 'HQ6-N2N-GYF'},
+    {name: 'SÁNCHEZ ESCOBAR, ESMARLIS ZOYMAR', code: '7FE-72P-VNY'},
+    {name: 'VARGAS T. KEVIN A', code: 'THK-62M-E59'},
+    {name: 'VIELMA RODRÍGUEZ, VICTORIA NAZARETH', code: 'FNL-QNC-AB5'},
+    {name: 'DÍAZ, SEBASTIÁN', code: 'RUX-HFC-8D3'},
+    {name: 'RIVAS, KATHERIN', code: 'GEV-D7G-WUV'},
+  ],
+  "C": [
+    {name: 'AGUILAR RÍOS, ILDEAMAR ANDREA', code: 'DX9-TSY-WKH'},
+    {name: 'ALVARADO MORENO, MARION ALEJANDRO', code: 'YQV-NKK-7BE'},
+    {name: 'BORGES MONTOYA, MILCA NOEMÍ', code: '3Q5-ULC-VBQ'},
+    {name: 'CAMPO, ALEXA', code: 'HS4-5GC-XKM'},
+    {name: 'CAPOTE HERRERA, CRISBEL DIOXENY', code: 'Z8G-ZPT-Y9V'},
+    {name: 'CARRANZA MEJÍAS, YERMAIN ORLEANYE', code: 'WFA-LF2-ZPR'},
+    {name: 'CARRIÓN RAMÍREZ, SOFÍA VALENTINA', code: '5TE-MEJ-6GS'},
+    {name: 'CASTELLANOS CARRERA, ISABELA SHALOM', code: '8SC-L4L-E9U'},
+    {name: 'CASTRO GUÍA, HEYNER ALEJANDRO', code: 'WHG-C37-J3R'},
+    {name: 'CHINCHILLA PEÑA, NAZARETH DE LOS ÁNGELES', code: 'ANQ-GVM-4S4'},
+    {name: 'CLAVIJO HERRERA, EILYN VALENTINA', code: '2H4-MJH-SB8'},
+    {name: 'CUETO DELFÍN, MARIANA ESTHEFANÍA', code: '7CB-7FZ-YL9'},
+    {name: 'ESPINOZA RANGEL, MYA ANTHONELA', code: 'K7C-YKV-ENJ'},
+    {name: 'FAJARDO PIAR, VICTORIA ISABELLA', code: 'SHT-KBN-ZRE'},
+    {name: 'FLORES CASTRO, PEDRO', code: '9AK-9LS-LWD'},
+    {name: 'GARCÍA GUZMÁN, EDWARD', code: '34A-QY5-ZB9'},
+    {name: 'GARCÍA HERRERA, DAILIMAR NAZARETH', code: 'KCC-G55-2T9'},
+    {name: 'GARCÍA PIRE, GABRIELA ISABEL', code: 'THU-GM9-98H'},
+    {name: 'GONZÁLEZ MUJICA, YOSNEIDYS JULIET', code: 'FNK-VKB-76U'},
+    {name: 'GONZÁLEZ PANACUAL, VICTORIA ALEXANDRA', code: 'S3J-F2S-4Y6'},
+    {name: 'GÓMEZ INOJOSA, ISABELLA SOPHIA', code: 'EGM-9DH-U8U'},
+    {name: 'HERNÁNDEZ JARAMILLO, JESÚS DE NAZARETH', code: 'WXJ-TRY-GF7'},
+    {name: 'KEY ALZURU, BRYANNA JULIETH', code: 'DFX-X5Y-7D5'},
+    {name: 'LANDER B. REYZMARYS', code: 'APQ-8YA-HQ2'},
+    {name: 'LIBENKO BALLESTERO, CAMILA VALENTINA', code: 'RKC-39E-2ZX'},
+    {name: 'PARRA TOVAR, ORIANNA COROMOTO', code: 'HZU-HQ3-8W5'},
+    {name: 'RIVERA, LUZARIANNY', code: '6GF-Q38-L2W'},
+    {name: 'SÁNCHEZ GONZÁLEZ, KARLIMAR GABRIELA', code: 'AGG-BHJ-FRB'},
+    {name: 'URBAEZ DI BENIGNO, SOPHIA ANTHONELLA', code: 'Y4X-6N6-BCV'},
+    {name: 'YÁNEZ PEÑALOZA, GIOFREYDER GABRIEL ALEX', code: 'Y6J-W3N-32L'},
+    {name: 'ÁLVAREZ JIMÉNEZ, MARÍA FERNANDA', code: 'JXD-99R-N93'},
+  ],
+  "D": [    {name: 'ARAFAH, SHARAZAD', code: 'UVZ-SPY-ATB'},
+    {name: 'HERNÁNDEZ MIRABA, ABRIL SOPHIA', code: 'DW6-M3C-UK3'},
+    {name: 'IDROGO, SARAY', code: 'Z6F-KQ3-A2M'},
+    {name: 'IRIARTE PÉREZ, HUMBERTO', code: 'S59-MLL-NYG'},
+    {name: 'JIMÉNEZ RAMÍREZ, GABRIHELA NAZARETH', code: 'GE9-W7C-784'},
+    {name: 'LAFFE MARTÍNEZ, GÉNESIS FRENYERLIN', code: 'QWU-NQX-LKJ'},
+    {name: 'LAFFE, VALERIA', code: 'ZWR-RYC-UX6'},
+    {name: 'LANDAETA MARCANO, MAXIMILIANO MIGUEL JO', code: 'J4A-8ZF-QFS'},
+    {name: 'LINARES ALMEIDA, CRISOL MADELEINE', code: 'KA3-NBK-DHG'},
+    {name: 'MANCERA GUZMÁN, ROSNERY DANIELA', code: 'Y4L-YQH-PHU'},
+    {name: 'MARTÍNEZ BUSTAMANTE, GILMARY ALEJANDRA', code: '8QC-ERL-B8X'},
+    {name: 'MARTÍNEZ FRANCO, CRISTHIAN', code: 'TT2-XTH-QFA'},
+    {name: 'MEDINA HERNÁNDEZ, BRAHYNER SANTIAGO', code: '938-8YS-FWC'},
+    {name: 'MORENO RINCONES, VIRGINIA ANABEL', code: 'M89-R3X-45L'},
+    {name: 'MOTA CORTEZ, EMELY ALEJANDRA', code: '4MF-EUH-PKE'},
+    {name: 'OROZCO GRATEROL, DASHA ELIENAI', code: '3AU-5SX-2LE'},
+    {name: 'OROZCO MARQUINA, SNAIDER LIONEL', code: 'EXB-5ZF-2DM'},
+    {name: 'OSUNA RONDÓN, SEBASTIÁN ALEJANDRO', code: 'SNV-2QU-QDT'},
+    {name: 'PACHECO PEÑA, MARIANGEL', code: 'QZQ-DMU-D2T'},
+    {name: 'PEREIRA, VIVIANA', code: '78Y-5VM-DMH'},
+    {name: 'PEÑA RASQUIN, ANDRÉS SEBASTIÁN', code: 'AVN-42C-648'},
+    {name: 'PÉREZ POZO, MELANNY DE LOS ÁNGELES', code: 'NC7-A2X-YZ4'},
+    {name: 'QUINTANA, CAMILA', code: '6W5-FM6-MQ4'},
+    {name: 'RAMOS VÁSQUEZ, DORIANNYS EVERLEINS', code: 'RP9-8GT-9V9'},
+    {name: 'RAMÍREZ TOVAR, LISVANY KATERINE', code: 'DG8-F4H-2SV'},
+    {name: 'REINOZA GIL, ABNER ALEJANDRO', code: 'MV9-CMR-U55'},
+    {name: 'RIVERA MARTÍNEZ, ANZZAC YAHIR', code: 'PPL-LWW-EZD'},
+    {name: 'RODRÍGUEZ HERNÁNDEZ, SOFÍA NAZARETH', code: 'B46-45B-WQP'},
+    {name: 'ROJAS AYALA, ASHLY NAIRIM', code: 'XDM-KKA-MS3'},
+    {name: 'ROMERO GUEVARA, KEIVER SAMUEL', code: 'XZJ-3P9-GAZ'},
+    {name: 'SALCEDO CASTRO, JEREMÍAS DENNIER', code: '5JC-2AQ-NX2'},
+  ],
+};
+let studentName="Estudiante", studentSection="A", studentCode="";
+
+let lastBadge="", lastScore=0, finalGrade20=0, totalPointsAllLevels=0;
+let lastVerifyCode="";
+let levelScores={0:0,1:0,2:0,3:0,4:0};
+let progress=loadProgress();
+loadLevelScores();
+if(progress.studentName){ studentName=progress.studentName; studentSection=progress.studentSection||"A"; studentCode=progress.studentCode||""; }
+
+function loadProgress(){
+  try{const r=localStorage.getItem(STORAGE_KEY);if(r)return JSON.parse(r);}catch(e){}
+  return {unlocked:0,stars:{},studentName:"",studentSection:"A"};
+}
+function saveProgress(p){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(p));return true;}catch(e){console.warn(e);return false;}}
+function loadLevelScores(){
+  try{const s=localStorage.getItem(SCORES_KEY);if(s)levelScores={0:0,1:0,2:0,3:0,4:0,...JSON.parse(s)};}catch(e){}
+}
+function saveLevelScores(){try{localStorage.setItem(SCORES_KEY,JSON.stringify(levelScores));return true;}catch(e){return false;}}
+function computeGrade20(){
+  totalPointsAllLevels=[0,1,2,3,4].reduce((s,L)=>s+(levelScores[L]||0),0);
+  let g=Math.round((totalPointsAllLevels/MAX_TOTAL_POINTS)*20);
+  if(g<1)g=1;if(g>20)g=20;finalGrade20=g;return g;
+}
+
+function randInt(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
+function choice(arr){return arr[randInt(0,arr.length-1)];}
+function fmt(n){const r=Math.round(n*100)/100;return Number.isInteger(r)?String(r):r.toFixed(2).replace(/0+$/,"").replace(/\.$/,"");}
+function closeEnough(a,b,tol){return Math.abs(a-b)<=tol;}
+
+/* ---- Generadores MRUV ---- */
+function genL0(){
+  // a = (v - v0) / t
+  const v0=choice([0,2,4,5,8,10]);
+  const a=choice([1,2,2.5,3,4,5]);
+  const t=choice([2,3,4,5,6]);
+  const v=v0+a*t;
+  return {
+    tag:"¿Cuál es la aceleración?",
+    formula:"a = (v − v₀) / t",
+    text:`Un móvil parte con velocidad <b>${v0} m/s</b> y al cabo de <b>${t} s</b> alcanza <b>${fmt(v)} m/s</b>. ¿Cuál es su aceleración?`,
+    unit:"m/s²", answer:a, tol:0.08,
+    steps:`a = (v − v₀) / t = (${fmt(v)} − ${v0}) / ${t} = ${fmt(a)} m/s²`
+  };
+}
+function genL1(){
+  // v = v0 + a t
+  const v0=choice([0,2,4,5,8,10,12]);
+  const a=choice([1,1.5,2,2.5,3,4]);
+  const t=choice([2,3,4,5,6,8]);
+  const v=v0+a*t;
+  return {
+    tag:"Velocidad final",
+    formula:"v = v₀ + a·t",
+    text:`Un auto arranca con <b>v₀ = ${v0} m/s</b> y acelera a <b>${fmt(a)} m/s²</b> durante <b>${t} s</b>. ¿Qué velocidad final alcanza?`,
+    unit:"m/s", answer:v, tol:0.1,
+    steps:`v = v₀ + a·t = ${v0} + (${fmt(a)})(${t}) = ${fmt(v)} m/s`
+  };
+}
+function genL2(){
+  // d = v0 t + 0.5 a t^2
+  const v0=choice([0,2,4,5,6,8]);
+  const a=choice([1,2,2,3,4]);
+  const t=choice([2,3,4,5]);
+  const d=v0*t+0.5*a*t*t;
+  return {
+    tag:"Distancia en MRUV",
+    formula:"d = v₀·t + ½·a·t²",
+    text:`Un móvil parte con <b>v₀ = ${v0} m/s</b> y acelera a <b>${a} m/s²</b> durante <b>${t} s</b>. ¿Qué distancia recorre?`,
+    unit:"m", answer:d, tol:Math.max(0.15, Math.abs(d)*0.02),
+    steps:`d = v₀·t + ½·a·t² = (${v0})(${t}) + ½(${a})(${t})² = ${v0*t} + ${0.5*a*t*t} = ${fmt(d)} m`
+  };
+}
+function genL3(){
+  // v² = v0² + 2 a d  → find v or a or d
+  const kind=choice(["v","a","d"]);
+  const v0=choice([0,2,4,5,6]);
+  const a=choice([1,2,2.5,3,4]);
+  const d=choice([4,8,9,12,16,18,25]);
+  const v2=v0*v0+2*a*d;
+  const v=Math.sqrt(v2);
+  if(kind==="v"){
+    return {
+      tag:"Velocidad sin tiempo",
+      formula:"v² = v₀² + 2·a·d",
+      text:`Parte con <b>v₀ = ${v0} m/s</b>, acelera a <b>${fmt(a)} m/s²</b> y recorre <b>${d} m</b>. ¿Qué velocidad final tiene?`,
+      unit:"m/s", answer:v, tol:0.15,
+      steps:`v² = v₀² + 2·a·d = ${v0}² + 2(${fmt(a)})(${d}) = ${fmt(v2)}\nv = √${fmt(v2)} = ${fmt(v)} m/s`
+    };
+  }
+  if(kind==="a"){
+    // choose nice numbers so a is clean
+    const v0b=choice([0,2,4]);
+    const vb=choice([6,8,10,12]);
+    const db=choice([8,9,12,16,18]);
+    const ab=(vb*vb-v0b*v0b)/(2*db);
+    return {
+      tag:"Aceleración sin tiempo",
+      formula:"a = (v² − v₀²) / (2·d)",
+      text:`Un móvil pasa de <b>${v0b} m/s</b> a <b>${vb} m/s</b> en <b>${db} m</b>. ¿Cuál fue su aceleración?`,
+      unit:"m/s²", answer:ab, tol:0.12,
+      steps:`a = (v² − v₀²) / (2·d) = (${vb}² − ${v0b}²) / (2·${db}) = ${vb*vb-v0b*v0b} / ${2*db} = ${fmt(ab)} m/s²`
+    };
+  }
+  // find d
+  const v0c=choice([0,2,4,5]);
+  const vc=choice([8,10,12,14]);
+  const ac=choice([1,2,2.5,4]);
+  const dc=(vc*vc-v0c*v0c)/(2*ac);
+  return {
+    tag:"Distancia sin tiempo",
+    formula:"d = (v² − v₀²) / (2·a)",
+    text:`Pasa de <b>${v0c} m/s</b> a <b>${vc} m/s</b> con a = <b>${fmt(ac)} m/s²</b>. ¿Qué distancia recorre?`,
+    unit:"m", answer:dc, tol:Math.max(0.15, Math.abs(dc)*0.02),
+    steps:`d = (v² − v₀²) / (2·a) = (${vc}² − ${v0c}²) / (2·${fmt(ac)}) = ${vc*vc-v0c*v0c} / ${2*ac} = ${fmt(dc)} m`
+  };
+}
+function genL4(){
+  const pick=randInt(0,3);
+  if(pick===0) return genL0();
+  if(pick===1) return genL1();
+  if(pick===2) return genL2();
+  return genL3();
+}
+const GENERATORS=[genL0,genL1,genL2,genL3,genL4];
+
+let session=null;
+
+function startLevel(levelId){
+  session={levelId,qIndex:0,results:[],currentProblem:null,levelPoints:0,lives:3};
+  nextQuestion();
+  renderQuestion();
+}
+function nextQuestion(){
+  session.currentProblem=GENERATORS[session.levelId]();
+}
+
+/* ---- UI: setup ---- */
+function fillNameSelect(){
+  const sec=document.getElementById("studentSectionInput").value;
+  const sel=document.getElementById("studentNameSelect");
+  sel.innerHTML='<option value="">— Elige tu nombre —</option>';
+  const list=(STUDENT_ROSTER[sec]||[]);
+  list.forEach(function(st){
+    const o=document.createElement("option");
+    o.value=st.name;
+    o.textContent=st.name;
+    o.dataset.code=st.code;
+    sel.appendChild(o);
+  });
+}
+function renderSetup(){
+  setHeader("Misión MRUV","3er año — Ingresa tus datos",false);
+  document.getElementById("tabbar").classList.add("hidden");
+  document.getElementById("main").innerHTML=`
+    <div class="intro-box">Elige tu <b>sección</b> y luego tu <b>nombre</b> de la lista (no se escribe a mano).</div>
+    <div class="form-box">
+      <p style="text-align:center;color:#E8763B;font-weight:bold;margin:0 0 12px;">3er año</p>
+      <label>Tu sección</label>
+      <select id="studentSectionInput">
+        <option value="">— Elige tu sección —</option>
+        <option value="A">3ero A</option>
+        <option value="B">3ero B</option>
+        <option value="C">3ero C</option>
+        <option value="D">3ero D</option>
+      </select>
+      <label>Tu nombre</label>
+      <select id="studentNameSelect" disabled>
+        <option value="">— Primero elige la sección —</option>
+      </select>
+      <p style="font-size:12px;color:#7a8a99;margin-top:8px;">El certificado usará tu código único de la lista del profesor.</p>
+      <button class="btn btn-primary" id="startSetupBtn">▶ Continuar al mapa de niveles</button>
+    </div>`;
+  const secSel=document.getElementById("studentSectionInput");
+  const nameSel=document.getElementById("studentNameSelect");
+  secSel.onchange=function(){
+    if(!secSel.value){ nameSel.innerHTML='<option value="">— Primero elige la sección —</option>'; nameSel.disabled=true; return; }
+    nameSel.disabled=false;
+    fillNameSelect();
+  };
+  document.getElementById("startSetupBtn").onclick=()=>{
+    if(!secSel.value){ alert("Elige tu sección."); return; }
+    if(!nameSel.value){ alert("Elige tu nombre de la lista."); return; }
+    studentSection=secSel.value;
+    studentName=nameSel.value;
+    const opt=nameSel.options[nameSel.selectedIndex];
+    studentCode=(opt && opt.dataset.code)||"";
+    progress.studentName=studentName;
+    progress.studentSection=studentSection;
+    progress.studentCode=studentCode;
+    saveProgress(progress);
+    document.getElementById("tabbar").classList.remove("hidden");
+    renderLevelMap();
+  };
+}
+
+function renderInstructions(){
+  setHeader("Misión MRUV","Instrucciones de uso",false);
+  document.getElementById("main").innerHTML=`
+    <div class="intro-box">📖 <b>¿Cómo jugar?</b> Practica el Movimiento Rectilíneo Uniformemente Variado (MRUV).</div>
+    <div class="question-card" style="margin-bottom:14px;">
+      <div class="question-tag">🎯 Pestaña Niveles</div>
+      <div class="question-text" style="margin-bottom:0;">
+        1. Toca un nivel disponible (los bloqueados tienen candado 🔒).<br>
+        <b>Importante:</b> si durante un nivel sales al Simulador o a Instrucciones, el intento se reinicia y los ejercicios cambian.<br>
+        2. Responde 5 preguntas por nivel. Necesitas al menos ${Math.ceil(QUESTIONS_PER_LEVEL*PASS_RATIO)} correctas para desbloquear el siguiente.<br>
+        3. Al completar los 5 niveles se desbloquea el certificado con <b>código de verificación y QR</b>.
+      </div>
+    </div>
+    <div class="question-card" style="margin-bottom:14px;">
+      <div class="question-tag">🚗 Simulador</div>
+      <div class="question-text" style="margin-bottom:0;">
+        Explora cómo cambian la velocidad y la posición cuando hay aceleración constante. Ajusta v₀ y a, inicia y observa el móvil y la gráfica.
+      </div>
+    </div>
+    <div class="question-card">
+      <div class="question-tag">📐 Fórmulas del MRUV</div>
+      <div class="question-text" style="margin-bottom:0;font-size:14px;">
+        • a = (v − v₀) / t<br>
+        • v = v₀ + a·t<br>
+        • d = v₀·t + ½·a·t²<br>
+        • v² = v₀² + 2·a·d
+      </div>
+    </div>
+    <p style="font-size:12px;color:#9AA7B2;text-align:center;margin-top:14px;">El progreso se guarda en este mismo navegador y dispositivo. Abre el archivo descargado (no la vista previa de Drive).</p>
+  `;
+}
+
+function renderLevelMap(){
+  setHeader("Misión MRUV","Mapa de niveles · 3ero "+studentSection,false);
+  let html=`<div class="intro-box">🚀 Resuelve problemas de MRUV. Necesitas ≥${Math.ceil(QUESTIONS_PER_LEVEL*PASS_RATIO)}/${QUESTIONS_PER_LEVEL} correctas para avanzar. Certificado al completar los 5 niveles.</div>
+  <div class="level-grid">`;
+  LEVELS.forEach(lv=>{
+    const locked=lv.id>progress.unlocked;
+    const stars=progress.stars[lv.id]||0;
+    html+=`<div class="level-card ${locked?'locked':''}" data-id="${lv.id}">
+      <div class="num">${lv.id+1}</div>
+      ${locked?'<div class="lock-icon">🔒</div>':''}
+      <div class="title">${lv.title}</div>
+      <div class="stars">${'★'.repeat(stars)}${'☆'.repeat(3-stars)}</div>
+    </div>`;
+  });
+  html+=`</div>
+  <p style="text-align:center;font-size:12px;color:#7a8a99;margin-top:12px;">${studentName} · 3ero ${studentSection}</p>
+  <div class="reset-link" id="resetProgress">Reiniciar progreso de este dispositivo</div>`;
+  document.getElementById("main").innerHTML=html;
+  document.querySelectorAll(".level-card:not(.locked)").forEach(card=>{
+    card.onclick=()=>startLevel(parseInt(card.dataset.id,10));
+  });
+  document.getElementById("resetProgress").onclick=()=>{
+    if(confirm("¿Borrar progreso, estrellas y puntajes de este dispositivo?")){
+      progress={unlocked:0,stars:{},studentName:progress.studentName,studentSection:progress.studentSection};
+      levelScores={0:0,1:0,2:0,3:0,4:0};
+      saveProgress(progress); saveLevelScores();
+      renderLevelMap();
+    }
+  };
+}
+
+function renderQuestion(){
+  const lv=LEVELS[session.levelId];
+  const p=session.currentProblem;
+  setHeader(lv.title,"Pregunta "+(session.qIndex+1)+" / "+QUESTIONS_PER_LEVEL,true);
+  document.getElementById("tabbar").classList.add("hidden");
+  let dots="";
+  for(let i=0;i<QUESTIONS_PER_LEVEL;i++){
+    let cls="dot";
+    if(i===session.qIndex) cls+=" current";
+    else if(session.results[i]===true) cls+=" done-correct";
+    else if(session.results[i]===false) cls+=" done-wrong";
+    dots+=`<div class="${cls}"></div>`;
+  }
+  document.getElementById("main").innerHTML=`
+    <div class="progress-dots">${dots}</div>
+    <span class="score-pill">Puntos del nivel: ${session.levelPoints||0}</span>
+    <div class="question-card">
+      <div class="question-tag">${p.tag}</div>
+      ${p.formula?`<div class="formula-hint">Fórmula guía: <b>${p.formula}</b></div>`:""}
+      <div class="question-text">${p.text}</div>
+      <div class="lives-bar"><span>Pregunta <b>${session.qIndex+1}</b> / ${QUESTIONS_PER_LEVEL}</span><span id="livesDisplay">${"❤️".repeat(session.lives||3)}</span></div>
+      <div class="answer-row">
+        <button type="button" class="btn-sign" id="signBtn" aria-label="Signo negativo">−</button>
+        <input type="text" id="answerInput" inputmode="decimal" placeholder="Solo números" autocomplete="off" enterkeyhint="done">
+        <span class="unit-label">${p.unit}</span>
+      </div>
+      <button type="button" class="btn-negative" id="negBtn">Tocar aquí si el resultado es NEGATIVO (−)</button>
+      <p style="font-size:0.78rem;color:#7a8a99;margin:4px 0 8px;text-align:center;">En iPhone usa el botón <b>−</b> o el de abajo.</p>
+      <button class="btn btn-primary" id="checkBtn">Verificar</button>
+      <div id="feedbackArea"></div>
+    </div>`;
+  document.getElementById("checkBtn").onclick=checkAnswer;
+  const ansInput=document.getElementById("answerInput");
+  const signBtn=document.getElementById("signBtn");
+  const negBtn=document.getElementById("negBtn");
+  function syncNegUI(){
+    const v=(ansInput.value||"").trim();
+    const isNeg=v.startsWith("-")||v.startsWith("−");
+    ansInput.classList.toggle("is-neg", isNeg);
+    if(negBtn){
+      negBtn.classList.toggle("is-neg", isNeg);
+      negBtn.textContent=isNeg?"Resultado NEGATIVO activado (tocar para quitar)":"Tocar aquí si el resultado es NEGATIVO (−)";
+    }
+  }
+  function toggleNegative(){
+    let v=(ansInput.value||"").trim().replace(/−/g,"-").replace(",",".");
+    if(!v||v==="-") ansInput.value="-";
+    else if(v.startsWith("-")) ansInput.value=v.slice(1);
+    else ansInput.value="-"+v.replace(/^\+/,"");
+    syncNegUI();
+  }
+  if(signBtn) signBtn.onclick=function(e){ e.preventDefault(); toggleNegative(); };
+  if(negBtn) negBtn.onclick=function(e){ e.preventDefault(); toggleNegative(); };
+  ansInput.addEventListener("input",()=>{
+    let v=ansInput.value.replace(/−/g,"-").replace(/[^0-9.,\-]/g,"");
+    v=v.replace(/(?!^)-/g,"");
+    ansInput.value=v;
+    syncNegUI();
+  });
+  ansInput.addEventListener("keydown",(e)=>{ if(e.key==="Enter") checkAnswer(); });
+  syncNegUI();
+}
+
+
+function launchConfetti(){
+  const layer=document.createElement("div");
+  layer.className="confetti-layer";
+  document.body.appendChild(layer);
+  const colors=["#F5A623","#E8763B","#2ECC71","#6B4C9A","#3498db","#e74c3c","#f1c40f"];
+  for(let i=0;i<48;i++){
+    const p=document.createElement("div");
+    p.className="confetti-piece";
+    p.style.left=(Math.random()*100)+"%";
+    p.style.background=colors[i%colors.length];
+    p.style.animationDuration=(1.4+Math.random()*1.6)+"s";
+    p.style.animationDelay=(Math.random()*0.35)+"s";
+    p.style.transform="rotate("+Math.random()*360+"deg)";
+    if(Math.random()>0.5){ p.style.width="10px"; p.style.height="6px"; p.style.borderRadius="50%"; }
+    layer.appendChild(p);
+  }
+  setTimeout(function(){ try{ layer.remove(); }catch(e){} }, 3200);
+}
+function praiseMessage(){
+  const msgs=["¡Excelente!","¡Muy bien!","¡Genial!","¡Correcto!","¡Sigue así!","¡Qué crack!","¡Lo lograste!"];
+  return msgs[Math.floor(Math.random()*msgs.length)];
+}
+
+function checkAnswer(){
+  const input=document.getElementById("answerInput");
+  const raw=(input.value||"").trim().replace(/−/g,"-").replace(",",".");
+  const val=parseFloat(raw);
+  const p=session.currentProblem;
+  const area=document.getElementById("feedbackArea");
+  if(raw===""||raw==="-"||isNaN(val)){area.innerHTML=`<div class="feedback bad">Escribe un número. Si es negativo, usa el botón − o el de abajo.</div>`;return;}
+  const correct=closeEnough(val,p.answer,p.tol);
+  session.results[session.qIndex]=correct;
+  if(correct){
+    session.levelPoints += 20*(session.levelId+1);
+    launchConfetti();
+  } else {
+    session.lives = Math.max(0, (session.lives||3) - 1);
+  }
+  const pts = 20*(session.levelId+1);
+  const reaction = correct
+    ? `<div class="reaction-wrap"><div class="reaction-avatar">🎉</div><div class="reaction-msg ok">${praiseMessage()}</div></div>`
+    : `<div class="reaction-wrap"><div class="reaction-avatar sad">😢</div><div class="reaction-msg bad">¡Ánimo! La próxima sale</div></div>`;
+  const livesEl=document.getElementById("livesDisplay");
+  if(livesEl) livesEl.textContent = "❤️".repeat(Math.max(session.lives||0,0)) || "💀";
+  area.innerHTML=`${reaction}<div class="feedback ${correct?'ok':'bad'}">
+    ${correct?`✅ ¡Correcto! +${pts} pts`:`❌ Incorrecto. Respuesta: ${fmt(p.answer)} ${p.unit}.`}
+    ${!correct?`<div style="margin-top:6px;font-weight:700;">Vidas: ${"❤️".repeat(Math.max(session.lives||0,0))||"💀"} (${session.lives||0})</div>`:""}
+    <div class="steps"><b>Procedimiento:</b><br>${p.steps.replace(/\n/g,"<br>")}</div>
+  </div>
+  <button class="btn btn-secondary" id="nextBtn">${(session.lives<=0||session.qIndex>=QUESTIONS_PER_LEVEL-1)?"Ver resultados ➜":"Siguiente pregunta ➜"}</button>`;
+  document.getElementById("checkBtn").remove();
+  input.disabled=true;
+  const signB=document.getElementById("signBtn"); if(signB) signB.disabled=true;
+  const negB=document.getElementById("negBtn"); if(negB) negB.disabled=true;
+  document.getElementById("nextBtn").onclick=()=>{
+    if((session.lives||0)<=0){ finishLevel(); return; }
+    session.qIndex++;
+    if(session.qIndex>=QUESTIONS_PER_LEVEL) finishLevel();
+    else { nextQuestion(); renderQuestion(); }
+  };
+}
+
+function finishLevel(){
+  const correctCount=session.results.filter(Boolean).length;
+  const ratio=correctCount/QUESTIONS_PER_LEVEL;
+  let stars=0;
+  if(ratio>=0.99) stars=3; else if(ratio>=0.8) stars=2; else if(ratio>=PASS_RATIO) stars=1;
+  const passed=ratio>=PASS_RATIO;
+  lastScore=session.levelPoints;
+  if(passed){
+    progress.stars[session.levelId]=Math.max(progress.stars[session.levelId]||0,stars);
+    levelScores[session.levelId]=Math.max(levelScores[session.levelId]||0,session.levelPoints);
+    saveLevelScores(); computeGrade20();
+    if(session.levelId===progress.unlocked && progress.unlocked<LEVELS.length-1) progress.unlocked++;
+    if(session.levelId===LEVELS.length-1) progress.completedAllLevels=true;
+    saveProgress(progress);
+  }
+  if(stars>=3) lastBadge="🏆 Excelente";
+  else if(stars>=2) lastBadge="🥈 Muy bien";
+  else if(passed) lastBadge="🥉 Nivel superado";
+  else lastBadge="🔄 Sigue practicando";
+  renderResult(correctCount,stars,passed);
+}
+
+function renderResult(correctCount,stars,passed){
+  const lv=LEVELS[session.levelId];
+  setHeader(lv.title,"Resultados",true);
+  const allDone=passed && session.levelId===LEVELS.length-1;
+  if(allDone) computeGrade20();
+  document.getElementById("main").innerHTML=`
+    <div class="result-wrap">
+      <div class="big-stars">${"★".repeat(stars)}${"☆".repeat(3-stars)}</div>
+      <div class="result-title">${passed?"¡Nivel superado!":"Casi lo logras"}</div>
+      <div class="result-sub">${studentName} · 3ero ${studentSection}<br>
+        Correctas: ${correctCount}/${QUESTIONS_PER_LEVEL} · Puntos: ${session.levelPoints}
+        ${allDone?`<br><b>Puntos totales: ${totalPointsAllLevels} · Nota: ${finalGrade20}/20</b>`:""}
+      </div>
+      ${!passed?`<div class="intro-box" style="text-align:left;">Necesitas al menos ${Math.ceil(QUESTIONS_PER_LEVEL*PASS_RATIO)} correctas para avanzar.</div>`:""}
+      ${allDone?`
+        <button class="btn btn-success" id="dlCert">📥 Descargar mi logro</button>
+        <button class="btn btn-secondary" id="notifyT">📧 Avisar a mi profesor</button>
+        <p id="notifyStatus" style="text-align:center;color:#7a8a99;font-size:13px;margin-top:8px;min-height:1.2em;"></p>
+        <p style="font-size:12px;color:#7a8a99;margin-top:4px;">Al avisar, el resultado se envía solo a tu profesor (no hace falta abrir el correo).</p>
+      `:`<p style="font-size:12px;color:#9AA7B2;margin-top:10px;">🔒 Certificado al completar los 5 niveles.</p>`}
+      <button class="btn btn-primary" id="retryBtn">Repetir este nivel</button>
+      ${(passed&&session.levelId<LEVELS.length-1)?`<button class="btn btn-secondary" id="nextLevelBtn">Siguiente nivel ➜</button>`:""}
+      <button class="btn btn-outline" id="menuBtn">Volver al mapa</button>
+    </div>`;
+  document.getElementById("retryBtn").onclick=()=>startLevel(session.levelId);
+  document.getElementById("menuBtn").onclick=()=>{session=null;showTab("levels");};
+  const nb=document.getElementById("nextLevelBtn");
+  if(nb) nb.onclick=()=>startLevel(session.levelId+1);
+  const dl=document.getElementById("dlCert");
+  if(dl) dl.onclick=()=>downloadAchievement();
+  const nt=document.getElementById("notifyT");
+  if(nt) nt.onclick=()=>notifyTeacher();
+}
+
+/* ---- Verificación anti-plagio ---- */
+const VERIFY_SECRET="JMC-GILBERTO-FISICA-2026";
+function simpleHash(str){
+  let h=2166136261;
+  for(let i=0;i<str.length;i++){h^=str.charCodeAt(i);h=Math.imul(h,16777619);}
+  return (h>>>0).toString(36).toUpperCase().padStart(7,"0").slice(0,7);
+}
+function makeVerificationCode(gameId,name,section,points,grade){
+  const base=[gameId,(name||"").trim().toUpperCase(),section,String(points),String(grade),VERIFY_SECRET].join("|");
+  const h=simpleHash(base);
+  return "MRV-"+h.slice(0,3)+"-"+h.slice(3,6);
+}
+function buildVerifyPayload(gameTitle,name,section,yearLabel,points,grade,badge,code){
+  return [
+    "VERIFICACION DE LOGRO",
+    "Colegio: U.E.P. Jose Maria Carreno",
+    "Profesor: GILAST",
+    "Juego: "+gameTitle,
+    "Estudiante: "+name,
+    "Curso: "+yearLabel,
+    "Seccion: "+section,
+    "Puntos: "+points,
+    "Nota: "+grade+" / 20",
+    "Insignia: "+(badge||""),
+    "Codigo: "+code,
+    "Fecha: "+new Date().toLocaleString("es-VE")
+  ].join("\n");
+}
+function drawCertificateChrome(ctx,w,h){
+  ctx.save(); ctx.globalAlpha=0.06; ctx.fillStyle="#ffffff"; ctx.font="12px Arial";
+  for(let y=40;y<h;y+=28) for(let x=20;x<w;x+=120) ctx.fillText("JMC",x+((y/28)%2)*40,y);
+  ctx.restore();
+}
+function loadQrImage(text,size){
+  return new Promise(function(resolve){
+    const img=new Image(); img.crossOrigin="anonymous";
+    img.onload=function(){resolve(img);};
+    img.onerror=function(){resolve(null);};
+    img.src="https://api.qrserver.com/v1/create-qr-code/?size="+size+"x"+size+"&margin=8&data="+encodeURIComponent(text);
+    setTimeout(function(){if(!img.complete)resolve(null);},4000);
+  });
+}
+
+async function downloadAchievement(){
+  computeGrade20();
+  lastVerifyCode=makeVerificationCode("MRV",studentName,studentSection,totalPointsAllLevels,finalGrade20);
+  const payload=buildVerifyPayload("Misión MRUV",studentName,studentSection,"3er Año",totalPointsAllLevels,finalGrade20,lastBadge,lastVerifyCode);
+  const canvas=document.createElement("canvas");
+  canvas.width=900; canvas.height=640;
+  const ctx=canvas.getContext("2d");
+  const g=ctx.createLinearGradient(0,0,900,640);
+  g.addColorStop(0,"#2d1b4e"); g.addColorStop(1,"#4a2c7a");
+  ctx.fillStyle=g; ctx.fillRect(0,0,900,640);
+  drawCertificateChrome(ctx,900,640);
+  ctx.strokeStyle="#E8763B"; ctx.lineWidth=8; ctx.strokeRect(20,20,860,600);
+  ctx.strokeStyle="rgba(255,255,255,0.35)"; ctx.lineWidth=2; ctx.strokeRect(32,32,836,576);
+  ctx.textAlign="center";
+  ctx.fillStyle="#fff"; ctx.font="bold 28px Arial";
+  ctx.fillText("CERTIFICADO DE LOGRO",450,90);
+  ctx.font="18px Arial"; ctx.fillText("Misión MRUV — Movimiento acelerado",450,125);
+  ctx.fillStyle="rgba(255,255,255,0.85)"; ctx.font="14px Arial";
+  ctx.fillText("GILAST — Producido por GILAST",450,155);
+  ctx.font="18px Arial"; ctx.fillText("Se otorga el presente reconocimiento a:",450,200);
+  ctx.fillStyle="#E8763B"; ctx.font="bold 40px Arial";
+  ctx.fillText(studentName,450,255);
+  ctx.fillStyle="rgba(255,255,255,0.9)"; ctx.font="18px Arial";
+  ctx.fillText("3er Año — Sección "+studentSection,450,290);
+  ctx.fillStyle="#fff"; ctx.font="22px Arial";
+  ctx.fillText("Puntos totales: "+totalPointsAllLevels,450,330);
+  ctx.fillStyle="#E8763B"; ctx.font="bold 26px Arial";
+  ctx.fillText("Nota: "+finalGrade20+" / 20",450,368);
+  ctx.fillStyle="#b8f0c8"; ctx.font="bold 20px Arial";
+  ctx.fillText(lastBadge,450,405);
+  ctx.fillStyle="#E8763B"; ctx.font="bold 18px Arial";
+  ctx.fillText("Código de verificación: "+lastVerifyCode,450,445);
+  const fecha=new Date().toLocaleDateString("es-VE",{year:"numeric",month:"long",day:"numeric"});
+  ctx.fillStyle="rgba(255,255,255,0.7)"; ctx.font="14px Arial";
+  ctx.fillText(fecha,450,475);
+  const qrImg=await loadQrImage(payload,140);
+  if(qrImg){ ctx.fillStyle="#fff"; ctx.fillRect(378,490,144,144); ctx.drawImage(qrImg,380,492,140,140); }
+  else { ctx.fillStyle="rgba(255,255,255,0.85)"; ctx.font="12px Arial"; ctx.fillText("(QR no disponible sin conexión — use el código)",450,530); }
+  const a=document.createElement("a");
+  const safe=studentName.replace(/[^a-zA-Z0-9À-ÿ ]/g,"").trim().replace(/\s+/g,"_")||"estudiante";
+  a.download="logro_MRUV_"+safe+".png";
+  a.href=canvas.toDataURL("image/png");
+  a.click();
+}
+
+async function notifyTeacher(){
+  computeGrade20();
+  lastVerifyCode=studentCode||makeVerificationCode("MRV",studentName,studentSection,totalPointsAllLevels,finalGrade20);
+  const teacherEmail="fisicajmc@gmail.com";
+  const subject="Logro: "+studentName+" (3ero "+studentSection+") - Misión MRUV ["+lastVerifyCode+"]";
+  const bodyText="Juego: Misión MRUV\nEstudiante: "+studentName+"\nSección: 3ero "+studentSection+"\nPuntos: "+totalPointsAllLevels+"\nNota: "+finalGrade20+" / 20\nCódigo verificación: "+lastVerifyCode+"\nInsignia: "+lastBadge;
+  const statusEl=document.getElementById("notifyStatus");
+  const btn=document.getElementById("notifyT");
+  if(btn){ btn.disabled=true; btn.textContent="⏳ Enviando…"; }
+  if(statusEl) statusEl.textContent="Enviando aviso al profesor…";
+  try{
+    const fd=new FormData();
+    fd.append("_subject",subject);
+    fd.append("_template","table");
+    fd.append("_captcha","false");
+    fd.append("_honey","");
+    fd.append("Juego","Misión MRUV");
+    fd.append("Estudiante",studentName||"");
+    fd.append("Seccion","3ero "+(studentSection||""));
+    fd.append("Puntos",String(totalPointsAllLevels));
+    fd.append("Nota",String(finalGrade20)+" / 20");
+    fd.append("Codigo",lastVerifyCode||"");
+    fd.append("Insignia",lastBadge||"");
+    fd.append("message",bodyText);
+    const res=await fetch("https://formsubmit.co/ajax/"+teacherEmail,{
+      method:"POST",
+      body:fd,
+      headers:{"Accept":"application/json"}
+    });
+    if(!res.ok) throw new Error("HTTP "+res.status);
+    const data=await res.json().catch(function(){ return {}; });
+    if(statusEl) statusEl.textContent="✅ Aviso enviado al profesor";
+    if(btn){ btn.textContent="✅ Enviado"; }
+    alert("✅ Aviso enviado al profesor.\n\nNo hace falta abrir el correo ni adjuntar nada.\nCódigo: "+lastVerifyCode);
+  }catch(err){
+    if(statusEl) statusEl.textContent="No se pudo enviar automático. Se abrirá el correo.";
+    if(btn){ btn.disabled=false; btn.textContent="📧 Avisar a mi profesor"; }
+    const mailto="mailto:"+teacherEmail+"?subject="+encodeURIComponent(subject)+"&body="+encodeURIComponent(bodyText);
+    try{
+      const a=document.createElement("a"); a.href=mailto; a.style.display="none";
+      document.body.appendChild(a); a.click();
+      setTimeout(function(){try{document.body.removeChild(a);}catch(e){}},500);
+    }catch(e){ window.location.href=mailto; }
+    alert("No se pudo enviar automático (revisa internet).\nSe abrió el correo como respaldo.\nCódigo: "+lastVerifyCode);
+  }
+}
+
+/* ---- Simulador MRUV ---- */
+let simState={running:false,x0:0,v0:0,a:2,t:0,lastTs:null,raf:null,history:[]};
+
+function renderSimulator(){
+  setHeader("Simulador MRUV","Explora posición y velocidad con aceleración",false);
+  document.getElementById("main").innerHTML=`
+    <div class="sim-track-wrap">
+      <div class="sim-readout">
+        <span class="c-t">t = <span id="simT">0.0</span> s</span>
+        <span class="c-v">v actual = <span id="simV">0.0</span> m/s</span>
+        <span class="c-x">x = <span id="simX">0.0</span> m</span>
+        <span class="c-a">a = <span id="simA">${simState.a}</span> m/s²</span>
+      </div>
+      <div class="sim-track" id="simTrack"></div>
+      <div class="graph-legend">
+        <span><i style="background:#C45C1A;"></i> Posición x(t)</span>
+        <span><i style="background:#1D6FBF;"></i> Velocidad v(t)</span>
+      </div>
+      <canvas id="simGraph" width="400" height="180"></canvas>
+      <div class="sim-controls">
+        <div class="ctrl-box ctrl-v">
+          <label>Velocidad inicial (v₀) <span class="valdisp" id="v0Disp">${simState.v0} m/s</span></label>
+          <input type="range" id="v0Slider" min="-10" max="15" step="1" value="${simState.v0}">
+        </div>
+        <div class="ctrl-box ctrl-a">
+          <label>Aceleración (a) <span class="valdisp" id="aDisp">${simState.a} m/s²</span></label>
+          <input type="range" id="aSlider" min="-5" max="8" step="0.5" value="${simState.a}">
+        </div>
+        <div class="ctrl-box ctrl-x">
+          <label>Posición inicial (x₀) <span class="valdisp" id="x0Disp">${simState.x0} m</span></label>
+          <input type="range" id="x0Slider" min="-20" max="20" step="1" value="${simState.x0}">
+        </div>
+      </div>
+      <div class="sim-final-box" id="simFinalBox">
+        <div class="muted" id="simFinalWhy">Listo para iniciar</div>
+        <div>Velocidad: <span class="vf" id="simFinalV">0</span> m/s</div>
+        <div>Posición: <span class="xf" id="simFinalX">0</span> m</div>
+      </div>
+      <div class="sim-btns">
+        <button class="btn btn-primary" id="simStart">▶ Iniciar</button>
+        <button class="btn btn-outline" id="simReset">⟲ Reiniciar</button>
+      </div>
+      <p style="font-size:12px;color:#7a8a99;margin-top:10px;text-align:center;">v = v₀ + a·t &nbsp;·&nbsp; x = x₀ + v₀·t + ½·a·t²</p>
+    </div>`;
+  buildTrackMarkers();
+  document.getElementById("v0Slider").oninput=e=>{
+    simState.v0=parseFloat(e.target.value);
+    document.getElementById("v0Disp").textContent=simState.v0+" m/s";
+    if(!simState.running){
+      resetSimVisual();
+      document.getElementById("simV").textContent=fmt(simState.v0);
+    }
+  };
+  document.getElementById("aSlider").oninput=e=>{
+    simState.a=parseFloat(e.target.value);
+    document.getElementById("aDisp").textContent=simState.a+" m/s²";
+    document.getElementById("simA").textContent=simState.a;
+  };
+  document.getElementById("x0Slider").oninput=e=>{
+    simState.x0=parseFloat(e.target.value);
+    document.getElementById("x0Disp").textContent=simState.x0+" m";
+    if(!simState.running) resetSimVisual();
+  };
+  document.getElementById("simStart").onclick=toggleSim;
+  document.getElementById("simReset").onclick=resetSim;
+  resetSimVisual();
+}
+
+function buildTrackMarkers(){
+  const track=document.getElementById("simTrack");
+  track.innerHTML="";
+  for(let m=-20;m<=20;m+=5){
+    const pct=((m+20)/40)*100;
+    const el=document.createElement("div");
+    el.className="marker"; el.style.left=pct+"%";
+    el.innerHTML=`<span>${m}</span>`;
+    track.appendChild(el);
+  }
+  const car=document.createElement("div");
+  car.className="sim-car"; car.id="simCar"; car.textContent="🚗";
+  track.appendChild(car);
+}
+function posToPct(x){const c=Math.max(-20,Math.min(20,x));return ((c+20)/40)*100;}
+function resetSimVisual(){
+  const car=document.getElementById("simCar");
+  if(car) car.style.left=posToPct(simState.x0)+"%";
+  document.getElementById("simT").textContent="0.0";
+  document.getElementById("simV").textContent=fmt(simState.v0);
+  document.getElementById("simX").textContent=fmt(simState.x0);
+  simState.history=[{t:0,x:simState.x0,v:simState.v0}];
+  const why=document.getElementById("simFinalWhy");
+  const fv=document.getElementById("simFinalV");
+  const fx=document.getElementById("simFinalX");
+  if(why) why.textContent="Listo para iniciar";
+  if(fv) fv.textContent=fmt(simState.v0);
+  if(fx) fx.textContent=fmt(simState.x0);
+  drawSimGraph();
+}
+function resetSim(){
+  simState.running=false; simState.t=0; simState.lastTs=null;
+  if(simState.raf) cancelAnimationFrame(simState.raf);
+  document.getElementById("simStart").textContent="▶ Iniciar";
+  resetSimVisual();
+}
+function toggleSim(){
+  simState.running=!simState.running;
+  document.getElementById("simStart").textContent=simState.running?"⏸ Pausar":"▶ Iniciar";
+  if(simState.running){
+    simState.lastTs=null;
+    const why=document.getElementById("simFinalWhy");
+    if(why) why.textContent="En movimiento…";
+    simState.raf=requestAnimationFrame(simLoop);
+  } else {
+    if(simState.raf) cancelAnimationFrame(simState.raf);
+    const v=simState.v0+simState.a*simState.t;
+    const x=simState.x0+simState.v0*simState.t+0.5*simState.a*simState.t*simState.t;
+    showFinalVelocity(v,x,"Simulación en pausa");
+  }
+}
+function updateSimReadout(v,x){
+  const elV=document.getElementById("simV");
+  const elX=document.getElementById("simX");
+  const elT=document.getElementById("simT");
+  if(elT) elT.textContent=fmt(simState.t);
+  if(elV) elV.textContent=fmt(v);
+  if(elX) elX.textContent=fmt(x);
+  const fv=document.getElementById("simFinalV");
+  const fx=document.getElementById("simFinalX");
+  const why=document.getElementById("simFinalWhy");
+  if(fv) fv.textContent=fmt(v);
+  if(fx) fx.textContent=fmt(x);
+  if(why && simState.running) why.textContent="En movimiento…";
+}
+function showFinalVelocity(v,x,reason){
+  const fv=document.getElementById("simFinalV");
+  const fx=document.getElementById("simFinalX");
+  const why=document.getElementById("simFinalWhy");
+  const elV=document.getElementById("simV");
+  const elX=document.getElementById("simX");
+  if(elV) elV.textContent=fmt(v);
+  if(elX) elX.textContent=fmt(x);
+  if(fv) fv.textContent=fmt(v);
+  if(fx) fx.textContent=fmt(x);
+  if(why){
+    why.textContent=(reason||"Simulación detenida")
+      +" · v = v₀ + a·t = "+fmt(simState.v0)+" + ("+fmt(simState.a)+")("+fmt(simState.t)+")";
+  }
+}
+function simLoop(ts){
+  const car=document.getElementById("simCar");
+  if(!car){simState.running=false;simState.raf=null;return;}
+  if(!simState.lastTs) simState.lastTs=ts;
+  const dt=(ts-simState.lastTs)/1000;
+  simState.lastTs=ts;
+  simState.t+=dt;
+  const v=simState.v0+simState.a*simState.t;
+  const x=simState.x0+simState.v0*simState.t+0.5*simState.a*simState.t*simState.t;
+  car.style.left=posToPct(x)+"%";
+  updateSimReadout(v,x);
+  simState.history.push({t:simState.t,x,v});
+  if(simState.history.length>400) simState.history.shift();
+  drawSimGraph();
+  if(x<=-20||x>=20){
+    simState.running=false;
+    const btn=document.getElementById("simStart");
+    if(btn) btn.textContent="▶ Iniciar";
+    showFinalVelocity(v,x, x>=20 ? "Llegó al extremo derecho de la pista" : "Llegó al extremo izquierdo de la pista");
+    return;
+  }
+  if(simState.running) simState.raf=requestAnimationFrame(simLoop);
+}
+function drawSimGraph(){
+  const canvas=document.getElementById("simGraph");
+  if(!canvas) return;
+  const ctx=canvas.getContext("2d");
+  const W=canvas.width, H=canvas.height;
+  const padL=44, padR=44, padT=14, padB=28;
+  const plotW=W-padL-padR, plotH=H-padT-padB;
+  ctx.clearRect(0,0,W,H);
+
+  // fondo del área de gráfica
+  ctx.fillStyle="#FAFBFC";
+  ctx.fillRect(0,0,W,H);
+  ctx.fillStyle="#FFFFFF";
+  ctx.fillRect(padL, padT, plotW, plotH);
+
+  const hist=simState.history || [{t:0,x:simState.x0,v:simState.v0}];
+  const maxT=Math.max(4, (hist[hist.length-1]&&hist[hist.length-1].t||0)*1.15, 0.5);
+
+  // rangos acotados para que la curva no “explote” fuera de escala
+  const xs=hist.map(h=>h.x), vs=hist.map(h=>h.v);
+  let minX=Math.min(-5, ...xs), maxX=Math.max(5, ...xs);
+  let minV=Math.min(-5, ...vs), maxV=Math.max(5, ...vs);
+  // margen 10%
+  const spanX=Math.max(maxX-minX, 1), spanV=Math.max(maxV-minV, 1);
+  minX-=spanX*0.1; maxX+=spanX*0.1;
+  minV-=spanV*0.1; maxV+=spanV*0.1;
+
+  function px(t){ return padL + (t/maxT)*plotW; }
+  function pyX(x){ return padT + plotH - ((x-minX)/(maxX-minX||1))*plotH; }
+  function pyV(v){ return padT + plotH - ((v-minV)/(maxV-minV||1))*plotH; }
+
+  // rejilla horizontal
+  ctx.strokeStyle="#E8EDF2"; ctx.lineWidth=1;
+  for(let i=0;i<=4;i++){
+    const y=padT+(plotH*i)/4;
+    ctx.beginPath(); ctx.moveTo(padL,y); ctx.lineTo(padL+plotW,y); ctx.stroke();
+  }
+  // rejilla vertical
+  for(let i=0;i<=4;i++){
+    const x=padL+(plotW*i)/4;
+    ctx.beginPath(); ctx.moveTo(x,padT); ctx.lineTo(x,padT+plotH); ctx.stroke();
+  }
+
+  // ejes
+  ctx.strokeStyle="#9AA7B2"; ctx.lineWidth=1.5;
+  ctx.beginPath();
+  ctx.moveTo(padL, padT);
+  ctx.lineTo(padL, padT+plotH);
+  ctx.lineTo(padL+plotW, padT+plotH);
+  ctx.stroke();
+
+  // etiquetas
+  ctx.font="10px Segoe UI, Arial";
+  ctx.fillStyle="#7a8a99";
+  ctx.textAlign="center";
+  ctx.fillText("t (s)", padL+plotW/2, H-6);
+  ctx.textAlign="left";
+  ctx.fillStyle="#C45C1A";
+  ctx.fillText("x", 6, padT+10);
+  ctx.fillStyle="#1D6FBF";
+  ctx.textAlign="right";
+  ctx.fillText("v", W-6, padT+10);
+
+  // valores de escala
+  ctx.textAlign="right";
+  ctx.fillStyle="#C45C1A";
+  ctx.fillText(fmt(maxX), padL-4, padT+10);
+  ctx.fillText(fmt(minX), padL-4, padT+plotH);
+  ctx.textAlign="left";
+  ctx.fillStyle="#1D6FBF";
+  ctx.fillText(fmt(maxV), padL+plotW+4, padT+10);
+  ctx.fillText(fmt(minV), padL+plotW+4, padT+plotH);
+
+  // recortar curvas al área de la gráfica
+  ctx.save();
+  ctx.beginPath();
+  ctx.rect(padL, padT, plotW, plotH);
+  ctx.clip();
+
+  if(hist.length>1){
+    // posición x(t) — naranja
+    ctx.strokeStyle="#C45C1A";
+    ctx.lineWidth=2.5;
+    ctx.lineJoin="round";
+    ctx.beginPath();
+    hist.forEach((h,i)=>{
+      const X=px(h.t), Y=pyX(h.x);
+      if(i===0) ctx.moveTo(X,Y); else ctx.lineTo(X,Y);
+    });
+    ctx.stroke();
+
+    // velocidad v(t) — azul
+    ctx.strokeStyle="#1D6FBF";
+    ctx.lineWidth=2.5;
+    ctx.beginPath();
+    hist.forEach((h,i)=>{
+      const X=px(h.t), Y=pyV(h.v);
+      if(i===0) ctx.moveTo(X,Y); else ctx.lineTo(X,Y);
+    });
+    ctx.stroke();
+  }
+  ctx.restore();
+
+  // borde del área de gráfica
+  ctx.strokeStyle="#D5DCE3";
+  ctx.lineWidth=1;
+  ctx.strokeRect(padL, padT, plotW, plotH);
+}
+
+function setHeader(title,sub,showBack){
+  document.getElementById("headerTitle").textContent=title;
+  document.getElementById("headerSub").textContent=sub;
+  document.getElementById("backBtn").classList.toggle("hidden",!showBack);
+}
+function stopSimAnimation(){
+  if(simState.raf) cancelAnimationFrame(simState.raf);
+  simState.raf=null; simState.running=false; simState.lastTs=null;
+}
+function abortChallengeIfLeaving(){
+  if(!session) return;
+  session=null;
+  alert("⚠️ Saliste del desafío. El intento se reinició y los ejercicios cambiarán al volver a jugar.");
+}
+function showTab(tab){
+  if(session) abortChallengeIfLeaving();
+  document.querySelectorAll(".tab").forEach(t=>t.classList.toggle("active",t.dataset.tab===tab));
+  document.getElementById("tabbar").classList.remove("hidden");
+  stopSimAnimation();
+  if(tab==="levels") renderLevelMap();
+  else if(tab==="instr") renderInstructions();
+  else { simState.t=0; renderSimulator(); }
+}
+document.querySelectorAll(".tab").forEach(t=>{
+  t.addEventListener("click",()=>showTab(t.dataset.tab));
+});
+document.getElementById("backBtn").onclick=()=>{
+  if(session){ session=null; renderLevelMap(); document.getElementById("tabbar").classList.remove("hidden"); }
+};
+
+if(progress.studentName){
+  studentName=progress.studentName;
+  studentSection=progress.studentSection||"A";
+  document.getElementById("tabbar").classList.remove("hidden");
+  showTab("levels");
+} else {
+  renderSetup();
+}
+</script>
+<script>
+(function(){
+  var SAAS_API = localStorage.getItem('saas_api_base') || '';
+  async function saasCheckAccess(){
+    var gate = document.getElementById('licenseGate');
+    var st = document.getElementById('licenseStatus');
+    var code = localStorage.getItem('saas_classCode') || '';
+    if(!code){ if(st) st.innerHTML='<b style="color:#fca5a5">Sin código de clase.</b> Vuelve al catálogo.'; if(gate) gate.className='license-gate blocked'; return false; }
+    try{
+      var r = await fetch(SAAS_API + '/api/access/check?classCode=' + encodeURIComponent(code));
+      var data = await r.json();
+      if(!data.allowed){ if(st) st.innerHTML='<b style="color:#fca5a5">Acceso bloqueado.</b>'; if(gate) gate.className='license-gate blocked'; return false; }
+      if(st) st.innerHTML='<b style="color:#86efac">Licencia activa.</b> '+(data.teacherName||'');
+      if(gate) gate.className='license-gate ok';
+      try{ localStorage.setItem('saas_access_ok','1'); }catch(e){}
+      var ni=document.getElementById('studentNameInput');
+      if(ni && !ni.value && localStorage.getItem('saas_studentName')){ ni.value=localStorage.getItem('saas_studentName'); }
+      return true;
+    }catch(e){ if(st) st.innerHTML='<b style="color:#fca5a5">Sin servidor.</b> '+e.message; if(gate) gate.className='license-gate blocked'; return false; }
+  }
+  window.saasCheckAccess = saasCheckAccess;
+  function wrapFn(name){
+    var orig = window[name];
+    if(typeof orig !== 'function' || orig._saasWrapped) return;
+    var wrapped = async function(){
+      if(!(await saasCheckAccess())){ alert('Sin acceso. Usa el catálogo con el código de clase.'); return; }
+      return orig.apply(this, arguments);
+    };
+    wrapped._saasWrapped = true;
+    window[name] = wrapped;
+  }
+  function install(){
+    ['startRetoLevel','startLevel','startChallenge','beginLevel','startGame','startReto'].forEach(wrapFn);
+    saasCheckAccess();
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', install);
+  else setTimeout(install, 0);
+})();
+</script>
+</body>
+</html>

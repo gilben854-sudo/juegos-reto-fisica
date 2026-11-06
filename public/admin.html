@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Juegos de Reto para Física — Aprende física resolviendo retos</title>
+<link rel="stylesheet" href="/css/app.css">
+</head>
+<body>
+<header><h1>Administración</h1>
+  <p class="slogan" style="color:#7dd3fc;font-weight:600;margin:8px 0 0">Aprende física resolviendo retos</p><p>Activar, extender o suspender licencias</p></header>
+<div class="wrap">
+  <div class="card" id="loginBox">
+    <h2>Login administrador</h2>
+    <div class="err" id="err"></div>
+    <label>Usuario</label>
+    <input id="user" value="admin" autocomplete="username">
+    <label>Contraseña</label>
+    <input id="pass" type="password" autocomplete="current-password">
+    <button class="btn btn-primary" type="button" onclick="doLogin()">Entrar</button>
+    <p class="muted">Por defecto (cámbiala en producción): admin / NewtonSaaS2026!</p>
+  </div>
+
+  <div id="panel" style="display:none">
+    <div class="card">
+      <div class="nav">
+        <button class="btn btn-outline" type="button" onclick="loadTeachers()">Actualizar lista</button>
+        <button class="btn btn-bad" type="button" onclick="logout()">Salir</button>
+      </div>
+      <h2>Crear profesor (licencia pagada)</h2>
+      <div class="grid">
+        <div><label>Nombre</label><input id="nName"></div>
+        <div><label>Correo</label><input id="nEmail" type="email"></div>
+        <div><label>Contraseña temporal</label><input id="nPass" type="text"></div>
+        <div><label>Colegio</label><input id="nSchool"></div>
+        <div><label>Días de acceso</label><input id="nDays" type="number" value="30"></div>
+      </div>
+      <button class="btn btn-ok" type="button" onclick="createTeacher()">Crear y activar</button>
+      <div class="ok" id="ok"></div>
+      <div class="err" id="err2"></div>
+    </div>
+    <div class="card">
+      <h2>Profesores y licencias</h2>
+      <div style="overflow:auto">
+        <table>
+          <thead><tr><th>Nombre</th><th>Correo</th><th>Plan</th><th>Estado</th><th>Vence</th><th>Código clase</th><th>Acciones</th></tr></thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="/js/api.js"></script>
+<script>
+async function doLogin(){
+  hide(err); 
+  try{
+    const data = await API.req('/api/admin/login',{method:'POST',body:JSON.stringify({username:user.value,password:pass.value})});
+    API.token=data.token; API.role='admin';
+    loginBox.style.display='none'; panel.style.display='block';
+    loadTeachers();
+  }catch(e){ show(err,e.message); }
+}
+function logout(){ API.token=''; API.role=''; location.reload(); }
+async function loadTeachers(){
+  const data = await API.req('/api/admin/teachers');
+  tbody.innerHTML='';
+  data.teachers.forEach(t=>{
+    const st = t.licenseOk ? '<span class="badge badge-ok">ACTIVA</span>' : '<span class="badge badge-bad">BLOQUEADA</span>';
+    const plan = t.plan==='trial' ? '<span class="badge badge-trial">prueba</span>' : t.plan;
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td>${esc(t.name)}</td><td>${esc(t.email)}</td><td>${plan}</td><td>${st}</td><td>${t.validUntil?new Date(t.validUntil).toLocaleDateString():'—'}</td><td><b>${esc(t.classCode||'')}</b></td>
+      <td>
+        <button class="btn btn-ok" type="button" onclick="activate('${t.id}',30)">+30 días</button>
+        <button class="btn btn-gold" type="button" onclick="activate('${t.id}',365)">+1 año</button>
+        <button class="btn btn-bad" type="button" onclick="suspend('${t.id}')">Suspender</button>
+      </td>`;
+    tbody.appendChild(tr);
+  });
+}
+async function activate(id,days){
+  await API.req('/api/admin/teachers/'+id+'/activate',{method:'POST',body:JSON.stringify({days,plan:'paid'})});
+  loadTeachers();
+}
+async function suspend(id){
+  if(!confirm('¿Suspender acceso de este profesor?')) return;
+  await API.req('/api/admin/teachers/'+id+'/suspend',{method:'POST',body:'{}'});
+  loadTeachers();
+}
+async function createTeacher(){
+  hide(ok); hide(err2);
+  try{
+    const body={name:nName.value,email:nEmail.value,password:nPass.value,school:nSchool.value,days:parseInt(nDays.value,10)||30,plan:'paid'};
+    const data=await API.req('/api/admin/teachers',{method:'POST',body:JSON.stringify(body)});
+    show(ok,'Creado: '+data.teacher.email+' · Código clase: '+data.teacher.classCode);
+    nName.value=nEmail.value=nPass.value=nSchool.value='';
+    loadTeachers();
+  }catch(e){ show(err2,e.message); }
+}
+function esc(s){ return String(s||'').replace(/[&<>"']/g,c=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c])); }
+if(API.token && API.role==='admin'){ loginBox.style.display='none'; panel.style.display='block'; loadTeachers().catch(()=>{API.token=''; location.reload();}); }
+</script>
+</body>
+</html>

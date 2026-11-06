@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>Energía mecánica — SaaS</title><style>
+:root{--bg:#0b1220;--card:#111827;--line:#1e293b;--text:#e2e8f0;--muted:#94a3b8}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;font-family:system-ui,sans-serif;background:linear-gradient(160deg,#0b1220,#0f172a 40%,#082f49);color:var(--text);min-height:100vh}
+header{padding:18px 16px 10px;text-align:center}header h1{margin:0;font-size:1.28rem;color:#7dd3fc}header p{margin:6px 0 0;color:var(--muted);font-size:.88rem}
+.menu{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;padding:8px 12px 16px}
+.menu button{border:1px solid #334155;background:#0f172a;color:#e2e8f0;padding:10px 14px;border-radius:12px;font-weight:700;cursor:pointer}
+.menu button.active{background:#0369a1;border-color:#38bdf8}
+.wrap{max-width:920px;margin:0 auto;padding:0 12px 40px}
+.panel{display:none;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px}.panel.visible{display:block}
+h2{margin:0 0 10px;color:#7dd3fc}.muted{color:var(--muted);font-size:.9rem;line-height:1.5}
+.formula-box{background:#0f172a;border:1px solid #334155;border-radius:12px;padding:12px;margin:10px 0;line-height:1.55;font-size:.92rem}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:8px 0}label{font-size:.9rem;color:#cbd5e1}
+input[type=range],input[type=text]{padding:10px 12px;border-radius:10px;border:2px solid #475569;background:#f8fafc;color:#0f172a;font-size:1rem}
+.btn{border:none;border-radius:12px;padding:12px 16px;font-weight:800;cursor:pointer;font-size:.95rem}
+.btn-primary{background:#0284c7;color:#fff}.btn-gold{background:#d97706;color:#fff}.btn-outline{background:transparent;border:2px solid #64748b;color:#e2e8f0}
+.readout{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+.pill{background:#0f172a;border:1px solid #334155;border-radius:12px;padding:8px 12px;min-width:88px;text-align:center}
+.pill .k{font-size:.68rem;color:#94a3b8}.pill .v{font-size:1.02rem;font-weight:800}
+canvas{width:100%;background:#020617;border-radius:12px;border:1px solid #1e293b}
+.level-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(56px,1fr));gap:8px;margin:12px 0}
+.level-grid button{padding:11px 4px;border-radius:10px;border:1px solid #334155;background:#0f172a;color:#e2e8f0;font-weight:700;cursor:pointer}
+.level-grid button.on{background:#0369a1;border-color:#38bdf8}.level-grid button:disabled{opacity:.45}
+.q-card{background:#0f172a;border:1px solid #334155;border-radius:14px;padding:14px;margin-top:10px}
+.q-ask{font-size:1.02rem;line-height:1.45;margin-bottom:12px}.mc{display:grid;gap:8px}
+.mc button{text-align:left;padding:12px;border-radius:10px;border:2px solid #334155;background:#111827;color:#e2e8f0;cursor:pointer}
+.mc button.sel{border-color:#38bdf8;background:#0c4a6e}
+.fb-celeb{text-align:center;padding:14px;margin:10px 0;border-radius:14px;background:linear-gradient(135deg,#052e16,#14532d);border:1px solid #22c55e}
+.fb-sad{text-align:center;padding:14px;margin:10px 0;border-radius:14px;background:linear-gradient(135deg,#450a0a,#7f1d1d);border:1px solid #f87171}
+.fb-celeb .big,.fb-sad .big{font-size:2rem}
+.sparkle{position:fixed;pointer-events:none;z-index:99;font-size:1.3rem;animation:spark 1s ease-out forwards}
+@keyframes spark{to{opacity:0;transform:translate(var(--dx),var(--dy)) scale(.4)}}
+.status-ok{color:#86efac;font-weight:700}.status-bad{color:#fca5a5;font-weight:700}
+.sim-controls{display:grid;gap:10px;margin-top:10px}.sim-controls .g{background:#0f172a;border:1px solid #334155;border-radius:12px;padding:10px}
+.slider-lab{display:flex;justify-content:space-between;font-size:.85rem;color:#94a3b8;margin-bottom:4px}
+footer{text-align:center;color:#64748b;font-size:.8rem;padding:20px 12px 30px}
+.license-gate{background:#0f172a;border:1px solid #334155;border-radius:14px;padding:14px;margin:10px 0}.license-gate.blocked{border-color:#7f1d1d;background:#450a0a}.license-gate.ok{border-color:#166534;background:#052e16}
+</style></head><body>
+<div id="licenseGate" class="license-gate"><div id="licenseStatus" class="muted">Comprobando acceso…</div></div>
+
+<header><h1>Energía mecánica</h1><p>Módulo SaaS · Física interactiva</p></header>
+<div class="menu">
+<button type="button" id="btnInstr" onclick="showPanel('instr')">Instrucciones</button>
+<button type="button" id="btnSim" class="active" onclick="showPanel('sim')">Simulador</button>
+<button type="button" id="btnGame" onclick="showPanel('game')">Desafíos</button>
+<button type="button" id="btnCert" onclick="showPanel('cert')">Certificado</button>
+</div>
+<div class="wrap">
+<div id="panelInstr" class="panel"><h2>Cómo jugar</h2>
+<div class="formula-box">Cinética, potencial y conservación. 10 niveles de desafío.</div><div class="formula-box"><b>Ec = ½mv²</b> · <b>Ep = mgh</b> · <b>W = ΔEc</b> · Em se conserva sin rozamiento</div></div>
+<div id="panelSim" class="panel visible"><h2>Simulador</h2>
+<p class="muted">Deslizador de altura y masa: compara Ep y Ec al “caer” idealmente.</p>
+<canvas id="simCanvas" width="860" height="300"></canvas>
+<div class="sim-controls">
+<div class="g"><div class="slider-lab"><span>Masa (kg)</span><span id="labM">2</span></div>
+<input type="range" id="rngM" min="1" max="10" value="2" oninput="onSim()"></div>
+<div class="g"><div class="slider-lab"><span>Altura h (m)</span><span id="labH">10</span></div>
+<input type="range" id="rngH" min="1" max="20" value="10" oninput="onSim()"></div>
+</div>
+<div class="readout">
+<div class="pill"><div class="k">Ep</div><div class="v" id="outEp">—</div></div>
+<div class="pill"><div class="k">Ec (abajo)</div><div class="v" id="outEc">—</div></div>
+<div class="pill"><div class="k">v abajo</div><div class="v" id="outV">—</div></div>
+</div>
+<div class="row">
+<button type="button" class="btn btn-primary" onclick="simPlay()">Caer</button>
+<button type="button" class="btn btn-outline" onclick="simReset()">Reiniciar</button>
+</div></div>
+<div id="panelGame" class="panel"><h2>Desafíos — 10 niveles</h2>
+<div class="formula-box">5 preguntas · 3 vidas · mínimo 4 aciertos para desbloquear. Opciones mezcladas.</div>
+<div class="row"><label>Tu nombre</label>
+<input type="text" id="studentNameInput" placeholder="Nombre y apellido" maxlength="80" oninput="onNameInput()" style="flex:1;min-width:180px"></div>
+<div class="row"><label>Curso (opcional)</label>
+<input type="text" id="studentSectionInput" placeholder="Ej: 4to año" maxlength="40" oninput="onNameInput()" style="flex:1;min-width:140px"></div>
+<div class="level-grid" id="levelGrid"></div>
+<div class="readout">
+<div class="pill"><div class="k">NIVEL</div><div class="v" id="retoLvlShow">1</div></div>
+<div class="pill"><div class="k">PREGUNTA</div><div class="v" id="retoNum">1/5</div></div>
+<div class="pill"><div class="k">PUNTOS</div><div class="v" id="retoScore">0</div></div>
+<div class="pill"><div class="k">VIDAS</div><div class="v" id="retoLives">❤️❤️❤️</div></div>
+</div>
+<div id="retoBody"><p class="muted">Escribe tu nombre, elige nivel y pulsa Comenzar.</p></div>
+<button type="button" class="btn btn-primary" id="retoStart" onclick="startRetoLevel()">Comenzar nivel</button>
+</div>
+<div id="panelCert" class="panel"><h2>Certificado</h2>
+<div class="formula-box">Versión plataforma SaaS. Escribe tu nombre en Desafíos.</div>
+<div class="readout">
+<div class="pill"><div class="k">ESTUDIANTE</div><div class="v" id="certName">—</div></div>
+<div class="pill"><div class="k">PUNTOS</div><div class="v" id="certScore">0</div></div>
+<div class="pill"><div class="k">NIVEL MÁX.</div><div class="v" id="certLevel">1</div></div>
+</div>
+<button type="button" class="btn btn-gold" onclick="downloadCertificate()">Generar certificado</button>
+<div id="certPreview" style="margin-top:12px;text-align:center"></div>
+</div></div>
+<footer>Energía mecánica · Módulo SaaS · Física interactiva</footer>
+<script>
+const MODULE_NAME="Energía mecánica";
+const STORAGE_KEY="energia";
+const N_LEVELS=10;
+let studentName='Estudiante', studentSection='—', studentCode='';
+let maxUnlocked=1, bestScore=0, challengeActive=false;
+try{const u=parseInt(localStorage.getItem(STORAGE_KEY+'_lvl')||'1',10); if(u>=1&&u<=N_LEVELS) maxUnlocked=u;}catch(e){}
+try{bestScore=parseInt(localStorage.getItem(STORAGE_KEY+'_best')||'0',10)||0;}catch(e){}
+
+function getLevelScoresMap(){
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY + '_levelScores');
+    if (!raw) return {};
+    const o = JSON.parse(raw);
+    return (o && typeof o === 'object') ? o : {};
+  } catch(e){ return {}; }
+}
+function getTotalScore(){
+  try {
+    const m = getLevelScoresMap();
+    let sum = 0;
+    Object.keys(m).forEach(function(k){
+      const v = parseInt(m[k], 10) || 0;
+      if (v > 0) sum += Math.min(5, v);
+    });
+    return sum;
+  } catch(e){ return 0; }
+}
+function saveLevelScore(level, s){
+  try {
+    const m = getLevelScoresMap();
+    const key = String(level);
+    const prev = parseInt(m[key] || '0', 10) || 0;
+    const val = Math.min(5, Math.max(0, s|0));
+    if (val > prev) {
+      m[key] = val;
+      localStorage.setItem(STORAGE_KEY + '_levelScores', JSON.stringify(m));
+    }
+    bestScore = getTotalScore();
+    localStorage.setItem(STORAGE_KEY + '_best', String(bestScore));
+  } catch(e){}
+}
+
+bestScore = Math.max(bestScore, getTotalScore());
+
+const reto={level:1,i:0,score:0,lives:3};
+const RETO_LEVELS={1:[{q:"La energía cinética es:",opts:["(1/2)mv²", "mgh", "Fd", "mv"],a:0},{q:"La energía potencial gravitatoria (cerca del suelo) es:",opts:["mgh", "(1/2)mv²", "mv", "F/m"],a:0},{q:"La unidad de energía en el SI es:",opts:["Joule (J)", "Newton", "Watt", "Pascal"],a:0},{q:"Si la rapidez se duplica, Ec se:",opts:["Cuadruplica", "Duplica", "Reduce a la mitad", "No cambia"],a:0},{q:"Trabajo de una fuerza constante = ",opts:["F · d · cosθ", "F + d", "F/d", "m·a"],a:0}],2:[{q:"En un sistema conservativo, Em = Ec + Ep:",opts:["Se conserva", "Siempre aumenta", "Siempre disminuye", "Es cero"],a:0},{q:"Al caer, Ep se convierte en:",opts:["Ec", "Calor solo", "Masa", "Carga"],a:0},{q:"Potencia media = ",opts:["Trabajo / tiempo", "Fuerza · tiempo", "Energía · tiempo", "m/v"],a:0},{q:"1 W equivale a:",opts:["1 J/s", "1 J", "1 N", "1 kg"],a:0},{q:"Si h se triplica, Ep se:",opts:["Triplica", "Cuadruplica", "No cambia", "Divide entre 3"],a:0}],3:[{q:"Un cuerpo en el punto más alto de un péndulo ideal tiene:",opts:["Máxima Ep y mínima Ec", "Máxima Ec", "Solo Ec", "Energía cero"],a:0},{q:"En el punto más bajo del péndulo ideal:",opts:["Máxima Ec", "Máxima Ep", "Energía negativa", "Sin movimiento posible"],a:0},{q:"Trabajo neto = variación de:",opts:["Energía cinética", "Solo la masa", "Solo Ep siempre", "Temperatura"],a:0},{q:"Si m se duplica y v se mantiene, Ec se:",opts:["Duplica", "Cuadruplica", "No cambia", "Divide entre 2"],a:0},{q:"Fuerzas no conservativas (rozamiento) suelen:",opts:["Disipar energía mecánica en calor", "Aumentar Em siempre", "Eliminar la masa", "Crear energía de la nada"],a:0}],4:[{q:"mgh con m=2 kg, g=10, h=3 m → Ep =",opts:["60 J", "6 J", "15 J", "30 J"],a:0},{q:"(1/2)mv² con m=4 kg, v=3 m/s → Ec =",opts:["18 J", "12 J", "6 J", "36 J"],a:0},{q:"Si el trabajo neto es positivo, Ec:",opts:["Aumenta", "Disminuye", "No cambia", "Se hace negativa"],a:0},{q:"La energía se mide en joules porque:",opts:["Es N·m (trabajo)", "Es kg/s", "Es solo voltaje", "Es amperios"],a:0},{q:"Conservación de la energía significa:",opts:["Se transforma, no se crea ni destruye", "La Ec nunca cambia", "Ep es siempre cero", "No hay trabajo"],a:0}],5:[{q:"La energía cinética es:",opts:["(1/2)mv²", "mgh", "Fd", "mv"],a:0},{q:"La energía potencial gravitatoria (cerca del suelo) es:",opts:["mgh", "(1/2)mv²", "mv", "F/m"],a:0},{q:"La unidad de energía en el SI es:",opts:["Joule (J)", "Newton", "Watt", "Pascal"],a:0},{q:"Si la rapidez se duplica, Ec se:",opts:["Cuadruplica", "Duplica", "Reduce a la mitad", "No cambia"],a:0},{q:"Trabajo de una fuerza constante = ",opts:["F · d · cosθ", "F + d", "F/d", "m·a"],a:0}],6:[{q:"En un sistema conservativo, Em = Ec + Ep:",opts:["Se conserva", "Siempre aumenta", "Siempre disminuye", "Es cero"],a:0},{q:"Al caer, Ep se convierte en:",opts:["Ec", "Calor solo", "Masa", "Carga"],a:0},{q:"Potencia media = ",opts:["Trabajo / tiempo", "Fuerza · tiempo", "Energía · tiempo", "m/v"],a:0},{q:"1 W equivale a:",opts:["1 J/s", "1 J", "1 N", "1 kg"],a:0},{q:"Si h se triplica, Ep se:",opts:["Triplica", "Cuadruplica", "No cambia", "Divide entre 3"],a:0}],7:[{q:"Un cuerpo en el punto más alto de un péndulo ideal tiene:",opts:["Máxima Ep y mínima Ec", "Máxima Ec", "Solo Ec", "Energía cero"],a:0},{q:"En el punto más bajo del péndulo ideal:",opts:["Máxima Ec", "Máxima Ep", "Energía negativa", "Sin movimiento posible"],a:0},{q:"Trabajo neto = variación de:",opts:["Energía cinética", "Solo la masa", "Solo Ep siempre", "Temperatura"],a:0},{q:"Si m se duplica y v se mantiene, Ec se:",opts:["Duplica", "Cuadruplica", "No cambia", "Divide entre 2"],a:0},{q:"Fuerzas no conservativas (rozamiento) suelen:",opts:["Disipar energía mecánica en calor", "Aumentar Em siempre", "Eliminar la masa", "Crear energía de la nada"],a:0}],8:[{q:"mgh con m=2 kg, g=10, h=3 m → Ep =",opts:["60 J", "6 J", "15 J", "30 J"],a:0},{q:"(1/2)mv² con m=4 kg, v=3 m/s → Ec =",opts:["18 J", "12 J", "6 J", "36 J"],a:0},{q:"Si el trabajo neto es positivo, Ec:",opts:["Aumenta", "Disminuye", "No cambia", "Se hace negativa"],a:0},{q:"La energía se mide en joules porque:",opts:["Es N·m (trabajo)", "Es kg/s", "Es solo voltaje", "Es amperios"],a:0},{q:"Conservación de la energía significa:",opts:["Se transforma, no se crea ni destruye", "La Ec nunca cambia", "Ep es siempre cero", "No hay trabajo"],a:0}],9:[{q:"La energía cinética es:",opts:["(1/2)mv²", "mgh", "Fd", "mv"],a:0},{q:"La energía potencial gravitatoria (cerca del suelo) es:",opts:["mgh", "(1/2)mv²", "mv", "F/m"],a:0},{q:"La unidad de energía en el SI es:",opts:["Joule (J)", "Newton", "Watt", "Pascal"],a:0},{q:"Si la rapidez se duplica, Ec se:",opts:["Cuadruplica", "Duplica", "Reduce a la mitad", "No cambia"],a:0},{q:"Trabajo de una fuerza constante = ",opts:["F · d · cosθ", "F + d", "F/d", "m·a"],a:0}],10:[{q:"En un sistema conservativo, Em = Ec + Ep:",opts:["Se conserva", "Siempre aumenta", "Siempre disminuye", "Es cero"],a:0},{q:"Al caer, Ep se convierte en:",opts:["Ec", "Calor solo", "Masa", "Carga"],a:0},{q:"Potencia media = ",opts:["Trabajo / tiempo", "Fuerza · tiempo", "Energía · tiempo", "m/v"],a:0},{q:"1 W equivale a:",opts:["1 J/s", "1 J", "1 N", "1 kg"],a:0},{q:"Si h se triplica, Ep se:",opts:["Triplica", "Cuadruplica", "No cambia", "Divide entre 3"],a:0}]};
+
+function onNameInput(){
+  const n=(document.getElementById('studentNameInput').value||'').trim();
+  const s=(document.getElementById('studentSectionInput').value||'').trim();
+  studentName=n||'Estudiante'; studentSection=s||'—';
+  studentCode=makeSessionCode(studentName, studentSection); refreshCert();
+}
+function makeSessionCode(name, section){
+  const base=((name||'')+'|'+(section||'')+'|'+STORAGE_KEY).toUpperCase();
+  let h=0; for(let i=0;i<base.length;i++) h=((h<<5)-h+base.charCodeAt(i))|0;
+  const alphabet='ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; let out='', x=Math.abs(h)||1;
+  for(let i=0;i<9;i++){ out+=alphabet[x%alphabet.length]; x=Math.floor(x/alphabet.length)+(i+3)*17; if(i===2||i===5) out+='-'; }
+  return out;
+}
+function showPanel(name){
+  ['instr','sim','game','cert'].forEach(function(p){
+    const el=document.getElementById('panel'+p.charAt(0).toUpperCase()+p.slice(1));
+    if(el) el.classList.toggle('visible', p===name);
+  });
+  document.querySelectorAll('.menu button').forEach(function(b){b.classList.remove('active');});
+  const map={instr:'btnInstr',sim:'btnSim',game:'btnGame',cert:'btnCert'};
+  const btn=document.getElementById(map[name]); if(btn) btn.classList.add('active');
+  if(name!=='game'&&challengeActive){
+    challengeActive=false; reto.i=0; reto.score=0; reto.lives=3;
+  reto.queue = pickFreshQuestions(reto.level, 5);
+    const body=document.getElementById('retoBody');
+    if(body) body.innerHTML='<p class="status-bad">Saliste del desafío: el intento se reinició.</p>';
+    const st=document.getElementById('retoStart'); if(st) st.style.display='block';
+  }
+  if(name==='sim' && typeof simReset==='function') simReset();
+  if(name==='cert') refreshCert();
+  if(name==='game') updateLevelButtons();
+}
+
+let simRunning=false, simY=0, simRaf=null;
+const g=9.8;
+function onSim(){
+  document.getElementById('labM').textContent=document.getElementById('rngM').value;
+  document.getElementById('labH').textContent=document.getElementById('rngH').value;
+  const m=parseFloat(document.getElementById('rngM').value);
+  const h=parseFloat(document.getElementById('rngH').value);
+  const Ep=m*g*h;
+  const v=Math.sqrt(2*g*h);
+  const Ec=0.5*m*v*v;
+  document.getElementById('outEp').textContent=Ep.toFixed(0)+' J';
+  document.getElementById('outEc').textContent=Ec.toFixed(0)+' J';
+  document.getElementById('outV').textContent=v.toFixed(1)+' m/s';
+  if(!simRunning){ simY=h; drawSim(h); }
+}
+function simPlay(){
+  if(simRunning) return; simRunning=true;
+  const h=parseFloat(document.getElementById('rngH').value);
+  simY=h; let vy=0;
+  const loop=function(){
+    if(!simRunning) return;
+    const dt=0.05; vy+=g*dt; simY-=vy*dt;
+    if(simY<=0){ simY=0; simRunning=false; }
+    drawSim(h); simRaf=requestAnimationFrame(loop);
+  }; simRaf=requestAnimationFrame(loop);
+}
+function simReset(){ simRunning=false; if(simRaf) cancelAnimationFrame(simRaf); onSim(); }
+function drawSim(h0){
+  const c=document.getElementById('simCanvas'); if(!c) return;
+  const ctx=c.getContext('2d'); ctx.clearRect(0,0,c.width,c.height);
+  ctx.fillStyle='#020617'; ctx.fillRect(0,0,c.width,c.height);
+  const ground=260, scale=10;
+  ctx.strokeStyle='#334155'; ctx.beginPath(); ctx.moveTo(40,ground); ctx.lineTo(820,ground); ctx.stroke();
+  const py=ground - Math.max(0,simY)*scale;
+  ctx.fillStyle='#4ade80'; ctx.beginPath(); ctx.arc(430, py, 14, 0, Math.PI*2); ctx.fill();
+  ctx.fillStyle='#94a3b8'; ctx.font='12px sans-serif';
+  ctx.fillText('h = '+simY.toFixed(1)+' m', 20, 28);
+}
+
+
+function updateLevelButtons(){
+  const g=document.getElementById('levelGrid'); if(!g) return; g.innerHTML='';
+  for(let n=1;n<=N_LEVELS;n++){
+    const b=document.createElement('button'); b.type='button';
+    b.textContent=n<=maxUnlocked?('N'+n):('N'+n+'🔒'); b.disabled=n>maxUnlocked;
+    if(n===reto.level) b.classList.add('on');
+    b.onclick=function(){ if(n<=maxUnlocked){ reto.level=n; updateLevelButtons(); document.getElementById('retoLvlShow').textContent=String(n); document.getElementById('retoBody').innerHTML='<p class="muted">Nivel '+n+' listo.</p>'; document.getElementById('retoStart').style.display='block'; }};
+    g.appendChild(b);
+  }
+}
+
+
+function shuffleArray(arr){
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    const t = a[i]; a[i] = a[j]; a[j] = t;
+  }
+  return a;
+}
+function questionKey(item){
+  try { return String(item.q || item.question || JSON.stringify(item)); } catch(e){ return String(Math.random()); }
+}
+function buildQuestionPool(level){
+  const pool = [];
+  const seen = {};
+  // Usa el nivel actual y vecinos para no repetir las mismas 5 al fallar
+  const ids = [level - 1, level, level + 1, level + 2, level + 3];
+  ids.forEach(function(L){
+    if (L < 1 || typeof RETO_LEVELS === 'undefined' || !RETO_LEVELS[L]) return;
+    (RETO_LEVELS[L] || []).forEach(function(item){
+      const k = questionKey(item);
+      if (seen[k]) return;
+      seen[k] = true;
+      pool.push(item);
+    });
+  });
+  // Si aún hay pocas, agrega de todos los niveles
+  if (pool.length < 8 && typeof RETO_LEVELS !== 'undefined') {
+    Object.keys(RETO_LEVELS).forEach(function(Lk){
+      (RETO_LEVELS[Lk] || []).forEach(function(item){
+        const k = questionKey(item);
+        if (seen[k]) return;
+        seen[k] = true;
+        pool.push(item);
+      });
+    });
+  }
+  return pool;
+}
+function pickFreshQuestions(level, n){
+  n = n || 5;
+  if (!reto.usedByLevel) reto.usedByLevel = {};
+  if (!reto.usedByLevel[level]) reto.usedByLevel[level] = {};
+  const used = reto.usedByLevel[level];
+  let pool = buildQuestionPool(level).filter(function(item){
+    return !used[questionKey(item)];
+  });
+  // Si no alcanzan 5 nuevas, reinicia memoria de ese nivel
+  if (pool.length < n) {
+    reto.usedByLevel[level] = {};
+    pool = buildQuestionPool(level);
+  }
+  const picked = shuffleArray(pool).slice(0, Math.min(n, pool.length));
+  picked.forEach(function(item){
+    reto.usedByLevel[level][questionKey(item)] = true;
+  });
+  return picked;
+}
+
+function startRetoLevel(){
+  onNameInput();
+  if(!studentName||studentName==='Estudiante'){alert('Escribe tu nombre antes de comenzar.');return;}
+  challengeActive=true; reto.i=0; reto.score=0; reto.lives=3;
+  document.getElementById('retoStart').style.display='none'; showRetoQ();
+}
+function spawnSparks(){
+  const em=['✨','⭐','🎉','⚡'];
+  for(let i=0;i<12;i++){
+    const el=document.createElement('div'); el.className='sparkle'; el.textContent=em[i%em.length];
+    el.style.left=(20+Math.random()*60)+'vw'; el.style.top=(25+Math.random()*40)+'vh';
+    el.style.setProperty('--dx',((Math.random()-0.5)*120)+'px');
+    el.style.setProperty('--dy',(-40-Math.random()*90)+'px');
+    document.body.appendChild(el); setTimeout(function(){el.remove();},1000);
+  }
+}
+function showRetoQ(){
+  const box=document.getElementById('retoBody');
+  const Qs=(reto.queue&&reto.queue.length)?reto.queue:(RETO_LEVELS[reto.level]||[]);
+  document.getElementById('retoLvlShow').textContent=String(reto.level);
+  if(reto.lives<=0||reto.i>=Qs.length){
+    challengeActive=false;
+    saveLevelScore(reto.level, reto.score); bestScore = getTotalScore();
+    const passed=reto.lives>0&&reto.score>=4;
+    let extra='';
+    if(passed){
+      if(reto.level<N_LEVELS&&maxUnlocked<reto.level+1){maxUnlocked=reto.level+1; try{localStorage.setItem(STORAGE_KEY+'_lvl',String(maxUnlocked));}catch(e){} extra='<p class="status-ok">✓ Nivel desbloqueado: '+maxUnlocked+'</p>';}
+      else if(reto.level===N_LEVELS) extra='<p class="status-ok">✓ Completaste todos los niveles.</p>';
+    } else if(reto.lives<=0) extra='<p class="status-bad">Se acabaron las vidas.</p>';
+    else extra='<p class="muted">Necesitas al menos 4 aciertos.</p>';
+    updateLevelButtons();
+    box.innerHTML='<div class="q-card"><p class="q-ask">Fin del nivel '+reto.level+'</p><p>Puntos de este nivel: <b>'+reto.score+'</b> / '+Qs.length+'</p><p>Total acumulado: <b>'+getTotalScore()+'</b> / '+(N_LEVELS*5)+'</p>'+extra+
+      '<button type="button" class="btn btn-primary" id="retoAgain">Reintentar</button>'+
+      (maxUnlocked>reto.level?'<button type="button" class="btn btn-gold" id="retoNext">Siguiente nivel</button>':'')+'</div>';
+    document.getElementById('retoAgain').onclick=function(){startRetoLevel();};
+    const nx=document.getElementById('retoNext');
+    if(nx) nx.onclick=function(){reto.level++; updateLevelButtons(); startRetoLevel();};
+    return;
+  }
+  const Qitem=Qs[reto.i];
+  document.getElementById('retoNum').textContent=(reto.i+1)+'/'+Qs.length;
+  document.getElementById('retoScore').textContent=reto.score;
+  document.getElementById('retoLives').textContent='❤️'.repeat(reto.lives)||'💀';
+  const order=Qitem.opts.map(function(_,i){return i;});
+  for(let i=order.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1)); const t=order[i]; order[i]=order[j]; order[j]=t;}
+  const shuffled=order.map(function(i){return Qitem.opts[i];});
+  const correctIdx=order.indexOf(Qitem.a);
+  const correctText=Qitem.opts[Qitem.a];
+  box.innerHTML='<div class="q-card"><div class="q-ask">'+Qitem.q+'</div><div class="mc" id="retoMc"></div>'+
+    '<button type="button" class="btn btn-gold" id="retoCheck">Verificar</button><div id="retoFb"></div></div>';
+  const mc=document.getElementById('retoMc'); let sel=null;
+  shuffled.forEach(function(o,idx){
+    const b=document.createElement('button'); b.type='button'; b.textContent=o;
+    b.onclick=function(){Array.prototype.forEach.call(mc.children,function(x){x.classList.remove('sel');}); b.classList.add('sel'); sel=idx;};
+    mc.appendChild(b);
+  });
+  document.getElementById('retoCheck').onclick=function(){
+    if(sel===null){alert('Elige una opción');return;}
+    const ok=sel===correctIdx; const fb=document.getElementById('retoFb');
+    if(ok){reto.score++; fb.innerHTML='<div class="fb-celeb"><div class="big">🎉✨</div><div>¡Correcto!</div></div>'; spawnSparks();}
+    else{reto.lives--; fb.innerHTML='<div class="fb-sad"><div class="big">😢</div><div>Incorrecto</div><div class="muted">Respuesta: '+correctText+'</div></div>';}
+    document.getElementById('retoScore').textContent=reto.score;
+    document.getElementById('retoLives').textContent='❤️'.repeat(Math.max(reto.lives,0))||'💀';
+    document.getElementById('retoCheck').style.display='none';
+    Array.prototype.forEach.call(mc.children,function(x){x.disabled=true;});
+    const next=document.createElement('button'); next.type='button'; next.className='btn btn-primary';
+    next.textContent=(reto.i+1>=Qs.length||reto.lives<=0)?'Ver resultado':'Siguiente';
+    next.onclick=function(){reto.i++; showRetoQ();}; box.appendChild(next);
+  };
+}
+function refreshCert(){
+  document.getElementById('certName').textContent=studentName||'—';
+  document.getElementById('certScore').textContent=String(Math.max(getTotalScore(),reto.score));
+  document.getElementById('certLevel').textContent=String(maxUnlocked);
+}
+function downloadCertificate(){
+  onNameInput();
+  if(!studentName||studentName==='Estudiante'){alert('Escribe tu nombre en Desafíos.'); showPanel('game'); return;}
+  const score=Math.max(getTotalScore(), bestScore, reto.score);
+  const canvas=document.createElement('canvas'); canvas.width=900; canvas.height=640;
+  const ctx=canvas.getContext('2d');
+  const g=ctx.createLinearGradient(0,0,900,640); g.addColorStop(0,'#1e3a5f'); g.addColorStop(1,'#0c4a6e');
+  ctx.fillStyle=g; ctx.fillRect(0,0,900,640);
+  ctx.strokeStyle='#38bdf8'; ctx.lineWidth=8; ctx.strokeRect(20,20,860,600);
+  ctx.strokeStyle='rgba(255,255,255,0.3)'; ctx.lineWidth=2; ctx.strokeRect(32,32,836,576);
+  ctx.textAlign='center'; ctx.fillStyle='#fff'; ctx.font='bold 28px Arial';
+  ctx.fillText('CERTIFICADO DE LOGRO',450,95);
+  ctx.font='18px Arial'; ctx.fillText(MODULE_NAME,450,130);
+  ctx.fillStyle='rgba(255,255,255,0.85)'; ctx.font='14px Arial';
+  ctx.fillText('Plataforma de física interactiva — Módulo SaaS',450,160);
+  ctx.fillStyle='#fff'; ctx.font='18px Arial'; ctx.fillText('Se otorga el presente reconocimiento a:',450,210);
+  ctx.fillStyle='#38bdf8'; ctx.font='bold 26px Arial'; ctx.fillText(studentName,450,255);
+  ctx.fillStyle='rgba(255,255,255,0.9)'; ctx.font='18px Arial';
+  ctx.fillText(studentSection!=='—'?studentSection:'Curso libre',450,295);
+  ctx.fillStyle='#fff'; ctx.font='20px Arial';
+  ctx.fillText('Puntos totales: '+score+' / '+(N_LEVELS*5)+' · Nivel máx.: '+maxUnlocked+' / '+N_LEVELS,450,345);
+  ctx.fillStyle='#86efac'; ctx.font='bold 20px Arial';
+  const badge=maxUnlocked>=N_LEVELS?'Maestro del módulo':(maxUnlocked>=6?'Avanzado':(maxUnlocked>=3?'En progreso':'Participante'));
+  ctx.fillText(badge,450,395);
+  ctx.fillStyle='#fbbf24'; ctx.font='bold 16px Arial';
+  ctx.fillText('ID de sesión: '+studentCode,450,445);
+  const fecha=new Date().toLocaleDateString('es-VE',{year:'numeric',month:'long',day:'numeric'});
+  ctx.fillStyle='rgba(255,255,255,0.75)'; ctx.font='14px Arial'; ctx.fillText(fecha,450,500);
+  ctx.fillStyle='rgba(255,255,255,0.5)'; ctx.font='12px Arial';
+  ctx.fillText("Energía cinética · potencial · trabajo",450,545);
+  const prev=document.getElementById('certPreview'); prev.innerHTML='';
+  const img=document.createElement('img'); img.src=canvas.toDataURL('image/png'); img.style.maxWidth='100%'; img.style.borderRadius='12px';
+  prev.appendChild(img);
+  const a=document.createElement('a'); a.href=img.src;
+  a.download='Certificado_'+STORAGE_KEY+'.png';
+  document.body.appendChild(a); a.click(); a.remove();
+}
+updateLevelButtons(); if(typeof simReset==='function') simReset(); refreshCert();
+</script><script>
+(function(){
+  var SAAS_API = localStorage.getItem('saas_api_base') || '';
+  async function saasCheckAccess(){
+    var gate = document.getElementById('licenseGate');
+    var st = document.getElementById('licenseStatus');
+    var code = localStorage.getItem('saas_classCode') || '';
+    if(!code){ if(st) st.innerHTML='<b style="color:#fca5a5">Sin código de clase.</b> Vuelve al catálogo.'; if(gate) gate.className='license-gate blocked'; return false; }
+    try{
+      var r = await fetch(SAAS_API + '/api/access/check?classCode=' + encodeURIComponent(code));
+      var data = await r.json();
+      if(!data.allowed){ if(st) st.innerHTML='<b style="color:#fca5a5">Acceso bloqueado.</b>'; if(gate) gate.className='license-gate blocked'; return false; }
+      if(st) st.innerHTML='<b style="color:#86efac">Licencia activa.</b> '+(data.teacherName||'');
+      if(gate) gate.className='license-gate ok';
+      try{ localStorage.setItem('saas_access_ok','1'); }catch(e){}
+      return true;
+    }catch(e){ if(st) st.innerHTML='Sin servidor: '+e.message; if(gate) gate.className='license-gate blocked'; return false; }
+  }
+  window.saasCheckAccess = saasCheckAccess;
+  function wrapFn(name){
+    var orig = window[name];
+    if(typeof orig !== 'function' || orig._saasWrapped) return;
+    var wrapped = async function(){
+      if(!(await saasCheckAccess())){ alert('Sin acceso. Usa el catálogo.'); return; }
+      return orig.apply(this, arguments);
+    };
+    wrapped._saasWrapped = true;
+    window[name] = wrapped;
+  }
+  function install(){
+    ['startRetoLevel','startLevel','startChallenge','beginLevel','startGame','startReto'].forEach(wrapFn);
+    saasCheckAccess();
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', install);
+  else setTimeout(install, 0);
+})();
+</script>
+</body></html>

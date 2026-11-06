@@ -1,0 +1,1024 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="color-scheme" content="light only">
+<title>MRU II — GILAST</title>
+<style>
+  html { color-scheme: light only; }
+  button, input, select, textarea {
+    -webkit-appearance: none;
+    appearance: none;
+    color-scheme: light only;
+  }
+  :root{
+    --navy:#1F4E79; --blue:#2E75B6; --lightblue:#DEEAF6;
+    --orange:#E8763B; --green:#2E9E5B; --red:#D64545;
+    --gray:#F2F2F2; --text:#26313D;
+  }
+  *{box-sizing:border-box;}
+  html,body{
+    margin:0;padding:0;height:100%;
+    font-family:'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+    background:linear-gradient(180deg,#0F2A44,#1F4E79 40%,#2E75B6);
+    color:var(--text);
+    -webkit-tap-highlight-color:transparent;
+    -webkit-user-select:none;user-select:none;
+  }
+  input,textarea,select{-webkit-user-select:text!important;user-select:text!important;}
+  #app{max-width:480px;margin:0 auto;min-height:100vh;background:#F7F9FC;display:flex;flex-direction:column;box-shadow:0 0 40px rgba(0,0,0,0.35);}
+  .teacher-bar{background:#0F2A44;color:#BFD3E6;font-size:11px;font-weight:600;text-align:center;padding:5px 8px;}
+  header{background:var(--navy);color:#fff;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:5;}
+  header h1{font-size:17px;margin:0;font-weight:700;}
+  header .sub{font-size:11px;opacity:0.8;margin-top:2px;}
+  .icon-btn{background:rgba(255,255,255,0.15);border:none;color:#fff;width:34px;height:34px;border-radius:50%;font-size:16px;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+  .tabbar{display:flex;background:#fff;border-bottom:1px solid #e2e6ea;position:sticky;top:58px;z-index:4;}
+  .tab{flex:1;text-align:center;padding:11px 4px;font-size:13px;font-weight:600;color:#7a8a99;cursor:pointer;border-bottom:3px solid transparent;}
+  .tab.active{color:var(--navy);border-bottom:3px solid var(--orange);}
+  main{flex:1;padding:16px;padding-bottom:36px;}
+  .hidden{display:none!important;}
+  .intro-box{background:#fff;border-left:4px solid var(--orange);border-radius:8px;padding:12px 14px;font-size:13.5px;line-height:1.5;margin-bottom:14px;color:#455364;}
+  .year-label{text-align:center;color:var(--orange);font-weight:bold;margin:6px 0 10px;font-size:1.05em;}
+  .form-box{background:#fff;border-radius:12px;padding:16px;border:1px solid #e6ecf2;}
+  .form-box label{display:block;font-size:13px;font-weight:700;margin-bottom:4px;}
+  .form-box input,.form-box select{width:100%;padding:12px;border-radius:10px;border:2px solid #dbe3ea;font-size:15px;margin-bottom:8px;}
+  .level-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:6px;}
+  .level-card{background:#fff;border-radius:14px;padding:14px 12px;box-shadow:0 2px 8px rgba(31,78,121,0.12);border:1px solid #e6ecf2;position:relative;min-height:118px;display:flex;flex-direction:column;justify-content:space-between;cursor:pointer;}
+  .level-card.locked{opacity:0.55;cursor:not-allowed;}
+  .level-card .num{width:28px;height:28px;border-radius:50%;background:var(--lightblue);color:var(--navy);font-weight:800;font-size:13px;display:flex;align-items:center;justify-content:center;}
+  .level-card .title{font-size:13px;font-weight:700;color:var(--navy);margin-top:8px;line-height:1.25;}
+  .level-card .stars{font-size:14px;color:#F5A623;margin-top:6px;letter-spacing:2px;}
+  .level-card .lock-icon{position:absolute;top:10px;right:10px;font-size:15px;color:#9AA7B2;}
+  .reset-link{text-align:center;margin-top:18px;font-size:12px;color:#9AA7B2;text-decoration:underline;cursor:pointer;}
+  .progress-dots{display:flex;gap:6px;justify-content:center;margin-bottom:16px;}
+  .dot{width:10px;height:10px;border-radius:50%;background:#DCE3EA;}
+  .dot.current{background:var(--orange);}
+  .dot.done-correct{background:var(--green);}
+  .dot.done-wrong{background:var(--red);}
+  .score-pill{display:inline-block;background:var(--lightblue);color:var(--navy);font-size:12px;font-weight:700;padding:4px 10px;border-radius:12px;margin-bottom:10px;}
+  .question-card{background:#fff;border-radius:14px;padding:18px 16px;box-shadow:0 2px 10px rgba(31,78,121,0.12);border:1px solid #e6ecf2;}
+  .question-tag{font-size:11px;font-weight:700;color:var(--blue);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;}
+  .question-text{font-size:15px;line-height:1.55;color:var(--text);margin-bottom:12px;}
+  .question-text b{color:var(--navy);}
+  .viz-box{background:#fbfdff;border:1px solid #e2e6ea;border-radius:10px;padding:10px;margin-bottom:12px;}
+  .viz-track{position:relative;height:50px;background:#EEF2F6;border-radius:8px;overflow:hidden;margin:6px 0;}
+  .viz-car{position:absolute;top:8px;font-size:22px;transform:translateX(-50%);transition:left 0.4s ease;}
+  .viz-meet{position:absolute;top:0;bottom:0;width:2px;background:var(--orange);opacity:0.7;}
+  .viz-label{font-size:11px;color:#7a8a99;text-align:center;}
+  .answer-row{display:flex;gap:8px;align-items:center;}
+  .answer-row input[type=number]{flex:1;font-size:20px;padding:12px;border-radius:10px;border:2px solid #dbe3ea;text-align:center;font-weight:700;color:var(--navy);}
+  .answer-row input:focus{outline:none;border-color:var(--blue);}
+  .unit-label{font-size:13px;font-weight:700;color:#7a8a99;min-width:44px;}
+  .btn{display:block;width:100%;border:none;border-radius:12px;padding:14px;font-size:15px;font-weight:700;cursor:pointer;margin-top:12px;color:#fff;}
+  .btn-primary{background:var(--orange);}
+  .btn-secondary{background:var(--navy);}
+  .btn-outline{background:#fff;color:var(--navy);border:2px solid var(--navy);}
+  .btn-success{background:var(--green);}
+  .feedback{margin-top:14px;padding:12px 14px;border-radius:10px;font-size:14px;line-height:1.5;}
+  .feedback.ok{background:#E7F6EC;color:#1E7A44;border:1px solid #bfe6cc;}
+  .feedback.bad{background:#FCEAEA;color:#B23A3A;border:1px solid #f3c6c6;}
+  .feedback .steps{margin-top:8px;font-size:13px;color:#4a5a68;background:rgba(255,255,255,0.6);border-radius:8px;padding:8px 10px;}
+  .result-wrap{text-align:center;padding-top:10px;}
+  .big-stars{font-size:38px;color:#F5A623;letter-spacing:6px;margin:14px 0 6px;}
+  .result-title{font-size:19px;font-weight:800;color:var(--navy);}
+  .result-sub{font-size:14px;color:#7a8a99;margin-top:4px;margin-bottom:18px;}
+  .badge{display:inline-block;background:var(--orange);color:#fff;padding:8px 16px;border-radius:20px;font-weight:bold;margin-top:8px;}
+  .sim-wrap{background:#fff;border-radius:14px;padding:16px;box-shadow:0 2px 10px rgba(31,78,121,0.12);border:1px solid #e6ecf2;}
+  .sim-readout{display:flex;flex-wrap:wrap;gap:8px;justify-content:space-between;background:var(--lightblue);border-radius:10px;padding:10px 12px;margin-bottom:12px;font-size:12px;font-weight:700;color:var(--navy);}
+  .sim-track{position:relative;height:70px;background:var(--gray);border-radius:8px;margin:10px 0 16px;overflow:hidden;border:1px solid #e2e6ea;}
+  .sim-track .marker{position:absolute;top:0;bottom:0;width:1px;background:#d3dae1;}
+  .sim-track .marker span{position:absolute;bottom:2px;left:2px;font-size:9px;color:#9AA7B2;}
+  .sim-car{position:absolute;top:6px;font-size:22px;transform:translateX(-50%);}
+  .sim-car.b{top:36px;}
+  .sim-meet-line{position:absolute;top:0;bottom:0;width:2px;background:var(--orange);opacity:0.5;display:none;}
+  .sim-controls label{
+    display:flex;justify-content:space-between;align-items:center;
+    font-size:12.5px;font-weight:700;color:#455364;margin-top:10px;margin-bottom:4px;
+  }
+  .sim-controls input[type=range]{
+    width:100%;display:block;touch-action:none;
+    -webkit-appearance:none;appearance:none;height:10px;border-radius:6px;
+    background:linear-gradient(90deg,#dbe3ea,#94a3b8);outline:none;margin:0 0 4px;
+  }
+  .sim-controls input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none;width:22px;height:22px;border-radius:50%;
+    background:#fff;border:3px solid #E8763B;box-shadow:0 1px 3px rgba(0,0,0,.25);cursor:pointer;
+  }
+  .sim-controls .valdisp{float:none;color:var(--navy);font-weight:800;min-width:4.5em;text-align:right;}
+  #simHint{min-height:2.6em;line-height:1.3;}
+  .sim-wrap{overflow-anchor:none;}
+  main{overflow-anchor:none;}
+  #app{overflow-anchor:none;overscroll-behavior:contain;}
+  .sim-btns{display:flex;gap:8px;margin-top:14px;}
+  .sim-btns .btn{margin-top:0;flex:1;}
+  .sim-mode{display:flex;gap:8px;margin-bottom:10px;}
+  .sim-mode button{flex:1;padding:8px;border-radius:8px;border:2px solid #dbe3ea;background:#fff;font-weight:700;font-size:12px;cursor:pointer;color:var(--navy);}
+  .sim-mode button.active{background:var(--orange);color:#fff;border-color:var(--orange);}
+
+.license-gate{background:#0f172a;border:1px solid #334155;border-radius:14px;padding:14px;margin:10px 0}.license-gate.blocked{border-color:#7f1d1d;background:#450a0a}.license-gate.ok{border-color:#166534;background:#052e16}</style>
+</head>
+<body>
+<div id="licenseGate" class="license-gate"><div id="licenseStatus" class="muted">Comprobando acceso…</div></div>
+
+<div id="app">
+  <div class="teacher-bar">Producido por GILAST — U.E.P. "GILAST" · MRU II</div>
+  <header>
+    <div>
+      <h1 id="headerTitle">MRU II</h1>
+      <div class="sub" id="headerSub">Encuentro de móviles y movimiento relativo</div>
+    </div>
+    <button class="icon-btn hidden" id="backBtn">←</button>
+  </header>
+  <div class="tabbar" id="tabbar">
+    <div class="tab" data-tab="instr">📖 Instrucciones</div>
+    <div class="tab active" data-tab="levels">🎯 Niveles</div>
+    <div class="tab" data-tab="sim">🚗🚗 Simulador</div>
+  </div>
+  <main id="main"></main>
+</div>
+<script>
+(function(){
+  document.addEventListener('contextmenu',e=>{e.preventDefault();return false;},true);
+  document.addEventListener('keydown',e=>{
+    const k=(e.key||'').toLowerCase(), ctrl=e.ctrlKey||e.metaKey, shift=e.shiftKey;
+    if((ctrl&&(k==='u'||k==='s'||k==='p'))||(ctrl&&shift&&(k==='i'||k==='j'||k==='c'))||k==='f12'||(ctrl&&k==='a')){
+      e.preventDefault();e.stopPropagation();return false;
+    }
+  },true);
+})();
+
+const STORAGE_KEY="mru4to_progress_v1";
+const SCORES_KEY="mru4to_scores_v1";
+const QUESTIONS_PER_LEVEL=5;
+const PASS_RATIO=0.6;
+const MAX_TOTAL_POINTS=1500;
+
+const LEVELS=[
+  {id:0,title:"Repaso MRU",tag:"Nivel 1 · v, d, t",desc:"Cálculos básicos de MRU."},
+  {id:1,title:"Ecuación y dirección",tag:"Nivel 2 · x = x₀ + v·t",desc:"Posición con sentido positivo/negativo."},
+  {id:2,title:"Conversión de unidades",tag:"Nivel 3 · km/h ↔ m/s",desc:"Problemas con cambio de unidades."},
+  {id:3,title:"Encuentro (opuestos)",tag:"Nivel 4 · dos móviles",desc:"Dos autos en sentido contrario; se encuentran."},
+  {id:4,title:"Alcance y ventaja",tag:"Nivel 5 · persecución",desc:"Un móvil alcanza a otro en la misma dirección."},
+  {id:5,title:"Reto mixto 4to",tag:"Nivel 6 · desafío final",desc:"Encuentro, alcance y conversiones combinados."},
+];
+
+const STUDENT_ROSTER = {
+  "D": [
+    {name: 'AGUILAR RÍOS, ILDEANDERLYS RAISALIS', code: 'VCJ-8T4-CTJ'},
+    {name: 'ARANGUREN SANTELIZ, NOHELIA VALENTINA', code: 'E7Q-VGF-LKU'},
+    {name: 'ASCANIO AZA, LIZ YASMIN', code: 'LMV-758-SZW'},
+    {name: 'ATOCHA SIFONTES, ELIEZER JOSUÉ', code: '4Y5-XNR-KSQ'},
+    {name: 'BARRETO, KARLA', code: 'SKY-TA5-6RR'},
+    {name: 'BARROSO LUGO, LISMAR MARÍA ANTONIETA', code: 'FW5-FF8-TKW'},
+    {name: 'BOLÍVAR SIMANCAS, ROYNER JAVIER', code: '65W-FJA-F5H'},
+    {name: 'BOLÍVAR, RAYNER', code: 'ZYW-KC7-HWZ'},
+    {name: 'BRITO ZERPA, SOFÍA VALERIA', code: '87K-NDL-R32'},
+    {name: 'CABRILES SOLÓRZANO, EDGAR ALBERTO', code: '6BW-URD-MY7'},
+    {name: 'CASTRO COITA, YIMBERSON ALEXANDER', code: 'L76-MP7-64M'},
+    {name: 'CASTRO RODRÍGUEZ, MARIANYELIS LIZMAR', code: 'QXJ-7E7-9Q8'},
+    {name: 'CIRELLI MACHADO, SAMUEL ISAAC', code: '2QQ-C3P-GEB'},
+    {name: 'FERNÁNDEZ MUÑOZ, LOREANNYS DEL CARMEN', code: '4PY-3AT-ANV'},
+    {name: 'GARCÍA HERRERA, DAILYN', code: 'PBP-N3D-Z3U'},
+    {name: 'GARCÍA MEZA, ALICE VALENTINA', code: 'TCF-YUB-BGL'},
+    {name: 'GONZÁLEZ MONTESINOS, LUIS ALEJANDRO', code: 'MSK-TDE-HZP'},
+    {name: 'HERNÁNDEZ SARMIENTO, ABRAHAM JOSÉ', code: 'HN4-HDH-KTZ'},
+    {name: 'HERNÁNDEZ SERRANO, ROBIANNYS ANDREA', code: '9BM-ZQR-CUG'},
+    {name: 'LÓPEZ MOYA, NAZARETH ALEJANDRA', code: 'JTF-3XV-GA9'},
+    {name: 'MARTÍNEZ, JOGHER', code: '3AB-EWN-JGZ'},
+    {name: 'MARÍN RODRÍGUEZ, EMANUEL AMILCAR', code: '5XU-ABP-QK6'},
+    {name: 'MATA CHACÓN, SINAÍ VICTORIA', code: 'WXQ-SS9-J7J'},
+    {name: 'MEGY SILVA, LEXIBETH DE LOS ÁNGELES', code: '2AK-UGA-9TU'},
+    {name: 'MEJÍAS DURÁN, AARÓN DAVID', code: 'CZA-W87-F72'},
+    {name: 'MEJÍAS ROMERO, RONALD SANTIAGO', code: '4ZU-KA7-3FJ'},
+    {name: 'MIJARES MUÑOZ, DIOGLINGER AARÓN', code: 'C56-692-NNH'},
+    {name: 'MÁRQUEZ OLIVEROS, ALEXANDRA', code: 'XGN-CFS-JXN'},
+    {name: 'PALMA GUZMÁN, NAYMAR ALEXANDRA', code: 'E25-3DR-UG3'},
+    {name: 'RESTREPO MÉNDEZ, MARÍA VICTORIA', code: 'GZH-8AS-CCT'},
+    {name: 'REVETE DÍAZ, FRANCISCO ANTONIO', code: 'ZFB-R7Q-D2R'},
+    {name: 'REYES, LEONARDO', code: 'ZNH-LDR-FRJ'},
+    {name: 'RODRÍGUEZ FLORES, MARIANA NAZARETH', code: '74B-VWP-MLL'},
+    {name: 'RODRÍGUEZ GUZMÁN, ARCÁNGEL JADNIEL', code: 'ANQ-GGC-9JS'},
+    {name: 'RODRÍGUEZ SOLÓRZANO, KRISBEILIS SARAÍ', code: 'E4V-F9A-BP7'},
+    {name: 'RODRÍGUEZ UREA, JOSÉ RICARDO', code: 'UVS-GBV-S2T'},
+    {name: 'ROJAS BLANCO, JESÚS MIGUEL', code: '89F-CDR-U2R'},
+    {name: 'SANTAELLA PÉREZ, VALERI SOFÍA', code: '6W2-3RW-5PK'},
+    {name: 'SARABIA ECHENIQUE, ALFONZO EMMANUEL', code: '9Z3-B3V-SWT'},
+    {name: 'SÁNCHEZ ROMERO, YAHIR ARCÁNGEL', code: 'XZK-GYP-GH2'},
+    {name: 'TRAVIESO, VALERY', code: '8KJ-3TW-UJS'},
+  
+  ],
+};
+
+let studentCode = '';
+
+function fillNameSelect() {
+  const sel = document.getElementById('studentNameSelect');
+  if (!sel) return;
+  sel.innerHTML = '';
+  const list = (STUDENT_ROSTER && STUDENT_ROSTER['D']) || [];
+  sel.disabled = false;
+  const opt0 = document.createElement('option');
+  opt0.value = '';
+  opt0.textContent = '— Elige tu nombre —';
+  sel.appendChild(opt0);
+  list.forEach(function(st, idx) {
+    const opt = document.createElement('option');
+    opt.value = String(idx);
+    opt.textContent = st.name;
+    sel.appendChild(opt);
+  });
+}
+
+function getSelectedStudent() {
+  const sel = document.getElementById('studentNameSelect');
+  if (!sel || sel.value === '') return null;
+  const list = (STUDENT_ROSTER && STUDENT_ROSTER['D']) || [];
+  const idx = parseInt(sel.value, 10);
+  if (isNaN(idx) || idx < 0 || idx >= list.length) return null;
+  return { section: 'D', name: list[idx].name, code: list[idx].code };
+}
+
+let studentName="Estudiante", studentSection="D";
+let lastBadge="", lastScore=0, finalGrade20=0, totalPointsAllLevels=0;
+let levelScores={0:0,1:0,2:0,3:0,4:0,5:0};
+let progress=loadProgress();
+loadLevelScores();
+if(progress.studentName) studentName=progress.studentName;
+studentSection="D";
+
+function loadProgress(){
+  try{const r=localStorage.getItem(STORAGE_KEY);if(r)return JSON.parse(r);}catch(e){}
+  return {unlocked:0,stars:{},studentName:""};
+}
+function saveProgress(p){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(p));return true;}catch(e){console.warn("No se pudo guardar progreso",e);return false;}}
+function loadLevelScores(){
+  try{const s=localStorage.getItem(SCORES_KEY);if(s)levelScores={0:0,1:0,2:0,3:0,4:0,5:0,...JSON.parse(s)};}catch(e){}
+}
+function saveLevelScores(){try{localStorage.setItem(SCORES_KEY,JSON.stringify(levelScores));return true;}catch(e){console.warn("No se pudieron guardar puntajes",e);return false;}}
+function computeGrade20(){
+  totalPointsAllLevels=[0,1,2,3,4,5].reduce((s,L)=>s+(levelScores[L]||0),0);
+  // max: 5 preguntas * 20 * (1+2+3+4+5+6) = 20*21*5 = 2100
+  const maxPts=2100;
+  let g=Math.round((totalPointsAllLevels/maxPts)*20);
+  if(g<1)g=1;if(g>20)g=20;finalGrade20=g;return g;
+}
+
+function randInt(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
+function choice(arr){return arr[randInt(0,arr.length-1)];}
+function fmt(n){const r=Math.round(n*100)/100;return Number.isInteger(r)?String(r):r.toFixed(2).replace(/0+$/,"").replace(/\.$/,"");}
+function closeEnough(a,b,tol){return Math.abs(a-b)<=tol;}
+
+/* ---- Generadores con visualización ---- */
+function genL0(){
+  const t=choice([2,3,4,5,6,8,10]), v=choice([2,3,4,5,6,8,10,12]), d=t*v;
+  return {
+    tag:"Velocidad básica",
+    text:`Un ciclista recorre <b>${d} m</b> en <b>${t} s</b> con MRU. ¿Cuál es su velocidad?`,
+    unit:"m/s", answer:v, tol:0.05,
+    steps:`v = d / t = ${d} / ${t} = ${fmt(v)} m/s`,
+    viz:{type:"single", x0:0, v, t, d}
+  };
+}
+function genL1(){
+  const x0=choice([-10,-5,0,5,10]), v=choice([-6,-4,3,4,5,6]), t=choice([2,3,4,5]), x=x0+v*t;
+  return {
+    tag:"Ecuación del MRU",
+    text:`Parte de <b>x₀ = ${x0} m</b> con <b>v = ${v} m/s</b>. ¿Posición a los <b>${t} s</b>?`,
+    unit:"m", answer:x, tol:0.05,
+    steps:`x = x₀ + v·t = ${x0} + (${v})(${t}) = ${fmt(x)} m`,
+    viz:{type:"single", x0, v, t, d:Math.abs(v*t)}
+  };
+}
+function genL2(){
+  const kmh=choice([36,54,72,90,108]), ms=kmh/3.6, t=choice([10,15,20,30]), d=ms*t;
+  return {
+    tag:"Conversión + distancia",
+    text:`Un auto va a <b>${kmh} km/h</b>. ¿Qué distancia recorre en <b>${t} s</b>? (pasa a m/s ÷ 3,6)`,
+    unit:"m", answer:d, tol:Math.max(0.5,d*0.01),
+    steps:`v = ${kmh} ÷ 3,6 = ${fmt(ms)} m/s\nd = v·t = ${fmt(ms)} × ${t} = ${fmt(d)} m`,
+    viz:{type:"single", x0:0, v:ms, t, d}
+  };
+}
+function genL3(){
+  // Encuentro: dos móviles en sentido opuesto
+  const v1=choice([20,25,30,35,40]);
+  const v2=choice([15,20,25,30,35]);
+  const t=choice([2,3,4,5,6]);
+  const D=(v1+v2)*t;
+  // punto de encuentro desde A: d1 = v1*t
+  const d1=v1*t;
+  return {
+    tag:"Encuentro (sentidos opuestos)",
+    text:`Los pueblos A y B están a <b>${D} km</b>. Desde A sale un auto a <b>${v1} km/h</b> hacia B, y al mismo tiempo desde B sale otro a <b>${v2} km/h</b> hacia A. ¿Después de cuántas <b>horas</b> se encuentran?`,
+    unit:"h", answer:t, tol:0.05,
+    steps:`Se acercan con rapidez combinada v1+v2 = ${v1}+${v2} = ${v1+v2} km/h.\nt = D / (v1+v2) = ${D} / ${v1+v2} = ${fmt(t)} h\nPunto de encuentro desde A: d₁ = v1·t = ${v1}×${t} = ${fmt(d1)} km`,
+    viz:{type:"meet", D, v1, v2, t, d1, unit:"km"}
+  };
+}
+function genL4(){
+  const v1=choice([20,25,30]); // adelante, más lento
+  const v2=choice([40,45,50,55,60]); // persigue
+  const t=choice([2,3,4,5]);
+  const D=(v2-v1)*t;
+  return {
+    tag:"Alcance (misma dirección)",
+    text:`Un camión va a <b>${v1} km/h</b>. Cuando lleva <b>${D} km</b> de ventaja, un auto sale detrás a <b>${v2} km/h</b>. ¿Cuánto tiempo tarda en alcanzarlo?`,
+    unit:"h", answer:t, tol:0.05,
+    steps:`Diferencia de rapidez: v2−v1 = ${v2-v1} km/h.\nt = D / (v2−v1) = ${D} / ${v2-v1} = ${fmt(t)} h`,
+    viz:{type:"chase", D, v1, v2, t, unit:"km"}
+  };
+}
+function genL5(){
+  // Mix: sometimes meet, sometimes chase, sometimes conversion
+  const kind=choice(["meet","chase","conv"]);
+  if(kind==="meet") return genL3();
+  if(kind==="chase") return genL4();
+  return genL2();
+}
+const GENERATORS=[genL0,genL1,genL2,genL3,genL4,genL5];
+
+let session=null;
+
+function startLevel(id){
+  session={levelId:id,qIndex:0,results:[],currentProblem:null,levelPoints:0,lives:3};
+  nextQ(); renderQuestion();
+}
+function nextQ(){ session.currentProblem=GENERATORS[session.levelId](); }
+
+function renderViz(viz){
+  if(!viz) return "";
+  if(viz.type==="single"){
+    const pct=Math.min(95, Math.max(5, (Math.abs(viz.v)>0?60:20)));
+    return `<div class="viz-box">
+      <div class="viz-label">Visualización del recorrido</div>
+      <div class="viz-track">
+        <div class="viz-car" style="left:8%;">🚗</div>
+        <div class="viz-car" style="left:${pct}%;opacity:0.5;">📍</div>
+      </div>
+      <div class="viz-label">x₀ → posición tras t (esquema)</div>
+    </div>`;
+  }
+  if(viz.type==="meet"){
+    const pct=Math.min(90, Math.max(10, (viz.d1/viz.D)*100));
+    return `<div class="viz-box">
+      <div class="viz-label">Encuentro · distancia total ${viz.D} ${viz.unit||"km"}</div>
+      <div class="viz-track">
+        <div class="viz-car" style="left:6%;">🚗</div>
+        <div class="viz-meet" style="left:${pct}%;"></div>
+        <div class="viz-car" style="left:94%;transform:translateX(-50%) scaleX(-1);">🚙</div>
+      </div>
+      <div class="viz-label">A ──► &nbsp; punto de encuentro &nbsp; ◄── B</div>
+    </div>`;
+  }
+  if(viz.type==="chase"){
+    return `<div class="viz-box">
+      <div class="viz-label">Alcance · ventaja inicial ${viz.D} ${viz.unit||"km"}</div>
+      <div class="viz-track">
+        <div class="viz-car" style="left:15%;">🚗</div>
+        <div class="viz-car" style="left:55%;">🚛</div>
+      </div>
+      <div class="viz-label">Auto (más rápido) persigue al camión</div>
+    </div>`;
+  }
+  return "";
+}
+
+/* ---- Setup ---- */
+function renderSetup(){
+  setHeader("Misión MRU 4to","MRU II — Sección D",false);
+  document.getElementById("tabbar").classList.add("hidden");
+  document.getElementById("main").innerHTML=`
+    <div class="intro-box">Elige tu <b>nombre</b> de la lista. El curso es <b>MRU II</b> y la sección es solo <b>D</b>.</div>
+    <div class="form-box">
+      <p class="year-label">MRU II — Sección D</p>
+      <label>Tu nombre</label>
+      <select id="studentNameSelect" style="width:100%;padding:12px;border-radius:10px;border:2px solid #dbe3ea;font-size:15px;margin-bottom:8px;">
+        <option value="">— Elige tu nombre —</option>
+      </select>
+      <p style="text-align:center;color:#7a8a99;font-size:13px;">El certificado usará tu código único de la lista del profesor.</p>
+      <button class="btn btn-primary" id="startSetupBtn">▶ Continuar al mapa de niveles</button>
+    </div>`;
+  fillNameSelect();
+  document.getElementById("startSetupBtn").onclick=()=>{
+    const st = getSelectedStudent();
+    if (!st) {
+      alert('Elige tu nombre de la lista.');
+      return;
+    }
+    studentName = st.name;
+    studentSection = 'D';
+    studentCode = st.code;
+    lastVerifyCode = st.code;
+    progress.studentName = studentName;
+    progress.studentCode = studentCode;
+    saveProgress(progress);
+    try {
+      const ni = document.getElementById('studentNameSelect');
+      if (ni) ni.disabled = true;
+    } catch(e) {}
+    document.getElementById("tabbar").classList.remove("hidden");
+    renderLevelMap();
+  };
+}
+
+function renderInstructions(){
+  setHeader("Misión MRU 4to","Instrucciones de uso",false);
+  const main=document.getElementById("main");
+  main.innerHTML=`
+    <div class="intro-box">📖 <b>¿Cómo jugar?</b> Aquí encuentras todo lo que necesitas para usar Misión MRU 4to.</div>
+
+    <div class="question-card" style="margin-bottom:14px;">
+      <div class="question-tag">🎯 Pestaña Niveles</div>
+      <div class="question-text" style="margin-bottom:0;">
+        1. Toca un nivel disponible en el mapa (los bloqueados muestran un candado 🔒).<br>        <b>Importante:</b> si durante un nivel sales al Simulador o a Instrucciones, el intento se reinicia y los ejercicios cambian.<br>
+        2. Responde los ejercicios del nivel; cada uno se genera con números distintos.<br>
+        3. Necesitas al menos ${Math.ceil(QUESTIONS_PER_LEVEL*PASS_RATIO)} de ${QUESTIONS_PER_LEVEL} correctas para desbloquear el siguiente nivel y ganar estrellas.<br>
+        4. Al completar los 6 niveles, se desbloquea tu certificado de logro.
+      </div>
+    </div>
+
+    <div class="question-card" style="margin-bottom:14px;">
+      <div class="question-tag">🚗🚗 Pestaña Simulador</div>
+      <div class="question-text" style="margin-bottom:0;">
+        1. Elige el modo: Encuentro (dos móviles en sentidos opuestos) o Alcance (uno persigue al otro).<br>
+        2. Ajusta la velocidad y posición inicial de cada auto con los controles deslizantes.<br>
+        3. Presiona "▶ Iniciar" para ver el movimiento de ambos autos y la gráfica posición-tiempo.<br>
+        4. Observa el aviso cuando se encuentran o cuando uno alcanza al otro.<br>
+        5. Usa "Reiniciar" para volver a empezar con otros valores.
+      </div>
+    </div>
+
+    <div class="question-card" style="margin-bottom:14px;">
+      <div class="question-tag">🏆 Certificado y aviso al profesor</div>
+      <div class="question-text" style="margin-bottom:0;">
+        Al completar los 6 niveles sin quedarte por debajo del mínimo en ninguno, aparecerán dos botones: "Descargar mi logro" (guarda tu certificado como imagen) y "Avisar a mi profesor" (envía tu resultado por correo automáticamente).
+      </div>
+    </div>
+
+    <div class="question-card" style="text-align:center;">
+      <div class="question-tag">📲 Descarga este juego</div>
+      <p style="font-size:13.5px; color:#455364; margin-bottom:12px;">Escanea el código con la cámara de tu teléfono para descargar el archivo y jugar sin conexión.<br><b>Importante:</b> el enlace debe descargar el archivo directamente. Si en cambio se abre una vista previa dentro de Drive, el juego no funcionará (los botones no responden); en ese caso, busca la opción "Descargar" (ícono ⬇ o menú ⋮) y luego abre el archivo ya descargado.</p>
+      <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https%3A%2F%2Fdrive.google.com%2Fuc%3Fexport%3Ddownload%26id%3D1rJLymYZl6pQlki2g-zNfAfPuAjDZXNGt"
+           alt="Código QR para descargar el juego Misión MRU 4to"
+           width="200" height="200"
+           style="background:#fff; padding:8px; border-radius:10px; border:2px solid var(--orange);">
+      <p style="font-size:12.5px; color:#7a8a99; margin-top:10px;">O accede directamente: <a href="https://drive.google.com/uc?export=download&id=1rJLymYZl6pQlki2g-zNfAfPuAjDZXNGt" target="_blank" style="color:var(--blue); font-weight:700;">enlace de Google Drive</a></p>
+    </div>
+  `;
+}
+
+function renderLevelMap(){
+  setHeader("Misión MRU 4to", studentName+" · 4to D", false);
+  document.getElementById("tabbar").classList.remove("hidden");
+  let html=`<div class="intro-box">Necesitas al menos ${Math.ceil(QUESTIONS_PER_LEVEL*PASS_RATIO)} de ${QUESTIONS_PER_LEVEL} correctas para desbloquear el siguiente. El certificado (con código de verificación y QR) se desbloquea al completar los <b>6 niveles</b>. Incluye encuentro de dos móviles en sentido contrario.</div><div class="level-grid">`;
+  LEVELS.forEach((lv,i)=>{
+    const unlocked=i<=progress.unlocked;
+    const stars=progress.stars[i]||0;
+    html+=`<div class="level-card ${unlocked?'':'locked'}" data-level="${i}">
+      ${unlocked?'':'<div class="lock-icon">🔒</div>'}
+      <div><div class="num">${i+1}</div><div class="title">${lv.title}</div></div>
+      <div class="stars">${unlocked?('★'.repeat(stars)+'☆'.repeat(3-stars)):'&nbsp;'}</div>
+    </div>`;
+  });
+  html+=`</div>
+    <div class="reset-link" id="resetLink">Reiniciar progreso</div>
+    <div class="reset-link" id="changeStudent" style="margin-top:8px;">Cambiar nombre</div>`;
+  document.getElementById("main").innerHTML=html;
+  document.querySelectorAll(".level-card").forEach(card=>{
+    card.onclick=()=>{const i=+card.dataset.level; if(i<=progress.unlocked) startLevel(i);};
+  });
+  document.getElementById("resetLink").onclick=()=>{
+    if(confirm("¿Reiniciar progreso?")){
+      progress={unlocked:0,stars:{},studentName}; levelScores={0:0,1:0,2:0,3:0,4:0,5:0};
+      saveProgress(progress); saveLevelScores(); renderLevelMap();
+    }
+  };
+  document.getElementById("changeStudent").onclick=()=>renderSetup();
+}
+
+function renderQuestion(){
+  const lv=LEVELS[session.levelId];
+  setHeader(lv.title, lv.tag, true);
+  document.getElementById("tabbar").classList.add("hidden");
+  const p=session.currentProblem;
+  let dots="";
+  for(let i=0;i<QUESTIONS_PER_LEVEL;i++){
+    let cls="dot";
+    if(i<session.qIndex) cls+=session.results[i]?" done-correct":" done-wrong";
+    else if(i===session.qIndex) cls+=" current";
+    dots+=`<div class="${cls}"></div>`;
+  }
+  document.getElementById("main").innerHTML=`
+    <div class="lives-bar" style="display:flex;justify-content:space-between;align-items:center;background:#fff;border:1px solid #e6ecf2;border-radius:12px;padding:10px 14px;margin-bottom:12px;font-size:14px;font-weight:700;">
+      <span>Pregunta <b>${session.qIndex+1}</b> / ${QUESTIONS_PER_LEVEL}</span>
+      <span id="livesDisplay">${'❤️'.repeat(Math.max(session.lives||0,0))||'💀'}</span>
+      <span>❤️ Vidas: <b>${session.lives||0}</b> · Pts: ${session.levelPoints}</span>
+    </div>
+    <div class="progress-dots">${dots}</div>
+    <div class="question-card">
+      <div class="question-tag">${p.tag}</div>
+      <div class="question-text">${p.text}</div>
+      ${renderViz(p.viz)}
+      <div class="answer-row">
+        <input type="number" inputmode="decimal" id="answerInput" placeholder="Tu respuesta">
+        <div class="unit-label">${p.unit}</div>
+      </div>
+      <button class="btn btn-primary" id="checkBtn">Verificar respuesta</button>
+      <div id="feedbackArea"></div>
+    </div>`;
+  document.getElementById("checkBtn").onclick=checkAnswer;
+  document.getElementById("answerInput").onkeydown=e=>{if(e.key==="Enter")checkAnswer();};
+  document.getElementById("answerInput").focus();
+}
+
+function checkAnswer(){
+  const input=document.getElementById("answerInput");
+  const val=parseFloat(input.value);
+  const p=session.currentProblem;
+  const area=document.getElementById("feedbackArea");
+  if(isNaN(val)){area.innerHTML=`<div class="feedback bad">Escribe un número.</div>`;return;}
+  const correct=closeEnough(val,p.answer,p.tol);
+  session.results[session.qIndex]=correct;
+  if(!correct) session.lives=Math.max(0,(session.lives||3)-1);
+  if(correct) session.levelPoints += 20*(session.levelId+1);
+  area.innerHTML=`<div class="feedback ${correct?'ok':'bad'}">
+    ${correct?`✅ ¡Correcto! +${20*(session.levelId+1)} pts`:`❌ Incorrecto. Respuesta: ${fmt(p.answer)} ${p.unit}.`}
+    ${!correct?`<div style="margin-top:6px;font-weight:700;">Vidas: ${'❤️'.repeat(Math.max(session.lives,0))||'💀'} (${session.lives})</div>`:''}
+    <div class="steps"><b>Procedimiento:</b><br>${p.steps.replace(/\n/g,"<br>")}</div>
+  </div>
+  <button class="btn btn-secondary" id="nextBtn">${session.qIndex<QUESTIONS_PER_LEVEL-1?"Siguiente pregunta ➜":"Ver resultados ➜"}</button>`;
+  document.getElementById("checkBtn").remove();
+  input.disabled=true;
+  const noLives = session.lives <= 0;
+  const lastQ = session.qIndex >= QUESTIONS_PER_LEVEL - 1;
+  let lbl = "Siguiente pregunta ➜";
+  if (noLives || lastQ) lbl = "Ver resultados ➜";
+  // update button text if already rendered with old label
+  const nb = document.getElementById("nextBtn");
+  if (nb) nb.textContent = lbl;
+  if (nb) nb.onclick=()=>{
+    if (session.lives <= 0) { finishLevel(); return; }
+    session.qIndex++;
+    if(session.qIndex>=QUESTIONS_PER_LEVEL) finishLevel();
+    else{ nextQ(); renderQuestion(); }
+  };
+}
+
+function finishLevel(){
+  for(let i=0;i<QUESTIONS_PER_LEVEL;i++){ if(session.results[i]===undefined) session.results[i]=false; }
+  const correctCount=session.results.filter(Boolean).length;
+  const ratio=correctCount/QUESTIONS_PER_LEVEL;
+  let stars=0;
+  if(ratio>=0.99) stars=3; else if(ratio>=0.8) stars=2; else if(ratio>=PASS_RATIO) stars=1;
+  const passed=ratio>=PASS_RATIO;
+  lastScore=session.levelPoints;
+  if(passed){
+    progress.stars[session.levelId]=Math.max(progress.stars[session.levelId]||0,stars);
+    levelScores[session.levelId]=Math.max(levelScores[session.levelId]||0,session.levelPoints);
+    saveLevelScores(); computeGrade20();
+    if(session.levelId===progress.unlocked && progress.unlocked<LEVELS.length-1) progress.unlocked++;
+    if(session.levelId===LEVELS.length-1) progress.completedAllLevels=true;
+    saveProgress(progress);
+  }
+  if(stars>=3) lastBadge="🏆 Excelente";
+  else if(stars>=2) lastBadge="🥈 Muy bien";
+  else if(passed) lastBadge="🥉 Nivel superado";
+  else lastBadge="🔄 Sigue practicando";
+  renderResult(correctCount,stars,passed);
+}
+
+function renderResult(correctCount,stars,passed){
+  const lv=LEVELS[session.levelId];
+  setHeader(lv.title,"Resultados",true);
+  const allDone=passed && session.levelId===LEVELS.length-1;
+  if(allDone) computeGrade20();
+  document.getElementById("main").innerHTML=`
+    <div class="result-wrap">
+      <div class="big-stars">${"★".repeat(stars)}${"☆".repeat(3-stars)}</div>
+      <div class="result-title">${passed?"¡Nivel superado!":"Casi lo logras"}</div>
+      <div class="result-sub">${studentName} · 4to ${studentSection}<br>
+        Correctas: ${correctCount}/${QUESTIONS_PER_LEVEL} · Puntos: ${session.levelPoints}
+        ${allDone?`<br><b>Puntos totales: ${totalPointsAllLevels} · Nota: ${finalGrade20}/20</b>`:""}
+      </div>
+      <div class="badge">${lastBadge}</div>
+      ${!passed?`<div class="intro-box" style="margin-top:12px;text-align:left;">Necesitas al menos ${Math.ceil(QUESTIONS_PER_LEVEL*PASS_RATIO)} correctas para avanzar.</div>`:""}
+      ${allDone?`
+        <button class="btn btn-success" id="dlCert">📥 Descargar mi logro</button>
+        <button class="btn btn-secondary" id="notifyT">📧 Avisar a mi profesor</button>
+        <p style="font-size:12px;color:#7a8a99;margin-top:8px;">Se genera certificado con código y QR para compartir o enviar al profesor.</p>
+      `:`<p style="font-size:12px;color:#9AA7B2;margin-top:10px;">🔒 Certificado al completar los 6 niveles.</p>`}
+      <button class="btn btn-primary" id="retryBtn">Repetir este nivel</button>
+      ${(passed&&session.levelId<LEVELS.length-1)?`<button class="btn btn-secondary" id="nextLevelBtn">Siguiente nivel ➜</button>`:""}
+      <button class="btn btn-outline" id="menuBtn">Volver al mapa</button>
+    </div>`;
+  document.getElementById("retryBtn").onclick=()=>startLevel(session.levelId);
+  document.getElementById("menuBtn").onclick=()=>{session=null;showTab("levels");};
+  const nb=document.getElementById("nextLevelBtn");
+  if(nb) nb.onclick=()=>startLevel(session.levelId+1);
+  const dl=document.getElementById("dlCert");
+  if(dl) dl.onclick=downloadAchievement;
+  const nt=document.getElementById("notifyT");
+  if(nt) nt.onclick=notifyTeacher;
+}
+
+
+const VERIFY_SECRET = 'JMC-GILBERTO-FISICA-2026';
+let lastVerifyCode = '';
+function simpleHash(str) {
+  let h = 2166136261;
+  for (let i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 16777619); }
+  return (h >>> 0).toString(36).toUpperCase().padStart(7, '0').slice(0, 7);
+}
+function makeVerificationCode(gameId, name, section, points, grade) {
+  const base = [gameId, (name || '').trim().toUpperCase(), section, String(points), String(grade), VERIFY_SECRET].join('|');
+  const h = simpleHash(base);
+  const pref = (gameId || 'JUE').replace(/[^A-Z0-9]/gi, '').slice(0, 3).toUpperCase() || 'JUE';
+  return pref + '-' + h.slice(0, 3) + '-' + h.slice(3, 6);
+}
+function buildVerifyPayload(gameTitle, name, section, yearLabel, points, grade, badge, code) {
+  return [
+    'VERIFICACION DE LOGRO',
+    'Colegio: U.E.P. Jose Maria Carreno',
+    'Profesor: GILAST',
+    'Juego: ' + gameTitle,
+    'Estudiante: ' + name,
+    'Curso: ' + yearLabel,
+    'Seccion: ' + section,
+    'Puntos: ' + points,
+    'Nota: ' + grade + ' / 20',
+    'Insignia: ' + (badge || ''),
+    'Codigo: ' + code,
+    'Fecha: ' + new Date().toLocaleString('es-VE')
+  ].join('\n');
+}
+function drawCertificateChrome(ctx, w, h) {
+  ctx.save();
+  ctx.globalAlpha = 0.06;
+  ctx.fillStyle = '#ffffff';
+  ctx.font = '12px Arial';
+  for (let y = 40; y < h; y += 28) {
+    for (let x = 20; x < w; x += 120) {
+      ctx.fillText('JMC', x + ((y / 28) % 2) * 40, y);
+    }
+  }
+  ctx.restore();
+}
+function loadQrImage(text, size) {
+  return new Promise(function(resolve) {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = function() { resolve(img); };
+    img.onerror = function() { resolve(null); };
+    img.src = 'https://api.qrserver.com/v1/create-qr-code/?size=' + size + 'x' + size + '&margin=8&data=' + encodeURIComponent(text);
+    setTimeout(function() { if (!img.complete) resolve(null); }, 4000);
+  });
+}
+
+
+async function downloadAchievement(){
+  computeGrade20();
+  lastVerifyCode = studentCode || makeVerificationCode('MR4', studentName, studentSection, totalPointsAllLevels, finalGrade20);
+  const payload = buildVerifyPayload('Misión MRU 4to', studentName, studentSection, 'MRU II', totalPointsAllLevels, finalGrade20, lastBadge, lastVerifyCode);
+  const canvas = document.createElement('canvas');
+  canvas.width = 900; canvas.height = 640;
+  const ctx = canvas.getContext('2d');
+  const g = ctx.createLinearGradient(0,0,900,640);
+  g.addColorStop(0,'#1F4E79'); g.addColorStop(1,'#2E75B6');
+  ctx.fillStyle = g; ctx.fillRect(0,0,900,640);
+  drawCertificateChrome(ctx, 900, 640);
+  ctx.strokeStyle = '#E8763B'; ctx.lineWidth = 8; ctx.strokeRect(20,20,860,600);
+  ctx.strokeStyle = 'rgba(255,255,255,0.35)'; ctx.lineWidth = 2; ctx.strokeRect(32,32,836,576);
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#fff'; ctx.font = 'bold 28px Arial';
+  ctx.fillText('CERTIFICADO DE LOGRO', 450, 90);
+  ctx.font = '18px Arial'; ctx.fillText('Misión MRU 4to — Encuentro de móviles', 450, 125);
+  ctx.fillStyle = 'rgba(255,255,255,0.85)'; ctx.font = '14px Arial';
+  ctx.fillText('GILAST — Producido por GILAST', 450, 155);
+  ctx.font = '18px Arial'; ctx.fillText('Se otorga el presente reconocimiento a:', 450, 200);
+  ctx.fillStyle = '#E8763B'; ctx.font = 'bold 40px Arial';
+  ctx.fillText(studentName, 450, 255);
+  ctx.fillStyle = 'rgba(255,255,255,0.9)'; ctx.font = '18px Arial';
+  ctx.fillText('MRU II — Sección ' + studentSection, 450, 290);
+  ctx.fillStyle = '#fff'; ctx.font = '22px Arial';
+  ctx.fillText('Puntos totales: ' + totalPointsAllLevels, 450, 330);
+  ctx.fillStyle = '#E8763B'; ctx.font = 'bold 26px Arial';
+  ctx.fillText('Nota: ' + finalGrade20 + ' / 20', 450, 368);
+  ctx.fillStyle = '#b8f0c8'; ctx.font = 'bold 20px Arial';
+  ctx.fillText(lastBadge, 450, 405);
+  ctx.fillStyle = '#E8763B'; ctx.font = 'bold 18px Arial';
+  ctx.fillText('Código de verificación: ' + lastVerifyCode, 450, 445);
+  const fecha = new Date().toLocaleDateString('es-VE',{year:'numeric',month:'long',day:'numeric'});
+  ctx.fillStyle = 'rgba(255,255,255,0.7)'; ctx.font = '14px Arial';
+  ctx.fillText(fecha, 450, 475);
+  const qrImg = await loadQrImage(payload, 140);
+  if (qrImg) {
+    ctx.fillStyle = '#fff'; ctx.fillRect(378, 490, 144, 144);
+    ctx.drawImage(qrImg, 380, 492, 140, 140);
+  } else {
+    ctx.fillStyle = 'rgba(255,255,255,0.85)'; ctx.font = '12px Arial';
+    ctx.fillText('(QR no disponible sin conexión — use el código)', 450, 530);
+  }
+  const a = document.createElement('a');
+  const safe = studentName.replace(/[^a-zA-Z0-9À-ÿ ]/g,'').trim().replace(/\s+/g,'_') || 'estudiante';
+  a.download = 'logro_MRU4to_' + safe + '.png';
+  a.href = canvas.toDataURL('image/png');
+  a.click();
+}
+
+async function notifyTeacher(){
+  computeGrade20();
+  lastVerifyCode = studentCode || makeVerificationCode('MR4', studentName, studentSection, totalPointsAllLevels, finalGrade20);
+  const subject = 'Logro: ' + studentName + ' (4to ' + studentSection + ') - Misión MRU 4to [' + lastVerifyCode + ']';
+  const body =
+    'Juego: Misión MRU 4to\\n' +
+    'Estudiante: ' + studentName + '\\n' +
+    'Sección: 4to ' + studentSection + '\\n' +
+    'Puntos: ' + totalPointsAllLevels + '\\n' +
+    'Nota: ' + finalGrade20 + ' / 20\\n' +
+    'Código verificación: ' + lastVerifyCode + '\\n' +
+    'Insignia: ' + lastBadge;
+  await downloadAchievement();
+  const mailto = 'mailto:yanijose111@gmail.com?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body + '\\n\\nAdjunta el certificado descargado (tiene QR y código).');
+  try {
+    const a = document.createElement('a'); a.href = mailto; a.style.display = 'none';
+    document.body.appendChild(a); a.click();
+    setTimeout(function(){ try{ document.body.removeChild(a);}catch(e){} }, 500);
+  } catch (e) { window.location.href = mailto; }
+  alert('1) Se descargó el certificado (con código y QR).\\n2) Se abrió el correo.\\n\\nAdjunta el certificado y pulsa ENVIAR.\\nCódigo: ' + lastVerifyCode);
+}
+
+/* ---- Simulador dual ---- */
+let sim={running:false,mode:"meet",xA:0,vA:8,xB:40,vB:-6,t:0,lastTs:null,raf:null,history:[]};
+
+function renderSimulator(){
+  setHeader("Simulador 2 móviles","Un carro y otro en sentido opuesto (o persecución)",false);
+  const main=document.getElementById("main");
+  main.innerHTML=`
+    <div class="sim-wrap">
+      <div class="sim-mode">
+        <button class="${sim.mode==='meet'?'active':''}" id="modeMeet">⇄ Encuentro</button>
+        <button class="${sim.mode==='chase'?'active':''}" id="modeChase">→→ Alcance</button>
+      </div>
+      <div class="sim-readout">
+        <span>t = <span id="simT">0.0</span> s</span>
+        <span>x₁ = <span id="simXA">0</span> m</span>
+        <span>x₂ = <span id="simXB">40</span> m</span>
+      </div>
+      <div class="sim-track" id="simTrack"></div>
+      <canvas id="simGraph" width="400" height="150"></canvas>
+      <div class="sim-controls" id="simControls"></div>
+      <div class="sim-btns">
+        <button class="btn btn-primary" id="simStart">▶ Iniciar</button>
+        <button class="btn btn-outline" id="simReset">⟲ Reiniciar</button>
+      </div>
+      <p style="font-size:12px;color:#7a8a99;margin-top:10px;text-align:center;" id="simHint"></p>
+    </div>`;
+  buildTrack();
+  buildControls();
+  document.getElementById("modeMeet").onclick=()=>{sim.mode="meet"; resetSimDefaults(); renderSimulator();};
+  document.getElementById("modeChase").onclick=()=>{sim.mode="chase"; resetSimDefaults(); renderSimulator();};
+  document.getElementById("simStart").onclick=toggleSim;
+  document.getElementById("simReset").onclick=resetSim;
+  updateHint();
+  resetSimVisual();
+}
+function resetSimDefaults(){
+  if(sim.mode==="meet"){ sim.xA=0; sim.vA=8; sim.xB=40; sim.vB=-6; }
+  else { sim.xA=0; sim.vA=12; sim.xB=15; sim.vB=5; }
+  sim.t=0; sim.history=[];
+}
+function updateHint(){
+  const el=document.getElementById("simHint");
+  if(!el) return;
+  if(sim.mode==="meet"){
+    const rel=sim.vA-sim.vB;
+    const dist=sim.xB-sim.xA;
+    const tMeet = rel!==0 ? dist/rel : NaN;
+    el.textContent = isFinite(tMeet)&&tMeet>0
+      ? `Encuentro estimado: t ≈ ${fmt(tMeet)} s (v constantes).`
+      : "Ajusta posiciones y velocidades para un encuentro posible.";
+  } else {
+    const dv=sim.vA-sim.vB;
+    const dist=sim.xB-sim.xA;
+    const t = dv>0 ? dist/dv : NaN;
+    el.textContent = isFinite(t)&&t>0
+      ? `Alcance estimado: t ≈ ${fmt(t)} s (si v₁ > v₂).`
+      : "El perseguidor debe ser más rápido (v₁ > v₂).";
+  }
+}
+function buildTrack(){
+  const track=document.getElementById("simTrack");
+  track.innerHTML="";
+  for(let m=0;m<=40;m+=5){
+    const pct=(m/40)*100;
+    const el=document.createElement("div");
+    el.className="marker"; el.style.left=pct+"%";
+    el.innerHTML=`<span>${m}</span>`;
+    track.appendChild(el);
+  }
+  const meet=document.createElement("div");
+  meet.className="sim-meet-line"; meet.id="simMeetLine";
+  track.appendChild(meet);
+  const c1=document.createElement("div"); c1.className="sim-car"; c1.id="carA"; c1.textContent="🚗";
+  const c2=document.createElement("div"); c2.className="sim-car b"; c2.id="carB"; c2.textContent=sim.mode==="meet"?"🚙":"🚛";
+  track.appendChild(c1); track.appendChild(c2);
+}
+function buildControls(){
+  const box=document.getElementById("simControls");
+  box.innerHTML=`
+    <label>Velocidad auto 1 (v₁): <span class="valdisp" id="vADisp">${sim.vA} m/s</span></label>
+    <input type="range" id="vASlider" min="-15" max="20" step="1" value="${sim.vA}">
+    <label>Posición inicial auto 1 (x₁): <span class="valdisp" id="xADisp">${sim.xA} m</span></label>
+    <input type="range" id="xASlider" min="0" max="40" step="1" value="${sim.xA}">
+    <label>Velocidad auto 2 (v₂): <span class="valdisp" id="vBDisp">${sim.vB} m/s</span></label>
+    <input type="range" id="vBSlider" min="-15" max="20" step="1" value="${sim.vB}">
+    <label>Posición inicial auto 2 (x₂): <span class="valdisp" id="xBDisp">${sim.xB} m</span></label>
+    <input type="range" id="xBSlider" min="0" max="40" step="1" value="${sim.xB}">
+  `;
+  const bind=(id,key,disp)=>{
+    const el=document.getElementById(id);
+    if(!el) return;
+    const handler=e=>{
+      sim[key]=parseFloat(e.target.value);
+      const d=document.getElementById(disp);
+      if(d) d.textContent=sim[key]+(key.startsWith("v")?" m/s":" m");
+      if(!sim.running){
+        // solo mover autos y lectura, sin rearmar DOM
+        const a=document.getElementById("carA"), b=document.getElementById("carB");
+        if(a) a.style.left=posPct(sim.xA)+"%";
+        if(b){ b.style.left=posPct(sim.xB)+"%"; b.style.transform=sim.mode==="meet"?"translateX(-50%) scaleX(-1)":"translateX(-50%)"; }
+        const xa=document.getElementById("simXA"), xb=document.getElementById("simXB");
+        if(xa) xa.textContent=fmt(sim.xA);
+        if(xb) xb.textContent=fmt(sim.xB);
+        sim.history=[{t:0,xA:sim.xA,xB:sim.xB}];
+        drawGraph();
+      }
+      updateHint();
+    };
+    el.oninput=handler;
+    // Evita que el teclado/scroll del móvil “salte” la página al tocar el slider
+    el.addEventListener('touchstart', e=>{ e.stopPropagation(); }, {passive:true});
+  };
+  bind("vASlider","vA","vADisp"); bind("xASlider","xA","xADisp");
+  bind("vBSlider","vB","vBDisp"); bind("xBSlider","xB","xBDisp");
+}
+function posPct(x){return (Math.max(0,Math.min(40,x))/40)*100;}
+function resetSimVisual(){
+  const a=document.getElementById("carA"), b=document.getElementById("carB");
+  if(a) a.style.left=posPct(sim.xA)+"%";
+  if(b){ b.style.left=posPct(sim.xB)+"%"; b.style.transform=sim.mode==="meet"?"translateX(-50%) scaleX(-1)":"translateX(-50%)"; }
+  const tEl=document.getElementById("simT"), xa=document.getElementById("simXA"), xb=document.getElementById("simXB");
+  if(tEl) tEl.textContent="0.0";
+  if(xa) xa.textContent=fmt(sim.xA);
+  if(xb) xb.textContent=fmt(sim.xB);
+  sim.history=[{t:0,xA:sim.xA,xB:sim.xB}];
+  drawGraph();
+}
+function resetSim(){
+  sim.running=false; sim.t=0; sim.lastTs=null;
+  if(sim.raf) cancelAnimationFrame(sim.raf);
+  const b=document.getElementById("simStart"); if(b) b.textContent="▶ Iniciar";
+  resetSimVisual(); updateHint();
+}
+function toggleSim(){
+  sim.running=!sim.running;
+  document.getElementById("simStart").textContent=sim.running?"⏸ Pausar":"▶ Iniciar";
+  if(sim.running){ sim.lastTs=null; sim.raf=requestAnimationFrame(simLoop); }
+  else if(sim.raf) cancelAnimationFrame(sim.raf);
+}
+function simLoop(ts){
+  const a=document.getElementById("carA"), b=document.getElementById("carB");
+  if(!a||!b){sim.running=false;sim.raf=null;return;}
+  if(!sim.lastTs) sim.lastTs=ts;
+  const dt=(ts-sim.lastTs)/1000; sim.lastTs=ts; sim.t+=dt;
+  const xA=sim.xA+sim.vA*sim.t;
+  const xB=sim.xB+sim.vB*sim.t;
+  a.style.left=posPct(xA)+"%";
+  b.style.left=posPct(xB)+"%";
+  document.getElementById("simT").textContent=fmt(sim.t);
+  document.getElementById("simXA").textContent=fmt(xA);
+  document.getElementById("simXB").textContent=fmt(xB);
+  sim.history.push({t:sim.t,xA,xB});
+  if(sim.history.length>400) sim.history.shift();
+  drawGraph();
+  // encuentro detectado
+  if(sim.mode==="meet" && ((sim.vA>0 && sim.vB<0 && xA>=xB) || (sim.vA<0 && sim.vB>0 && xA<=xB))){
+    sim.running=false;
+    document.getElementById("simStart").textContent="▶ Iniciar";
+    document.getElementById("simHint").textContent="¡Se encontraron cerca de t = "+fmt(sim.t)+" s!";
+    return;
+  }
+  if(sim.mode==="chase" && sim.vA>sim.vB && xA>=xB){
+    sim.running=false;
+    document.getElementById("simStart").textContent="▶ Iniciar";
+    document.getElementById("simHint").textContent="¡Alcanzó al otro cerca de t = "+fmt(sim.t)+" s!";
+    return;
+  }
+  if(xA<0||xA>40||xB<0||xB>40){
+    sim.running=false;
+    document.getElementById("simStart").textContent="▶ Iniciar";
+    return;
+  }
+  if(sim.running) sim.raf=requestAnimationFrame(simLoop);
+}
+function drawGraph(){
+  const canvas=document.getElementById("simGraph");
+  if(!canvas) return;
+  const ctx=canvas.getContext("2d");
+  const W=canvas.width,H=canvas.height, padL=36,padB=24,padT=10,padR=10;
+  ctx.clearRect(0,0,W,H);
+  const hist=sim.history;
+  const maxT=Math.max(5, hist[hist.length-1].t*1.1);
+  function px(t){return padL+(t/maxT)*(W-padL-padR);}
+  function py(x){return H-padB-((x-0)/40)*(H-padB-padT);}
+  ctx.strokeStyle="#c9d3db"; ctx.beginPath();
+  ctx.moveTo(padL,padT); ctx.lineTo(padL,H-padB); ctx.lineTo(W-padR,H-padB); ctx.stroke();
+  ctx.fillStyle="#7a8a99"; ctx.font="10px Segoe UI";
+  ctx.fillText("t (s)",W-padR-18,H-padB+16); ctx.fillText("x",4,padT+8);
+  if(hist.length>1){
+    ctx.strokeStyle="#E8763B"; ctx.lineWidth=2; ctx.beginPath();
+    hist.forEach((h,i)=>{const X=px(h.t),Y=py(h.xA); if(i===0)ctx.moveTo(X,Y); else ctx.lineTo(X,Y);});
+    ctx.stroke();
+    ctx.strokeStyle="#2E75B6"; ctx.beginPath();
+    hist.forEach((h,i)=>{const X=px(h.t),Y=py(h.xB); if(i===0)ctx.moveTo(X,Y); else ctx.lineTo(X,Y);});
+    ctx.stroke();
+  }
+}
+
+function setHeader(title,sub,showBack){
+  document.getElementById("headerTitle").textContent=title;
+  document.getElementById("headerSub").textContent=sub;
+  document.getElementById("backBtn").classList.toggle("hidden",!showBack);
+}
+function stopSim(){ if(sim.raf) cancelAnimationFrame(sim.raf); sim.raf=null; sim.running=false; sim.lastTs=null; }
+function abortChallengeIfLeaving(){
+  if(!session) return;
+  session=null;
+  alert("⚠️ Saliste del desafío. El intento se reinició y los ejercicios cambiarán al volver a jugar.");
+}
+function showTab(tab){
+  if(session) abortChallengeIfLeaving();
+  document.querySelectorAll(".tab").forEach(t=>t.classList.toggle("active",t.dataset.tab===tab));
+  document.getElementById("tabbar").classList.remove("hidden");
+  stopSim();
+  if(tab==="levels") renderLevelMap();
+  else if(tab==="instr") renderInstructions();
+  else { resetSimDefaults(); renderSimulator(); }
+}
+document.querySelectorAll(".tab").forEach(t=>{
+  t.addEventListener("click",()=>{ showTab(t.dataset.tab); });
+});
+document.getElementById("backBtn").onclick=()=>{
+  if(session){ session=null; renderLevelMap(); document.getElementById("tabbar").classList.remove("hidden"); }
+};
+
+if(progress.studentName){
+  studentName=progress.studentName;
+  document.getElementById("tabbar").classList.remove("hidden");
+  showTab("levels");
+} else {
+  renderSetup();
+}
+</script>
+<script>
+(function(){
+  var SAAS_API = localStorage.getItem('saas_api_base') || '';
+  async function saasCheckAccess(){
+    var gate = document.getElementById('licenseGate');
+    var st = document.getElementById('licenseStatus');
+    var code = localStorage.getItem('saas_classCode') || '';
+    if(!code){ if(st) st.innerHTML='<b style="color:#fca5a5">Sin código de clase.</b> Vuelve al catálogo.'; if(gate) gate.className='license-gate blocked'; return false; }
+    try{
+      var r = await fetch(SAAS_API + '/api/access/check?classCode=' + encodeURIComponent(code));
+      var data = await r.json();
+      if(!data.allowed){ if(st) st.innerHTML='<b style="color:#fca5a5">Acceso bloqueado.</b>'; if(gate) gate.className='license-gate blocked'; return false; }
+      if(st) st.innerHTML='<b style="color:#86efac">Licencia activa.</b> '+(data.teacherName||'');
+      if(gate) gate.className='license-gate ok';
+      try{ localStorage.setItem('saas_access_ok','1'); }catch(e){}
+      var ni=document.getElementById('studentNameInput');
+      if(ni && !ni.value && localStorage.getItem('saas_studentName')){ ni.value=localStorage.getItem('saas_studentName'); }
+      return true;
+    }catch(e){ if(st) st.innerHTML='<b style="color:#fca5a5">Sin servidor.</b> '+e.message; if(gate) gate.className='license-gate blocked'; return false; }
+  }
+  window.saasCheckAccess = saasCheckAccess;
+  function wrapFn(name){
+    var orig = window[name];
+    if(typeof orig !== 'function' || orig._saasWrapped) return;
+    var wrapped = async function(){
+      if(!(await saasCheckAccess())){ alert('Sin acceso. Usa el catálogo con el código de clase.'); return; }
+      return orig.apply(this, arguments);
+    };
+    wrapped._saasWrapped = true;
+    window[name] = wrapped;
+  }
+  function install(){
+    ['startRetoLevel','startLevel','startChallenge','beginLevel','startGame','startReto'].forEach(wrapFn);
+    saasCheckAccess();
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', install);
+  else setTimeout(install, 0);
+})();
+</script>
+</body>
+</html>

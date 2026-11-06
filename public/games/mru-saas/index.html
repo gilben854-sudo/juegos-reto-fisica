@@ -1,0 +1,1618 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="color-scheme" content="light only">
+<title>Misión MRU — Juego de niveles</title>
+<style>
+  html { color-scheme: light only; }
+  button, input, select, textarea {
+    -webkit-appearance: none;
+    appearance: none;
+    color-scheme: light only;
+  }
+  :root{
+    --navy:#1F4E79;
+    --blue:#2E75B6;
+    --lightblue:#DEEAF6;
+    --orange:#E8763B;
+    --green:#2E9E5B;
+    --red:#D64545;
+    --gray:#F2F2F2;
+    --text:#26313D;
+  }
+  *{box-sizing:border-box;}
+  html,body{
+    margin:0;padding:0;height:100%;
+    font-family:'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+    background:linear-gradient(180deg,#0F2A44,#1F4E79 40%,#2E75B6);
+    color:var(--text);
+    -webkit-tap-highlight-color:transparent;
+  }
+  #app{
+    max-width:480px;
+    margin:0 auto;
+    min-height:100vh;
+    background:#F7F9FC;
+    display:flex;
+    flex-direction:column;
+    box-shadow:0 0 40px rgba(0,0,0,0.35);
+  }
+  .teacher-bar{
+    background:#0F2A44;
+    color:#BFD3E6;
+    font-size:11px;
+    font-weight:600;
+    text-align:center;
+    padding:5px 8px;
+    letter-spacing:0.3px;
+  }
+  header{
+    background:var(--navy);
+    color:#fff;
+    padding:14px 16px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    position:sticky;
+    top:0;
+    z-index:5;
+  }
+  header h1{
+    font-size:17px;
+    margin:0;
+    font-weight:700;
+    letter-spacing:0.3px;
+  }
+  header .sub{
+    font-size:11px;
+    opacity:0.8;
+    margin-top:2px;
+  }
+  .icon-btn{
+    background:rgba(255,255,255,0.15);
+    border:none;
+    color:#fff;
+    width:34px;height:34px;
+    border-radius:50%;
+    font-size:16px;
+    display:flex;align-items:center;justify-content:center;
+    cursor:pointer;
+  }
+  .tabbar{
+    display:flex;
+    background:#fff;
+    border-bottom:1px solid #e2e6ea;
+    position:sticky;
+    top:58px;
+    z-index:4;
+  }
+  .tab{
+    flex:1;
+    text-align:center;
+    padding:11px 4px;
+    font-size:13px;
+    font-weight:600;
+    color:#7a8a99;
+    cursor:pointer;
+    border-bottom:3px solid transparent;
+  }
+  .tab.active{
+    color:var(--navy);
+    border-bottom:3px solid var(--orange);
+  }
+  main{
+    flex:1;
+    padding:16px;
+    padding-bottom:36px;
+  }
+  .hidden{display:none !important;}
+
+  /* Level map */
+  .level-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:12px;
+    margin-top:6px;
+  }
+  .level-card{
+    background:#fff;
+    border-radius:14px;
+    padding:14px 12px;
+    box-shadow:0 2px 8px rgba(31,78,121,0.12);
+    border:1px solid #e6ecf2;
+    position:relative;
+    min-height:118px;
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between;
+    cursor:pointer;
+  }
+  .level-card.locked{
+    opacity:0.55;
+    cursor:not-allowed;
+  }
+  .level-card .num{
+    width:28px;height:28px;
+    border-radius:50%;
+    background:var(--lightblue);
+    color:var(--navy);
+    font-weight:800;
+    font-size:13px;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .level-card .title{
+    font-size:13.5px;
+    font-weight:700;
+    color:var(--navy);
+    margin-top:8px;
+    line-height:1.25;
+  }
+  .level-card .stars{
+    font-size:14px;
+    color:#F5A623;
+    margin-top:6px;
+    letter-spacing:2px;
+  }
+  .level-card .lock-icon{
+    position:absolute;
+    top:10px;right:10px;
+    font-size:15px;
+    color:#9AA7B2;
+  }
+  .intro-box{
+    background:#fff;
+    border-left:4px solid var(--orange);
+    border-radius:8px;
+    padding:12px 14px;
+    font-size:13.5px;
+    line-height:1.5;
+    margin-bottom:14px;
+    color:#455364;
+  }
+  .reset-link{
+    text-align:center;
+    margin-top:22px;
+    font-size:12px;
+    color:#9AA7B2;
+    text-decoration:underline;
+    cursor:pointer;
+  }
+
+  /* Question screen */
+  .progress-dots{
+    display:flex;
+    gap:6px;
+    justify-content:center;
+    margin-bottom:16px;
+  }
+  .dot{
+    width:10px;height:10px;border-radius:50%;
+    background:#DCE3EA;
+  }
+  .dot.current{background:var(--orange);}
+  .dot.done-correct{background:var(--green);}
+  .dot.done-wrong{background:var(--red);}
+
+  .lives-bar{
+    display:flex;justify-content:space-between;align-items:center;
+    background:#fff;border:1px solid #e6ecf2;border-radius:12px;
+    padding:10px 14px;margin-bottom:12px;font-size:14px;font-weight:700;color:#26313D;
+  }
+  .lives-bar .hearts{letter-spacing:2px;font-size:18px;}
+  .score-pill{
+    display:inline-block;
+    background:var(--lightblue);
+    color:var(--navy);
+    font-size:12px;
+    font-weight:700;
+    padding:4px 10px;
+    border-radius:12px;
+    margin-bottom:10px;
+  }
+
+  .question-card{
+    background:#fff;
+    border-radius:14px;
+    padding:18px 16px;
+    box-shadow:0 2px 10px rgba(31,78,121,0.12);
+    border:1px solid #e6ecf2;
+  }
+  .question-tag{
+    font-size:11px;
+    font-weight:700;
+    color:var(--blue);
+    text-transform:uppercase;
+    letter-spacing:0.5px;
+    margin-bottom:6px;
+  }
+  .question-text{
+    font-size:15.5px;
+    line-height:1.55;
+    color:var(--text);
+    margin-bottom:14px;
+  }
+  .question-text b{color:var(--navy);}
+  canvas{
+    background:#fbfdff;
+    border:1px solid #e2e6ea;
+    border-radius:8px;
+    width:100%;
+    height:auto;
+    margin-bottom:12px;
+  }
+  .answer-row{
+    display:flex;
+    gap:8px;
+    align-items:center;
+  }
+  .answer-row input#answerInput{
+    flex:1;
+    font-size:20px;
+    padding:12px 12px;
+    border-radius:10px;
+    border:2px solid #dbe3ea;
+    text-align:center;
+    font-weight:700;
+    color:var(--navy);
+    min-width:0;
+  }
+  .answer-row input#answerInput:focus{
+    outline:none;
+    border-color:var(--blue);
+  }
+  .btn-sign{
+    flex:0 0 auto;
+    min-width:52px;
+    height:52px;
+    padding:0 12px;
+    border-radius:12px;
+    border:2px solid #0f766e;
+    background:#ccfbf1;
+    color:#0f766e;
+    font-size:26px;
+    font-weight:900;
+    cursor:pointer;
+    line-height:1;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+  .btn-sign:active{ background:#99f6e4; }
+  .btn-negative{
+    display:block;
+    width:100%;
+    margin:10px 0 6px;
+    padding:14px 12px;
+    border-radius:12px;
+    border:2px dashed #0f766e;
+    background:#f0fdfa;
+    color:#0f766e;
+    font-size:1rem;
+    font-weight:800;
+    cursor:pointer;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+  .btn-negative:active{ background:#ccfbf1; }
+  .btn-negative.is-neg{
+    border-style:solid;
+    background:#0f766e;
+    color:#ecfdf5;
+  }
+  #answerInput.is-neg{
+    border-color:#0f766e;
+    background:#f0fdfa;
+    color:#0f766e;
+  }
+  .unit-label{
+    font-size:13px;
+    font-weight:700;
+    color:#7a8a99;
+    min-width:44px;
+  }
+  .btn{
+    display:block;
+    width:100%;
+    border:none;
+    border-radius:12px;
+    padding:14px;
+    font-size:15px;
+    font-weight:700;
+    cursor:pointer;
+    margin-top:14px;
+    color:#fff;
+  }
+  .btn-primary{background:var(--orange);}
+  .btn-primary:active{background:#d0672e;}
+  .btn-secondary{background:var(--navy);}
+  .btn-outline{
+    background:#fff;
+    color:var(--navy);
+    border:2px solid var(--navy);
+  }
+  .feedback{
+    margin-top:14px;
+    padding:12px 14px;
+    border-radius:10px;
+    font-size:14px;
+    line-height:1.5;
+  }
+  .feedback.ok{background:#E7F6EC;color:#1E7A44;border:1px solid #bfe6cc;}
+  .feedback.bad{background:#FCEAEA;color:#B23A3A;border:1px solid #f3c6c6;}
+  .feedback .steps{
+    margin-top:8px;
+    font-size:13px;
+    color:#4a5a68;
+    background:rgba(255,255,255,0.6);
+    border-radius:8px;
+    padding:8px 10px;
+  }
+
+  /* Result screen */
+  .result-wrap{
+    text-align:center;
+    padding-top:10px;
+  }
+  .big-stars{
+    font-size:38px;
+    color:#F5A623;
+    letter-spacing:6px;
+    margin:14px 0 6px;
+  }
+  .result-title{
+    font-size:19px;
+    font-weight:800;
+    color:var(--navy);
+  }
+  .result-sub{
+    font-size:14px;
+    color:#7a8a99;
+    margin-top:4px;
+    margin-bottom:18px;
+  }
+
+  /* Simulator */
+  .sim-track-wrap{
+    background:#fff;
+    border-radius:14px;
+    padding:16px;
+    box-shadow:0 2px 10px rgba(31,78,121,0.12);
+    border:1px solid #e6ecf2;
+  }
+  .sim-track{
+    position:relative;
+    height:46px;
+    background:var(--gray);
+    border-radius:8px;
+    margin:14px 0 20px;
+    overflow:hidden;
+    border:1px solid #e2e6ea;
+  }
+  .sim-track .marker{
+    position:absolute;
+    top:0;bottom:0;
+    width:1px;
+    background:#d3dae1;
+  }
+  .sim-track .marker span{
+    position:absolute;
+    bottom:2px;
+    left:2px;
+    font-size:9px;
+    color:#9AA7B2;
+  }
+  .sim-car{
+    position:absolute;
+    top:8px;
+    width:30px;height:30px;
+    line-height:30px;
+    text-align:center;
+    font-size:18px;
+    transform:translateX(-15px);
+  }
+  .sim-readout{
+    display:flex;
+    justify-content:space-between;
+    background:var(--lightblue);
+    border-radius:10px;
+    padding:10px 12px;
+    margin-bottom:14px;
+    font-size:13px;
+    font-weight:700;
+    color:var(--navy);
+  }
+  .sim-controls label{
+    display:block;
+    font-size:12.5px;
+    font-weight:700;
+    color:#455364;
+    margin-top:12px;
+    margin-bottom:4px;
+  }
+  .sim-controls input[type=range]{width:100%;}
+  .sim-controls .valdisp{
+    float:right;
+    color:var(--navy);
+  }
+  .sim-btns{
+    display:flex;
+    gap:8px;
+    margin-top:16px;
+  }
+  .sim-btns .btn{margin-top:0;flex:1;}
+
+  html, body { -webkit-user-select: none; user-select: none; }
+  input, textarea, select { -webkit-user-select: text !important; user-select: text !important; }
+
+
+.license-gate{background:#0f172a;border:1px solid #334155;border-radius:14px;padding:14px;margin:10px 0}.license-gate.blocked{border-color:#7f1d1d;background:#450a0a}.license-gate.ok{border-color:#166534;background:#052e16}</style>
+</head>
+<body>
+<div id="licenseGate" class="license-gate"><div id="licenseStatus" class="muted">Comprobando acceso…</div></div>
+
+<div id="app">
+  <div class="teacher-bar">Producido por GILAST — U.E.P. "GILAST" · 3er año</div>
+  <header>
+    <div>
+      <h1 id="headerTitle">Misión MRU</h1>
+      <div class="sub" id="headerSub">Practica el Movimiento Rectilíneo Uniforme</div>
+    </div>
+    <button class="icon-btn hidden" id="backBtn">←</button>
+  </header>
+
+  <div class="tabbar" id="tabbar">
+    <div class="tab" data-tab="instr">📖 Instrucciones</div>
+    <div class="tab active" data-tab="levels">🎯 Niveles</div>
+    <div class="tab" data-tab="sim">🚗 Simulador</div>
+  </div>
+
+  <main id="main"></main>
+</div>
+
+<script>
+/* ===================== DATA / ESTADO ===================== */
+const STORAGE_KEY = "mru_game_progress_v2";
+const QUESTIONS_PER_LEVEL = 5;
+const PASS_RATIO = 0.6; // 60% para desbloquear el siguiente nivel
+
+const LEVELS = [
+  { id:0, title:"Velocidad básica", tag:"Nivel 1 · v = d / t", desc:"Calcula la velocidad conociendo la distancia y el tiempo." },
+  { id:1, title:"Distancia o tiempo", tag:"Nivel 2 · despeje", desc:"Despeja la distancia o el tiempo a partir de la velocidad." },
+  { id:2, title:"Ecuación del MRU", tag:"Nivel 3 · x = x₀ + v·t", desc:"Incluye posición inicial y dirección del movimiento (signo de v)." },
+  { id:3, title:"Conversión de unidades", tag:"Nivel 4 · km/h ↔ m/s", desc:"Resuelve problemas convirtiendo unidades de velocidad." },
+  { id:4, title:"Encuentro y alcance", tag:"Nivel 5 · reto final", desc:"Problemas de dos móviles: encuentro o alcance." },
+];
+
+const SCORES_KEY = "mru_levelScores_v2";
+const MAX_TOTAL_POINTS = 1500;
+const STUDENT_ROSTER = {
+  "A": [    {name: 'ARISTIZÁBAL HERRERA, SERGIO ISMAEL', code: 'FQ2-VKW-6BH'},
+    {name: 'BLANCO RODRÍGUEZ, ROIDELYS EUDEMAR', code: 'TMT-7DA-2FN'},
+    {name: 'BLANCO SEIJAS, MÍA VALENTINA DE PAULA', code: 'VZJ-LW2-TGG'},
+    {name: 'BOLÍVAR ALFONZO, EMILIANNYS DARIELA', code: 'VHB-DLX-FMZ'},
+    {name: 'CALZADILLA CARRILLO, CAMILA ALEJANDRA', code: 'UCB-MJW-HY7'},
+    {name: 'CARRERO MORA, VALERIA ALEJANDRA', code: 'MZX-H3U-PBR'},
+    {name: 'CEBALLOS ANCHETA, DANIELA ALEJANDRA', code: 'C3H-5AL-CZH'},
+    {name: 'CHACOA ECHEZURÍA, EMMARI VICTORIA', code: 'LSW-Z3E-MBH'},
+    {name: 'CHACÓN TOVAR, SAMUEL ERNESTO', code: 'SZ2-QC7-QND'},
+    {name: 'COLINA CARDOZO, JHOINNER DAVID', code: 'NPD-RQ8-XV5'},
+    {name: 'CORREA REYES, MARIELENA', code: 'M95-YZA-WXS'},
+    {name: 'CRESPO GUARAMATA, FERNANDO ABRAHAM', code: '3M6-RYC-E9P'},
+    {name: 'DA CRUZ MIJARES, SAMUEL DAVID', code: '5AS-LSX-GWX'},
+    {name: 'DA CRUZ MIJARES, SEBASTIÁN ALEJANDRO', code: 'HMY-8K6-S3A'},
+    {name: 'DUARTE ROJAS, KARIANYELIS BETANIA', code: 'FGG-PTB-YD2'},
+    {name: 'ESCALONA FARÍA, VICTORIA VALENTINA', code: 'Q3V-7DM-G6C'},
+    {name: 'FERNÁNDEZ ESCALONA, LEANDRO MIGUEL', code: '8JX-8MS-J7V'},
+    {name: 'GARCÍA MAVÁREZ, EDWIN JESÚS', code: 'RAX-57T-Q9L'},
+    {name: 'GEORGERIN LANDAETA, FREIKERLYN INÉS', code: 'E42-3ZC-UHU'},
+    {name: 'GONZÁLEZ SOSA, GABRIEL JOSÉ', code: 'B27-M5N-BT9'},
+    {name: 'HERRERA BLANCO, ABRAHÁN DE JESÚS', code: 'LVL-K68-2WR'},
+    {name: 'LEÓN PÉREZ, NICOLLE ELINNYS', code: 'RMF-J22-4MJ'},
+    {name: 'MEDINA ROJAS, KIMBERLY ANGÉLICA', code: 'PQ3-RYK-SDQ'},
+    {name: 'MENDOZA LIOTTA, SAMUEL ANDRÉS', code: 'KEC-BR4-KLV'},
+    {name: 'MORENO ROJAS, GUILLERMO HANIEL', code: 'Y6D-H3T-W9D'},
+    {name: 'MUÑOZ CABRILES, VALERIA ANTONELLA', code: 'DKP-DRF-4QE'},
+    {name: 'PADRÓN FERNÁNDEZ, JOHANNYS NAZARETH', code: 'NX8-76M-EGT'},
+    {name: 'POLO, ORIANYELIS', code: '9BJ-JR7-5E8'},
+    {name: 'PRADO, CÉSAR', code: 'YTN-68N-WBG'},
+    {name: 'RANGEL VILLASANA, ASHLEY ANTONELLA', code: 'YF5-B4L-R6K'},
+    {name: 'REYES DUQUE, ODLANYER ALBERTO', code: '2LR-8QP-EDW'},
+    {name: 'RIVERO ESPINOZA, FABIANA DANIELA', code: '6VK-7UG-DRC'},
+    {name: 'UCROS PÉREZ, ESTEBAN JOSUÉ', code: 'WJ3-S5X-6SC'},
+    {name: 'VILLANUEVA CARREÑO, IZABELLA AMELIE', code: 'KEW-9GA-SWH'},
+    {name: 'YÁNEZ GONZÁLEZ, DIEGO ARMANDO', code: 'RK8-VGQ-383'},
+  ],
+  "B": [
+    {name: 'ARANGUREN RONDÓN, MARÍA FERNANDA', code: '2WK-SAH-NSP'},
+    {name: 'ARTEAGA ÁLVAREZ, LEONELA DAYMARY', code: 'FZY-N8T-5RW'},
+    {name: 'AULAR ZAMBRANO, YOSUENI ALEXANDRA', code: 'FS7-DSC-UHM'},
+    {name: 'BARRIOS ACEVEDO, ANTONELLA MERCEDES', code: 'DNL-4DX-7JN'},
+    {name: 'BARRIOS SAVARESE, CARMEN LUISA DE JESÚS', code: 'KKD-GL2-68K'},
+    {name: 'CALOGERO GONZÁLEZ, YONATHAN JOSUÉ', code: 'CDL-93D-P2P'},
+    {name: 'CÓRDOVA MORALES, JOHANNY VALENTINA', code: '5NZ-R73-EHH'},
+    {name: 'DOMÍNGUEZ ESCOBAR, HELI JULIET', code: 'N6X-MHZ-JS2'},
+    {name: 'DÍAZ GÓMEZ, BRITHANY STEPHANIA', code: 'YUM-265-GRC'},
+    {name: 'DÍAZ RASQUIN, VICTORIA NAZARETH', code: 'ZN3-RSH-QGD'},
+    {name: 'GARAY GUERRERO, BIANCA VICTORIA', code: 'FM5-23F-9BU'},
+    {name: 'GARCÍA RAMOS, ANGELINA SOFÍA', code: 'HJ5-8FQ-X9C'},
+    {name: 'GUEVARA RAMÍREZ, DIEGO ALEJANDRO', code: 'TTA-TWN-QE9'},
+    {name: 'LISCANO TOVAR, GUILLERMO ANTONIO', code: '7VB-W2E-Q3Z'},
+    {name: 'LOZADA CONTRERAS, ASHLEY', code: 'QQQ-LQZ-P8R'},
+    {name: 'MALDONADO SEGOVIA, ENZO ISMAEL', code: 'WTR-T8U-4KM'},
+    {name: 'MONTENEGRO LÓPEZ, LUIS ÁNGEL', code: '4QC-74V-YBE'},
+    {name: 'NIEVES DELGADO, SAÚL DAVID', code: '9SQ-FUS-6H8'},
+    {name: 'OLIVAR HERNÁNDEZ, DYLAN EMMANUEL', code: 'MVF-V2Y-QR9'},
+    {name: 'PACHECO LA ROSA, ADRIÁN MISAEL', code: 'NAP-77U-2UU'},
+    {name: 'PALACIOS HENRÍQUEZ, WILESKA VALENTINA', code: 'D2S-3K9-MA4'},
+    {name: 'PORTABARRIA SAAVEDRA, SEBASTIÁN JOSUÉ', code: '5CR-YKT-NDM'},
+    {name: 'PRIETO PARADA, AARÓN JOSÉ', code: 'T4M-HAP-HGT'},
+    {name: 'PURROY LANDAETA, DAIRON JESÚS', code: 'DTQ-GYD-3YH'},
+    {name: 'QUEVEDO FLORES, SEBASTIÁN ALEJANDRO', code: 'CK7-QTR-QEV'},
+    {name: 'REQUENA PÉREZ, ARANTZA SOPHIA', code: '79U-7HA-VEA'},
+    {name: 'RONDÓN AQUINO, ESTEFANI EVAGELIN', code: 'ZGZ-EUV-56X'},
+    {name: 'SALAZAR HERNÁNDEZ, SOPHIE ANTHONELLA', code: 'VYZ-LVQ-XDP'},
+    {name: 'SAVARESE CASTRO, CHRISYERLI NAZARETH', code: 'DLM-PEB-267'},
+    {name: 'SILVEIRA ROJAS, LUISANA SOFÍA', code: 'KQT-BEX-FNU'},
+    {name: 'SÁNCHEZ ESCOBAR, ESMARLIS ZOYMAR', code: 'GX4-FL7-YJP'},
+    {name: 'VARGAS T. KEVIN A', code: 'RBK-A2Y-2WC'},
+    {name: 'VIELMA RODRÍGUEZ, VICTORIA NAZARETH', code: '33R-MAA-7N2'},
+    {name: 'DÍAZ, SEBASTIÁN', code: 'AUF-4Y2-PGV'},
+    {name: 'RIVAS, KATHERIN', code: 'UJ8-WZS-CPQ'},
+  ],
+  "C": [
+    {name: 'AGUILAR RÍOS, ILDEAMAR ANDREA', code: '22P-Z69-62V'},
+    {name: 'ALVARADO MORENO, MARION ALEJANDRO', code: 'VNZ-Y8A-7BE'},
+    {name: 'BORGES MONTOYA, MILCA NOEMÍ', code: '5CD-Q5S-N29'},
+    {name: 'CAMPO, ALEXA', code: 'P9B-XW4-TUE'},
+    {name: 'CAPOTE HERRERA, CRISBEL DIOXENY', code: 'VME-XNQ-84V'},
+    {name: 'CARRANZA MEJÍAS, YERMAIN ORLEANYE', code: '9C8-VJC-W8H'},
+    {name: 'CARRIÓN RAMÍREZ, SOFÍA VALENTINA', code: '5GK-6LV-LQS'},
+    {name: 'CASTELLANOS CARRERA, ISABELA SHALOM', code: 'Q86-ZK5-H7R'},
+    {name: 'CASTRO GUÍA, HEYNER ALEJANDRO', code: 'JY9-4FV-2CS'},
+    {name: 'CHINCHILLA PEÑA, NAZARETH DE LOS ÁNGELES', code: 'EXT-676-D5A'},
+    {name: 'CLAVIJO HERRERA, EILYN VALENTINA', code: 'ZHZ-7F4-Q5G'},
+    {name: 'CUETO DELFÍN, MARIANA ESTHEFANÍA', code: 'W9Z-V8R-RKV'},
+    {name: 'ESPINOZA RANGEL, MYA ANTHONELA', code: 'EZZ-48U-GBJ'},
+    {name: 'FAJARDO PIAR, VICTORIA ISABELLA', code: '8RA-UXQ-GV3'},
+    {name: 'FLORES CASTRO, PEDRO', code: 'KBU-S7T-4TY'},
+    {name: 'GARCÍA GUZMÁN, EDWARD', code: 'N7F-LKQ-7J6'},
+    {name: 'GARCÍA HERRERA, DAILIMAR NAZARETH', code: '9ZN-ETV-AA8'},
+    {name: 'GARCÍA PIRE, GABRIELA ISABEL', code: 'A4N-3JX-NVV'},
+    {name: 'GONZÁLEZ MUJICA, YOSNEIDYS JULIET', code: 'BSW-APG-AAF'},
+    {name: 'GONZÁLEZ PANACUAL, VICTORIA ALEXANDRA', code: 'YS5-JGW-5VZ'},
+    {name: 'GÓMEZ INOJOSA, ISABELLA SOPHIA', code: 'BWM-ZRK-7GK'},
+    {name: 'HERNÁNDEZ JARAMILLO, JESÚS DE NAZARETH', code: 'EDJ-Z2V-CA4'},
+    {name: 'KEY ALZURU, BRYANNA JULIETH', code: 'HV7-2KK-NPS'},
+    {name: 'LANDER B. REYZMARYS', code: 'RBX-HJJ-LS2'},
+    {name: 'LIBENKO BALLESTERO, CAMILA VALENTINA', code: 'FMV-SFL-WJX'},
+    {name: 'PARRA TOVAR, ORIANNA COROMOTO', code: 'VN6-9P6-B3G'},
+    {name: 'RIVERA, LUZARIANNY', code: 'Z5Y-BCH-86P'},
+    {name: 'SÁNCHEZ GONZÁLEZ, KARLIMAR GABRIELA', code: 'LHG-T9B-WSJ'},
+    {name: 'URBAEZ DI BENIGNO, SOPHIA ANTHONELLA', code: '2VX-KC9-DVB'},
+    {name: 'YÁNEZ PEÑALOZA, GIOFREYDER GABRIEL ALEX', code: 'VJP-GJL-XP4'},
+    {name: 'ÁLVAREZ JIMÉNEZ, MARÍA FERNANDA', code: 'PCA-N39-76P'},
+  ],
+  "D": [    {name: 'ARAFAH, SHARAZAD', code: 'KNL-PGX-6CY'},
+    {name: 'HERNÁNDEZ MIRABA, ABRIL SOPHIA', code: 'MGM-9DX-BJ6'},
+    {name: 'IDROGO, SARAY', code: '2X4-3WR-BSH'},
+    {name: 'IRIARTE PÉREZ, HUMBERTO', code: 'G35-3UQ-JV3'},
+    {name: 'JIMÉNEZ RAMÍREZ, GABRIHELA NAZARETH', code: '6D9-7GD-NDL'},
+    {name: 'LAFFE MARTÍNEZ, GÉNESIS FRENYERLIN', code: 'YHF-7PC-NMB'},
+    {name: 'LAFFE, VALERIA', code: 'FD4-7CC-QD5'},
+    {name: 'LANDAETA MARCANO, MAXIMILIANO MIGUEL JO', code: 'R47-3B2-VZV'},
+    {name: 'LINARES ALMEIDA, CRISOL MADELEINE', code: '38Z-VF2-V55'},
+    {name: 'MANCERA GUZMÁN, ROSNERY DANIELA', code: 'STP-5WP-888'},
+    {name: 'MARTÍNEZ BUSTAMANTE, GILMARY ALEJANDRA', code: 'J76-FG3-H85'},
+    {name: 'MARTÍNEZ FRANCO, CRISTHIAN', code: 'NSM-QVF-NXW'},
+    {name: 'MEDINA HERNÁNDEZ, BRAHYNER SANTIAGO', code: 'G7Q-RT2-ZXN'},
+    {name: 'MORENO RINCONES, VIRGINIA ANABEL', code: 'APV-QSL-NAS'},
+    {name: 'MOTA CORTEZ, EMELY ALEJANDRA', code: 'YCW-9E5-57V'},
+    {name: 'OROZCO GRATEROL, DASHA ELIENAI', code: 'DBR-D4G-NK2'},
+    {name: 'OROZCO MARQUINA, SNAIDER LIONEL', code: 'A4B-ANU-Z3U'},
+    {name: 'OSUNA RONDÓN, SEBASTIÁN ALEJANDRO', code: 'RAA-5LG-ZR5'},
+    {name: 'PACHECO PEÑA, MARIANGEL', code: '754-9UB-VC4'},
+    {name: 'PEREIRA, VIVIANA', code: 'Z8C-F6H-SEL'},
+    {name: 'PEÑA RASQUIN, ANDRÉS SEBASTIÁN', code: '5QP-8LD-74H'},
+    {name: 'PÉREZ POZO, MELANNY DE LOS ÁNGELES', code: '2TR-BEA-6BD'},
+    {name: 'QUINTANA, CAMILA', code: '7R8-KR8-URP'},
+    {name: 'RAMOS VÁSQUEZ, DORIANNYS EVERLEINS', code: 'EWL-HAE-AX3'},
+    {name: 'RAMÍREZ TOVAR, LISVANY KATERINE', code: 'R3Z-YQJ-Y7D'},
+    {name: 'REINOZA GIL, ABNER ALEJANDRO', code: '8V9-DR7-ZY8'},
+    {name: 'RIVERA MARTÍNEZ, ANZZAC YAHIR', code: 'RBF-JEU-46X'},
+    {name: 'RODRÍGUEZ HERNÁNDEZ, SOFÍA NAZARETH', code: 'UC5-CNK-XAW'},
+    {name: 'ROJAS AYALA, ASHLY NAIRIM', code: '4N5-X27-37B'},
+    {name: 'ROMERO GUEVARA, KEIVER SAMUEL', code: 'G35-FQ9-LQR'},
+    {name: 'SALCEDO CASTRO, JEREMÍAS DENNIER', code: '432-KGL-KRB'},
+  ],
+};
+
+let studentCode = '';
+
+function onSectionChange() {
+  const sec = document.getElementById('studentSectionInput').value;
+  const sel = document.getElementById('studentNameSelect');
+  if (!sel) return;
+  sel.innerHTML = '';
+  if (!sec || !STUDENT_ROSTER[sec]) {
+    sel.disabled = true;
+    const opt = document.createElement('option');
+    opt.value = '';
+    opt.textContent = '— Primero elige la sección —';
+    sel.appendChild(opt);
+    return;
+  }
+  sel.disabled = false;
+  const opt0 = document.createElement('option');
+  opt0.value = '';
+  opt0.textContent = '— Elige tu nombre —';
+  sel.appendChild(opt0);
+  STUDENT_ROSTER[sec].forEach(function(st, idx) {
+    const opt = document.createElement('option');
+    opt.value = String(idx);
+    opt.textContent = st.name;
+    sel.appendChild(opt);
+  });
+}
+
+function getSelectedStudent() {
+  const sec = document.getElementById('studentSectionInput').value;
+  const sel = document.getElementById('studentNameSelect');
+  if (!sec || !sel || sel.value === '') return null;
+  const list = STUDENT_ROSTER[sec];
+  if (!list) return null;
+  const idx = parseInt(sel.value, 10);
+  if (isNaN(idx) || idx < 0 || idx >= list.length) return null;
+  return { section: sec, name: list[idx].name, code: list[idx].code };
+}
+
+let studentName = 'Estudiante';
+let studentSection = 'A';
+let lastBadge = '';
+let lastScore = 0;
+let finalGrade20 = 0;
+let totalPointsAllLevels = 0;
+let levelScores = { 0:0, 1:0, 2:0, 3:0, 4:0 };
+
+function loadLevelScores(){
+  try{
+    const s = localStorage.getItem(SCORES_KEY);
+    if(s) levelScores = { 0:0, 1:0, 2:0, 3:0, 4:0, ...JSON.parse(s) };
+  }catch(e){}
+}
+function saveLevelScores(){
+  try{ localStorage.setItem(SCORES_KEY, JSON.stringify(levelScores)); return true; }
+  catch(e){ console.warn('No se pudieron guardar puntajes', e); return false; }
+}
+function computeGrade20(){
+  totalPointsAllLevels = [0,1,2,3,4].reduce((s,L)=> s + (levelScores[L]||0), 0);
+  let g = Math.round((totalPointsAllLevels / MAX_TOTAL_POINTS) * 20);
+  if(g < 1) g = 1; if(g > 20) g = 20;
+  finalGrade20 = g; return g;
+}
+loadLevelScores();
+
+function loadProgress(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(raw) return JSON.parse(raw);
+  }catch(e){}
+  return { unlocked:0, stars:{}, studentName:'', studentSection:'A' };
+}
+function saveProgress(p){
+  try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(p)); return true; }
+  catch(e){ console.warn('No se pudo guardar progreso', e); return false; }
+}
+let progress = loadProgress();
+
+/* ===================== UTILIDADES ===================== */
+function randInt(min,max){ return Math.floor(Math.random()*(max-min+1))+min; }
+function choice(arr){ return arr[randInt(0,arr.length-1)]; }
+function fmt(n){
+  const r = Math.round(n*100)/100;
+  return (Number.isInteger(r)) ? r.toString() : r.toFixed(2).replace(/0+$/,"").replace(/\.$/,"");
+}
+function closeEnough(a,b,tol){ return Math.abs(a-b) <= tol; }
+
+/* ===================== GENERADORES DE PROBLEMAS ===================== */
+function genLevel0(){
+  // v = d/t, numeros amigables
+  const t = choice([2,3,4,5,6,8,10]);
+  const vTarget = choice([2,3,4,5,6,8,10,12]);
+  const d = t*vTarget;
+  return {
+    tag:"¿Cuál es la velocidad?",
+    text:`Un ciclista recorre <b>${d} m</b> en línea recta en <b>${t} s</b>, siempre a la misma rapidez. ¿Cuál es su velocidad?`,
+    unit:"m/s",
+    answer: vTarget,
+    tol: 0.05,
+    steps:`v = d / t = ${d} m / ${t} s = ${fmt(vTarget)} m/s`
+  };
+}
+
+function genLevel1(){
+  const findWhat = choice(["d","t"]);
+  const v = choice([2,3,4,5,6,8,10,12]);
+  const t = choice([2,3,4,5,6,7,8]);
+  const d = v*t;
+  if(findWhat === "d"){
+    return {
+      tag:"¿Qué distancia recorre?",
+      text:`Un auto se mueve con MRU a <b>${v} m/s</b> durante <b>${t} s</b>. ¿Qué distancia recorre?`,
+      unit:"m",
+      answer:d, tol:0.05,
+      steps:`d = v · t = ${v} m/s × ${t} s = ${fmt(d)} m`
+    };
+  } else {
+    return {
+      tag:"¿Cuánto tiempo tarda?",
+      text:`Un auto viaja con MRU a <b>${v} m/s</b> y recorre <b>${d} m</b>. ¿Cuánto tiempo tarda?`,
+      unit:"s",
+      answer:t, tol:0.05,
+      steps:`t = d / v = ${d} m / ${v} m/s = ${fmt(t)} s`
+    };
+  }
+}
+
+function genLevel2(){
+  const x0 = choice([-10,-5,0,0,5,10,15]);
+  const v = choice([-6,-4,-3,2,3,4,5,6,7]);
+  const t = choice([2,3,4,5,6]);
+  const x = x0 + v*t;
+  const dirTxt = v>=0 ? "hacia la derecha (dirección positiva)" : "hacia la izquierda (dirección negativa)";
+  return {
+    tag:"Ecuación del MRU",
+    text:`Un móvil parte de la posición <b>x₀ = ${x0} m</b> y se mueve con velocidad constante <b>v = ${v} m/s</b> (${dirTxt}). ¿En qué posición se encuentra luego de <b>${t} s</b>?`,
+    unit:"m",
+    answer:x, tol:0.05,
+    steps:`x = x₀ + v·t = ${x0} + (${v})(${t}) = ${fmt(x)} m`
+  };
+}
+
+function genLevel3(){
+  const kmh_options = [18,36,54,72,90,108];
+  const kmh = choice(kmh_options);
+  const ms = kmh/3.6;
+  const t = choice([5,10,15,20,25,30]);
+  const findWhat = choice(["d","kmh_to_ms"]);
+  if(findWhat === "d"){
+    const d = ms*t;
+    return {
+      tag:"Convierte y calcula",
+      text:`Un vehículo se mueve a <b>${kmh} km/h</b> con velocidad constante. ¿Qué distancia recorre en <b>${t} s</b>? (Recuerda convertir a m/s dividiendo entre 3,6)`,
+      unit:"m",
+      answer:d, tol: Math.max(0.5, d*0.01),
+      steps:`v = ${kmh} km/h ÷ 3,6 = ${fmt(ms)} m/s\nd = v · t = ${fmt(ms)} × ${t} = ${fmt(d)} m`
+    };
+  } else {
+    return {
+      tag:"Convierte unidades",
+      text:`Expresa <b>${kmh} km/h</b> en metros por segundo (m/s).`,
+      unit:"m/s",
+      answer:ms, tol:0.1,
+      steps:`v = ${kmh} ÷ 3,6 = ${fmt(ms)} m/s`
+    };
+  }
+}
+
+function genLevel4(){
+  const type = choice(["encuentro","alcance"]);
+  if(type === "encuentro"){
+    const v1 = choice([20,25,30,35,40,45]);
+    const v2 = choice([15,20,25,30,35]);
+    const t = choice([2,3,4,5,6]);
+    const D = (v1+v2)*t;
+    return {
+      tag:"Encuentro de dos móviles",
+      text:`Dos pueblos, A y B, están separados por <b>${D} km</b>. Desde A sale un auto hacia B a <b>${v1} km/h</b>, y al mismo tiempo, desde B sale otro auto hacia A a <b>${v2} km/h</b>. Ambos mantienen velocidad constante. ¿Después de cuántas horas se encuentran?`,
+      unit:"h",
+      answer:t, tol:0.05,
+      steps:`Se acercan a una rapidez combinada de v1+v2 = ${v1+v2} km/h.\nt = D / (v1+v2) = ${D} / ${v1+v2} = ${fmt(t)} h`
+    };
+  } else {
+    const v1 = choice([20,25,30]); // el que va adelante, más lento
+    let v2 = choice([40,45,50,55,60]); // el que persigue, más rápido
+    const t = choice([2,3,4,5,6]);
+    const D = (v2-v1)*t;
+    return {
+      tag:"Alcance de dos móviles",
+      text:`Un camión va por una carretera recta a <b>${v1} km/h</b>. Cuando lleva <b>${D} km</b> de ventaja, un auto sale a perseguirlo desde el mismo punto de partida del camión, a <b>${v2} km/h</b> constantes. ¿Cuánto tiempo tarda el auto en alcanzar al camión?`,
+      unit:"h",
+      answer:t, tol:0.05,
+      steps:`Diferencia de rapidez v2−v1 = ${v2-v1} km/h.\nt = D / (v2−v1) = ${D} / ${v2-v1} = ${fmt(t)} h`
+    };
+  }
+}
+
+const GENERATORS = [genLevel0, genLevel1, genLevel2, genLevel3, genLevel4];
+
+/* ===================== ESTADO DE JUEGO ===================== */
+let session = null; // {levelId, qIndex, results:[], currentProblem}
+
+function startLevel(levelId){
+  session = { levelId, qIndex:0, results:[], currentProblem:null, lives:3 };
+  nextQuestion();
+  renderQuestion();
+}
+function nextQuestion(){
+  session.currentProblem = GENERATORS[session.levelId]();
+}
+
+/* ===================== RENDER: NIVELES (MAPA) ===================== */
+/* ===================== RENDER: INSTRUCCIONES ===================== */
+function renderInstructions(){
+  setHeader("Misión MRU","Instrucciones de uso", false);
+  const main = document.getElementById("main");
+  main.innerHTML = `
+    <div class="intro-box">📖 <b>¿Cómo jugar?</b> Aquí encuentras todo lo que necesitas para usar Misión MRU.</div>
+
+    <div class="question-card" style="margin-bottom:14px;">
+      <div class="question-tag">🎯 Pestaña Niveles</div>
+      <div class="question-text" style="margin-bottom:0;">
+        1. Si durante un nivel sales al Simulador o a Instrucciones, el intento se reinicia y los ejercicios cambian. Toca un nivel disponible en el mapa (los bloqueados muestran un candado 🔒).<br>
+        2. Responde los ejercicios del nivel; cada uno se genera con números distintos. Tienes <b>3 vidas</b> ❤️: cada error resta una vida.<br>
+        3. Necesitas al menos ${Math.ceil(QUESTIONS_PER_LEVEL*PASS_RATIO)} de ${QUESTIONS_PER_LEVEL} correctas para desbloquear el siguiente nivel y ganar estrellas.<br>
+        4. Al completar los 5 niveles, se desbloquea tu certificado de logro. El progreso se guarda en este mismo navegador y dispositivo (abre el archivo descargado, no la vista previa de Drive).
+      </div>
+    </div>
+
+    <div class="question-card" style="margin-bottom:14px;">
+      <div class="question-tag">🚗 Pestaña Simulador</div>
+      <div class="question-text" style="margin-bottom:0;">
+        1. Ajusta la posición inicial y la velocidad con los controles deslizantes.<br>
+        2. Presiona "▶ Iniciar" para ver el auto moverse en línea recta según esos valores.<br>
+        3. Observa cómo se dibuja la gráfica posición-tiempo (x vs t) en tiempo real.<br>
+        4. Usa "Reiniciar" para volver a empezar con otros valores.
+      </div>
+    </div>
+
+    <div class="question-card" style="margin-bottom:14px;">
+      <div class="question-tag">🏆 Certificado y aviso al profesor</div>
+      <div class="question-text" style="margin-bottom:0;">
+        Al completar los 5 niveles sin quedarte por debajo del mínimo en ninguno, aparecerán dos botones: "Descargar mi logro" (guarda tu certificado como imagen) y "Avisar a mi profesor" (genera una imagen del resultado para compartir o enviar por correo).
+      </div>
+    </div>
+
+    <div class="question-card" style="text-align:center;">
+      <div class="question-tag">📲 Descarga este juego</div>
+      <p style="font-size:13.5px; color:#455364; margin-bottom:12px;">Escanea el código con la cámara de tu teléfono para descargar el archivo y jugar sin conexión.<br><b>Importante:</b> el enlace debe descargar el archivo directamente. Si en cambio se abre una vista previa dentro de Drive, el juego no funcionará (los botones no responden); en ese caso, busca la opción "Descargar" (ícono ⬇ o menú ⋮) y luego abre el archivo ya descargado.</p>
+      <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https%3A%2F%2Fdrive.google.com%2Fuc%3Fexport%3Ddownload%26id%3D1k5-4Xxalq2rs67KVoc2_cBSPlCN8xNoS"
+           alt="Código QR para descargar el juego Misión MRU"
+           width="200" height="200"
+           style="background:#fff; padding:8px; border-radius:10px; border:2px solid var(--orange);">
+      <p style="font-size:12.5px; color:#7a8a99; margin-top:10px;">O accede directamente: <a href="https://drive.google.com/uc?export=download&id=1k5-4Xxalq2rs67KVoc2_cBSPlCN8xNoS" target="_blank" style="color:var(--blue); font-weight:700;">enlace de Google Drive</a></p>
+    </div>
+  `;
+}
+
+/* ===================== RENDER: MAPA DE NIVELES ===================== */
+function renderLevelMap(){
+  setHeader("Misión MRU","Practica el Movimiento Rectilíneo Uniforme", false);
+  const main = document.getElementById("main");
+  let html = `<div class="intro-box">🚗 Resuelve los ejercicios de cada nivel para avanzar. Necesitas al menos ${Math.ceil(QUESTIONS_PER_LEVEL*PASS_RATIO)} de ${QUESTIONS_PER_LEVEL} correctas para desbloquear el siguiente. El certificado (nota 1-20) se desbloquea al completar los 5 niveles.</div>`;
+  html += `<div class="level-grid">`;
+  LEVELS.forEach((lv,i)=>{
+    const unlocked = i <= progress.unlocked;
+    const stars = progress.stars[i] || 0;
+    html += `<div class="level-card ${unlocked?'':'locked'}" data-level="${i}">
+      ${unlocked?'':'<div class="lock-icon">🔒</div>'}
+      <div>
+        <div class="num">${i+1}</div>
+        <div class="title">${lv.title}</div>
+      </div>
+      <div class="stars">${unlocked ? ('★'.repeat(stars)+'☆'.repeat(3-stars)) : '&nbsp;'}</div>
+    </div>`;
+  });
+  html += `</div>`;
+  html += `<div class="reset-link" id="resetLink">Reiniciar progreso</div>`;
+  main.innerHTML = html;
+
+  main.querySelectorAll(".level-card").forEach(card=>{
+    card.addEventListener("click", ()=>{
+      const i = parseInt(card.dataset.level);
+      if(i <= progress.unlocked){
+        startLevel(i);
+      }
+    });
+  });
+  document.getElementById("resetLink").addEventListener("click", ()=>{
+    if(confirm("¿Reiniciar todo el progreso del juego?")){
+      progress = { unlocked:0, stars:{} };
+      saveProgress(progress);
+      renderLevelMap();
+    }
+  });
+}
+
+/* ===================== RENDER: PREGUNTA ===================== */
+function renderQuestion(){
+  const lv = LEVELS[session.levelId];
+  setHeader(lv.title, lv.tag, true);
+  const main = document.getElementById("main");
+
+  let dots = "";
+  for(let i=0;i<QUESTIONS_PER_LEVEL;i++){
+    let cls = "dot";
+    if(i < session.qIndex) cls += session.results[i] ? " done-correct" : " done-wrong";
+    else if(i === session.qIndex) cls += " current";
+    dots += `<div class="${cls}"></div>`;
+  }
+
+  const p = session.currentProblem;
+
+  const hearts = '❤️'.repeat(Math.max(session.lives, 0)) || '💀';
+  main.innerHTML = `
+    <div class="lives-bar">
+      <span>Pregunta <b>${session.qIndex+1}</b> / ${QUESTIONS_PER_LEVEL}</span>
+      <span class="hearts" id="livesDisplay">${hearts}</span>
+      <span>❤️ Vidas: <b>${session.lives}</b></span>
+    </div>
+    <div class="progress-dots">${dots}</div>
+    <div class="question-card">
+      <div class="question-tag">${p.tag}</div>
+      <div class="question-text">${p.text}</div>
+      <div class="answer-row">
+        <button type="button" class="btn-sign" id="signBtn" title="Negativo" aria-label="Signo negativo">−</button>
+        <input type="text" inputmode="decimal" id="answerInput" placeholder="Solo números" autocomplete="off" enterkeyhint="done">
+        <div class="unit-label">${p.unit}</div>
+      </div>
+      <button type="button" class="btn-negative" id="negBtn">Tocar aquí si el resultado es NEGATIVO (−)</button>
+      <p style="font-size:0.78rem;color:#64748b;margin:4px 0 8px;text-align:center;">En iPhone el teclado no tiene el signo menos: usa el botón <b>−</b> o el de abajo.</p>
+      <button class="btn btn-primary" id="checkBtn">Verificar respuesta</button>
+      <div id="feedbackArea"></div>
+    </div>
+  `;
+
+  document.getElementById("checkBtn").addEventListener("click", checkAnswer);
+  const ansInput = document.getElementById("answerInput");
+  const signBtn = document.getElementById("signBtn");
+  const negBtn = document.getElementById("negBtn");
+
+  function syncNegUI(){
+    const v = (ansInput.value || "").trim();
+    const isNeg = v.startsWith("-") || v.startsWith("−");
+    ansInput.classList.toggle("is-neg", isNeg);
+    if (negBtn) {
+      negBtn.classList.toggle("is-neg", isNeg);
+      negBtn.textContent = isNeg
+        ? "Resultado NEGATIVO activado (tocar para quitar)"
+        : "Tocar aquí si el resultado es NEGATIVO (−)";
+    }
+  }
+  function toggleNegative(){
+    let v = (ansInput.value || "").trim().replace(/−/g, "-").replace(",", ".");
+    if (!v || v === "-") {
+      ansInput.value = "-";
+    } else if (v.startsWith("-")) {
+      ansInput.value = v.slice(1);
+    } else {
+      ansInput.value = "-" + v.replace(/^\+/, "");
+    }
+    syncNegUI();
+    // No forzar focus en iPhone para no ocultar los botones con el teclado
+  }
+  if (signBtn) signBtn.addEventListener("click", function(e){ e.preventDefault(); toggleNegative(); });
+  if (negBtn) negBtn.addEventListener("click", function(e){ e.preventDefault(); toggleNegative(); });
+  ansInput.addEventListener("keydown", (e)=>{
+    if(e.key === "Enter") checkAnswer();
+  });
+  ansInput.addEventListener("input", ()=>{
+    let v = ansInput.value;
+    v = v.replace(/−/g, "-");
+    v = v.replace(/[^0-9.,\-]/g, "");
+    v = v.replace(/(?!^)-/g, "");
+    ansInput.value = v;
+    syncNegUI();
+  });
+  syncNegUI();
+}
+
+function checkAnswer(){
+  const input = document.getElementById("answerInput");
+  const raw = (input.value || "").trim().replace(/−/g, "-").replace(",", ".");
+  const val = parseFloat(raw);
+  const p = session.currentProblem;
+  const area = document.getElementById("feedbackArea");
+  if(raw === "" || raw === "-" || isNaN(val)){
+    area.innerHTML = `<div class="feedback bad">Escribe un número antes de verificar. Si es negativo, usa el botón ±.</div>`;
+    return;
+  }
+  const correct = closeEnough(val, p.answer, p.tol);
+  session.results[session.qIndex] = correct;
+
+  if (!correct) {
+    session.lives = Math.max(0, (session.lives || 0) - 1);
+  }
+  const heartsNow = '❤️'.repeat(Math.max(session.lives, 0)) || '💀';
+  const livesEl = document.getElementById('livesDisplay');
+  if (livesEl) livesEl.textContent = heartsNow;
+
+  const noLives = session.lives <= 0;
+  const lastQ = session.qIndex >= QUESTIONS_PER_LEVEL - 1;
+  let nextLabel = 'Siguiente pregunta';
+  if (noLives) nextLabel = 'Ver resultados';
+  else if (lastQ) nextLabel = 'Ver resultados';
+
+  area.innerHTML = `<div class="feedback ${correct?'ok':'bad'}">
+      ${correct ? "✅ ¡Correcto!" : `❌ No es correcto. La respuesta era ${fmt(p.answer)} ${p.unit}.`}
+      ${!correct ? `<div style="margin-top:6px;font-weight:700;">Vidas restantes: ${heartsNow} (${session.lives})</div>` : ''}
+      <div class="steps">${p.steps.replace(/\n/g,"<br>")}</div>
+    </div>
+    <button class="btn btn-secondary" id="nextBtn">${nextLabel}</button>`;
+
+  document.getElementById("checkBtn").remove();
+  input.disabled = true;
+
+  document.getElementById("nextBtn").addEventListener("click", ()=>{
+    if (session.lives <= 0) {
+      finishLevel();
+      return;
+    }
+    session.qIndex++;
+    if(session.qIndex >= QUESTIONS_PER_LEVEL){
+      finishLevel();
+    } else {
+      nextQuestion();
+      renderQuestion();
+    }
+  });
+}
+
+function finishLevel(){
+  // Rellenar preguntas no respondidas (por pérdida de vidas) como incorrectas
+  for (let i = 0; i < QUESTIONS_PER_LEVEL; i++) {
+    if (session.results[i] === undefined) session.results[i] = false;
+  }
+  const correctCount = session.results.filter(Boolean).length;
+  const ratio = correctCount / QUESTIONS_PER_LEVEL;
+  let stars = 0;
+  if(ratio >= 0.99) stars = 3;
+  else if(ratio >= 0.8) stars = 2;
+  else if(ratio >= PASS_RATIO) stars = 1;
+
+  const passed = ratio >= PASS_RATIO;
+  // puntos: 20 * (nivel+1) por acierto
+  const pts = correctCount * 20 * (session.levelId + 1);
+  session.levelPoints = pts;
+  lastScore = pts;
+
+  if(passed){
+    progress.stars[session.levelId] = Math.max(progress.stars[session.levelId]||0, stars);
+    levelScores[session.levelId] = Math.max(levelScores[session.levelId]||0, pts);
+    saveLevelScores();
+    computeGrade20();
+    if(session.levelId === progress.unlocked && progress.unlocked < LEVELS.length-1){
+      progress.unlocked++;
+    }
+    if(session.levelId === LEVELS.length-1) progress.completedAllLevels = true;
+    saveProgress(progress);
+  }
+
+  if(stars >= 3) lastBadge = '🏆 Excelente';
+  else if(stars >= 2) lastBadge = '🥈 Muy bien';
+  else if(passed) lastBadge = '🥉 Nivel superado';
+  else lastBadge = '🔄 Sigue practicando';
+
+  renderResult(correctCount, stars, passed);
+}
+
+function renderResult(correctCount, stars, passed){
+  const lv = LEVELS[session.levelId];
+  setHeader(lv.title, "Resultados", true);
+  const main = document.getElementById("main");
+  main.innerHTML = `
+    <div class="result-wrap">
+      <div class="big-stars">${'★'.repeat(stars)}${'☆'.repeat(3-stars)}</div>
+      <div class="result-title">${passed ? "¡Nivel superado!" : "Casi lo logras"}</div>
+      <div class="result-sub">${studentName} · 3ero ${studentSection}<br>Correctas: ${correctCount}/${QUESTIONS_PER_LEVEL} · Puntos: ${session.levelPoints||0}</div>
+      ${!passed ? `<div class="intro-box">Necesitas al menos ${Math.ceil(QUESTIONS_PER_LEVEL*PASS_RATIO)} correctas para desbloquear el siguiente nivel. ¡Inténtalo de nuevo!</div>` : ``}
+      <button class="btn btn-primary" id="retryBtn">Repetir este nivel</button>
+      ${(passed && session.levelId < LEVELS.length-1) ? `<button class="btn btn-secondary" id="nextLevelBtn">Siguiente nivel ➜</button>` : ``}
+      ${(passed && session.levelId === LEVELS.length-1) ? `
+        <button class="btn btn-primary" id="dlCert" style="background:#2E9E5B;">📥 Descargar mi logro</button>
+        <button class="btn btn-secondary" id="notifyT">📧 Avisar a mi profesor</button>
+        <p style="font-size:12px;color:#7a8a99;margin-top:8px;">Puntos totales: ${totalPointsAllLevels} · Nota: ${finalGrade20}/20<br>Se genera una imagen del resultado para compartir o enviar por correo al profesor.</p>
+      ` : `<p style="font-size:12px;color:#9AA7B2;margin-top:10px;">🔒 El certificado se desbloquea al completar los 5 niveles.</p>`}
+      <button class="btn btn-outline" id="menuBtn">Volver al mapa de niveles</button>
+    </div>
+  `;
+  document.getElementById("retryBtn").addEventListener("click", ()=> startLevel(session.levelId));
+  document.getElementById("menuBtn").addEventListener("click", ()=>{ session=null; showTab("levels"); });
+  const nb = document.getElementById("nextLevelBtn");
+  if(nb) nb.addEventListener("click", ()=> startLevel(session.levelId+1));
+  const dl = document.getElementById("dlCert");
+  if(dl) dl.addEventListener("click", downloadAchievement);
+  const nt = document.getElementById("notifyT");
+  if(nt) nt.addEventListener("click", notifyTeacher);
+}
+
+/* ===================== SIMULADOR ===================== */
+let simState = { running:false, x0:0, v:5, t:0, lastTs:null, raf:null, history:[] };
+
+function renderSimulator(){
+  setHeader("Simulador MRU","Explora cómo cambia la posición con el tiempo", false);
+  const main = document.getElementById("main");
+  main.innerHTML = `
+    <div class="sim-track-wrap">
+      <div class="sim-readout">
+        <span>t = <span id="simT">0.0</span> s</span>
+        <span>x = <span id="simX">0.0</span> m</span>
+        <span>v = <span id="simV">${simState.v}</span> m/s</span>
+      </div>
+      <div class="sim-track" id="simTrack"></div>
+      <canvas id="simGraph" width="400" height="160"></canvas>
+      <div class="sim-controls">
+        <label>Velocidad inicial (v): <span class="valdisp" id="vDisp">${simState.v} m/s</span></label>
+        <input type="range" id="vSlider" min="-15" max="15" step="1" value="${simState.v}">
+        <label>Posición inicial (x₀): <span class="valdisp" id="x0Disp">${simState.x0} m</span></label>
+        <input type="range" id="x0Slider" min="-20" max="20" step="1" value="${simState.x0}">
+      </div>
+      <div class="sim-btns">
+        <button class="btn btn-primary" id="simStart">▶ Iniciar</button>
+        <button class="btn btn-outline" id="simReset">⟲ Reiniciar</button>
+      </div>
+    </div>
+  `;
+  buildTrackMarkers();
+  document.getElementById("vSlider").addEventListener("input", (e)=>{
+    simState.v = parseFloat(e.target.value);
+    document.getElementById("vDisp").textContent = simState.v + " m/s";
+    document.getElementById("simV").textContent = simState.v;
+  });
+  document.getElementById("x0Slider").addEventListener("input", (e)=>{
+    simState.x0 = parseFloat(e.target.value);
+    document.getElementById("x0Disp").textContent = simState.x0 + " m";
+    if(!simState.running) resetSimVisual();
+  });
+  document.getElementById("simStart").addEventListener("click", toggleSim);
+  document.getElementById("simReset").addEventListener("click", resetSim);
+  resetSimVisual();
+}
+
+function buildTrackMarkers(){
+  const track = document.getElementById("simTrack");
+  track.innerHTML = "";
+  for(let m=-20;m<=20;m+=5){
+    const pct = ((m+20)/40)*100;
+    const el = document.createElement("div");
+    el.className = "marker";
+    el.style.left = pct+"%";
+    el.innerHTML = `<span>${m}</span>`;
+    track.appendChild(el);
+  }
+  const car = document.createElement("div");
+  car.className = "sim-car";
+  car.id = "simCar";
+  car.textContent = "🚗";
+  track.appendChild(car);
+}
+
+function posToPct(x){
+  const clamped = Math.max(-20, Math.min(20, x));
+  return ((clamped+20)/40)*100;
+}
+
+function resetSimVisual(){
+  const car = document.getElementById("simCar");
+  if(car) car.style.left = posToPct(simState.x0)+"%";
+  document.getElementById("simT").textContent = "0.0";
+  document.getElementById("simX").textContent = fmt(simState.x0);
+  simState.history = [{t:0,x:simState.x0}];
+  drawSimGraph();
+}
+
+function resetSim(){
+  simState.running = false;
+  simState.t = 0;
+  simState.lastTs = null;
+  if(simState.raf) cancelAnimationFrame(simState.raf);
+  document.getElementById("simStart").textContent = "▶ Iniciar";
+  resetSimVisual();
+}
+
+function toggleSim(){
+  simState.running = !simState.running;
+  document.getElementById("simStart").textContent = simState.running ? "⏸ Pausar" : "▶ Iniciar";
+  if(simState.running){
+    simState.lastTs = null;
+    simState.raf = requestAnimationFrame(simLoop);
+  } else if(simState.raf){
+    cancelAnimationFrame(simState.raf);
+  }
+}
+
+function simLoop(ts){
+  const car = document.getElementById("simCar");
+  const tEl = document.getElementById("simT");
+  const xEl = document.getElementById("simX");
+  if(!car || !tEl || !xEl){
+    // La pantalla del simulador ya no está visible: detener el bucle.
+    simState.running = false;
+    simState.raf = null;
+    return;
+  }
+
+  if(!simState.lastTs) simState.lastTs = ts;
+  const dt = (ts - simState.lastTs)/1000;
+  simState.lastTs = ts;
+  simState.t += dt;
+  const x = simState.x0 + simState.v*simState.t;
+
+  car.style.left = posToPct(x)+"%";
+  tEl.textContent = fmt(simState.t);
+  xEl.textContent = fmt(x);
+
+  simState.history.push({t:simState.t, x});
+  if(simState.history.length > 400) simState.history.shift();
+  drawSimGraph();
+
+  if(x <= -20 || x >= 20){
+    simState.running = false;
+    document.getElementById("simStart").textContent = "▶ Iniciar";
+    return;
+  }
+  if(simState.running) simState.raf = requestAnimationFrame(simLoop);
+}
+
+function drawSimGraph(){
+  const canvas = document.getElementById("simGraph");
+  if(!canvas) return;
+  const ctx = canvas.getContext("2d");
+  const W = canvas.width, H = canvas.height;
+  const padL = 40, padB = 26, padT = 12, padR = 12;
+  ctx.clearRect(0,0,W,H);
+
+  const hist = simState.history;
+  const maxT = Math.max(5, hist[hist.length-1].t*1.1);
+  const xs = hist.map(h=>h.x);
+  let maxX = Math.max(20, ...xs);
+  let minX = Math.min(-20, ...xs);
+
+  function px(t){ return padL + (t/maxT)*(W-padL-padR); }
+  function py(x){ return H-padB - ((x-minX)/(maxX-minX))*(H-padB-padT); }
+
+  ctx.strokeStyle = "#c9d3db";
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(padL, padT); ctx.lineTo(padL, H-padB); ctx.lineTo(W-padR, H-padB);
+  ctx.stroke();
+  ctx.fillStyle = "#7a8a99";
+  ctx.font = "10px Segoe UI";
+  ctx.fillText("t (s)", W-padR-20, H-padB+18);
+  ctx.fillText("x (m)", 4, padT+8);
+
+  if(hist.length > 1){
+    ctx.strokeStyle = "#E8763B";
+    ctx.lineWidth = 2.5;
+    ctx.beginPath();
+    hist.forEach((h,i)=>{
+      const X = px(h.t), Y = py(h.x);
+      if(i===0) ctx.moveTo(X,Y); else ctx.lineTo(X,Y);
+    });
+    ctx.stroke();
+  }
+}
+
+/* ===================== NAVEGACIÓN GENERAL ===================== */
+function setHeader(title, sub, showBack){
+  document.getElementById("headerTitle").textContent = title;
+  document.getElementById("headerSub").textContent = sub;
+  document.getElementById("backBtn").classList.toggle("hidden", !showBack);
+}
+
+function stopSimAnimation(){
+  if(simState.raf) cancelAnimationFrame(simState.raf);
+  simState.raf = null;
+  simState.running = false;
+  simState.lastTs = null;
+}
+
+
+function abortChallengeIfLeaving() {
+  if (!session) return;
+  // Estaba en medio de un nivel de desafío
+  session = null;
+  alert('⚠️ Saliste del desafío. El intento se reinició y los ejercicios cambiarán al volver a jugar.');
+}
+
+function showTab(tab){
+  // Si cambia de pestaña durante un nivel, reinicia el intento
+  if(session) abortChallengeIfLeaving();
+  document.querySelectorAll(".tab").forEach(t=>t.classList.toggle("active", t.dataset.tab===tab));
+  document.getElementById("tabbar").classList.remove("hidden");
+  stopSimAnimation();
+  if(tab === "levels"){
+    renderLevelMap();
+  } else if(tab === "instr"){
+    renderInstructions();
+  } else {
+    simState.t = 0;
+    renderSimulator();
+  }
+}
+
+document.querySelectorAll(".tab").forEach(t=>{
+  t.addEventListener("click", ()=>{
+    // showTab se encarga de abortar si había sesión activa
+    showTab(t.dataset.tab);
+  });
+});
+
+document.getElementById("backBtn").addEventListener("click", ()=>{
+  if(session){ session=null; renderLevelMap(); document.getElementById("tabbar").classList.remove("hidden"); }
+});
+
+
+/* PROTECCIÓN */
+(function(){
+  document.addEventListener('contextmenu', function(e){ e.preventDefault(); return false; }, true);
+  document.addEventListener('keydown', function(e){
+    var k = (e.key||'').toLowerCase();
+    var ctrl = e.ctrlKey || e.metaKey;
+    var shift = e.shiftKey;
+    if ((ctrl && (k==='u'||k==='s'||k==='p')) || (ctrl && shift && (k==='i'||k==='j'||k==='c')) || k==='f12' || (ctrl && k==='a')) {
+      e.preventDefault(); e.stopPropagation(); return false;
+    }
+  }, true);
+})();
+
+
+function renderSetup(){
+  setHeader("Misión MRU","3er año — Ingresa tus datos", false);
+  document.getElementById("tabbar").classList.add("hidden");
+  const main = document.getElementById("main");
+  main.innerHTML = `
+    <div class="intro-box">Elige tu <b>sección</b> y luego tu <b>nombre</b> de la lista (no se escribe a mano).</div>
+    <div style="background:#fff;border-radius:12px;padding:16px;border:1px solid #e6ecf2;">
+      <p style="text-align:center;color:#E8763B;font-weight:bold;margin:0 0 12px;">3er año</p>
+      <label style="display:block;font-size:13px;font-weight:700;margin-bottom:4px;">Tu sección</label>
+      <select id="studentSectionInput" onchange="onSectionChange()" style="width:100%;padding:12px;border-radius:10px;border:2px solid #dbe3ea;font-size:15px;margin-bottom:12px;">
+        <option value="">— Elige tu sección —</option>
+        <option value="A">3ero A</option>
+        <option value="B">3ero B</option>
+        <option value="C">3ero C</option>
+        <option value="D">3ero D</option>
+      </select>
+      <label style="display:block;font-size:13px;font-weight:700;margin-bottom:4px;">Tu nombre</label>
+      <select id="studentNameSelect" disabled style="width:100%;padding:12px;border-radius:10px;border:2px solid #dbe3ea;font-size:15px;margin-bottom:8px;">
+        <option value="">— Primero elige la sección —</option>
+      </select>
+      <p style="text-align:center;color:#7a8a99;font-size:13px;margin-top:8px;">El certificado usará tu código único de la lista del profesor.</p>
+      <button class="btn btn-primary" id="startSetupBtn">▶ Continuar al mapa de niveles</button>
+    </div>
+  `;
+  document.getElementById("startSetupBtn").addEventListener("click", ()=>{
+    const st = getSelectedStudent();
+    if (!st) {
+      alert('Elige tu sección y luego tu nombre de la lista.');
+      return;
+    }
+    studentName = st.name;
+    studentSection = st.section;
+    studentCode = st.code;
+    lastVerifyCode = st.code;
+    progress.studentName = studentName;
+    progress.studentSection = studentSection;
+    progress.studentCode = studentCode;
+    saveProgress(progress);
+    document.getElementById("tabbar").classList.remove("hidden");
+    renderLevelMap();
+  });
+}
+
+
+const VERIFY_SECRET = 'JMC-GILBERTO-FISICA-2026';
+function simpleHash(str) {
+  let h = 2166136261;
+  for (let i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 16777619); }
+  return (h >>> 0).toString(36).toUpperCase().padStart(7, '0').slice(0, 7);
+}
+function makeVerificationCode(gameId, name, section, points, grade) {
+  const base = [gameId, (name || '').trim().toUpperCase(), section, String(points), String(grade), VERIFY_SECRET].join('|');
+  const h = simpleHash(base);
+  const pref = (gameId || 'JUE').replace(/[^A-Z0-9]/gi, '').slice(0, 3).toUpperCase() || 'JUE';
+  return pref + '-' + h.slice(0, 3) + '-' + h.slice(3, 6);
+}
+function buildVerifyPayload(gameTitle, name, section, yearLabel, points, grade, badge, code) {
+  return [
+    'VERIFICACION DE LOGRO',
+    'Colegio: U.E.P. Jose Maria Carreno',
+    'Profesor: GILAST',
+    'Juego: ' + gameTitle,
+    'Estudiante: ' + name,
+    'Curso: ' + yearLabel,
+    'Seccion: ' + section,
+    'Puntos: ' + points,
+    'Nota: ' + grade + ' / 20',
+    'Insignia: ' + (badge || ''),
+    'Codigo: ' + code,
+    'Fecha: ' + new Date().toLocaleString('es-VE')
+  ].join('\n');
+}
+function drawCertificateChrome(ctx, w, h) {
+  ctx.save();
+  ctx.globalAlpha = 0.06;
+  ctx.fillStyle = '#ffffff';
+  ctx.font = '12px Arial';
+  for (let y = 40; y < h; y += 28) {
+    for (let x = 20; x < w; x += 120) {
+      ctx.fillText('JMC', x + ((y / 28) % 2) * 40, y);
+    }
+  }
+  ctx.restore();
+}
+function loadQrImage(text, size) {
+  return new Promise(function(resolve) {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = function() { resolve(img); };
+    img.onerror = function() { resolve(null); };
+    img.src = 'https://api.qrserver.com/v1/create-qr-code/?size=' + size + 'x' + size + '&margin=8&data=' + encodeURIComponent(text);
+    setTimeout(function() { if (!img.complete) resolve(null); }, 4000);
+  });
+}
+
+let lastVerifyCode = "";
+async function downloadAchievement(){
+  computeGrade20();
+  lastVerifyCode = studentCode || makeVerificationCode('MRU', studentName, studentSection, totalPointsAllLevels, finalGrade20);
+  const payload = buildVerifyPayload('Misión MRU', studentName, studentSection, '3er Año', totalPointsAllLevels, finalGrade20, lastBadge, lastVerifyCode);
+  const canvas = document.createElement('canvas');
+  canvas.width = 900; canvas.height = 640;
+  const ctx = canvas.getContext('2d');
+  const grad = ctx.createLinearGradient(0,0,900,640);
+  grad.addColorStop(0,'#1F4E79'); grad.addColorStop(1,'#2E75B6');
+  ctx.fillStyle = grad; ctx.fillRect(0,0,900,640);
+  if (typeof drawCertificateChrome === 'function') drawCertificateChrome(ctx, 900, 640);
+  ctx.strokeStyle = '#E8763B'; ctx.lineWidth = 8; ctx.strokeRect(20,20,860,600);
+  ctx.strokeStyle = 'rgba(255,255,255,0.35)'; ctx.lineWidth = 2; ctx.strokeRect(32,32,836,576);
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#fff'; ctx.font = 'bold 28px Arial';
+  ctx.fillText('CERTIFICADO DE LOGRO', 450, 90);
+  ctx.font = '18px Arial'; ctx.fillText('Misión MRU — Movimiento Rectilíneo Uniforme', 450, 125);
+  ctx.fillStyle = 'rgba(255,255,255,0.85)'; ctx.font = '14px Arial';
+  ctx.fillText('GILAST — Producido por GILAST', 450, 155);
+  ctx.font = '18px Arial'; ctx.fillText('Se otorga el presente reconocimiento a:', 450, 200);
+  ctx.fillStyle = '#E8763B'; ctx.font = 'bold 40px Arial';
+  ctx.fillText(studentName, 450, 255);
+  ctx.fillStyle = 'rgba(255,255,255,0.9)'; ctx.font = '18px Arial';
+  ctx.fillText('3er Año - Sección ' + studentSection, 450, 290);
+  ctx.fillStyle = '#fff'; ctx.font = '22px Arial';
+  ctx.fillText('Puntos totales: ' + totalPointsAllLevels, 450, 330);
+  ctx.fillStyle = '#E8763B'; ctx.font = 'bold 26px Arial';
+  ctx.fillText('Nota: ' + finalGrade20 + ' / 20', 450, 368);
+  ctx.fillStyle = '#b8f0c8'; ctx.font = 'bold 20px Arial';
+  ctx.fillText(lastBadge, 450, 405);
+  ctx.fillStyle = '#E8763B'; ctx.font = 'bold 18px Arial';
+  ctx.fillText('Código de verificación: ' + lastVerifyCode, 450, 445);
+  const fecha = new Date().toLocaleDateString('es-VE',{year:'numeric',month:'long',day:'numeric'});
+  ctx.fillStyle = 'rgba(255,255,255,0.7)'; ctx.font = '14px Arial';
+  ctx.fillText(fecha, 450, 475);
+  const qrImg = await loadQrImage(payload, 140);
+  if (qrImg) {
+    ctx.fillStyle = '#fff'; ctx.fillRect(378, 490, 144, 144);
+    ctx.drawImage(qrImg, 380, 492, 140, 140);
+  } else {
+    ctx.fillStyle = 'rgba(255,255,255,0.85)'; ctx.font = '12px Arial';
+    ctx.fillText('(QR no disponible sin conexión — use el código)', 450, 530);
+  }
+  const link = document.createElement('a');
+  const safe = studentName.replace(/[^a-zA-Z0-9À-ÿ ]/g,'').trim().replace(/\s+/g,'_') || 'estudiante';
+  link.download = 'logro_MRU_' + safe + '.png';
+  link.href = canvas.toDataURL('image/png');
+  link.click();
+}
+
+
+function buildResultCanvas(){
+  computeGrade20();
+  const canvas = document.createElement('canvas');
+  canvas.width = 900; canvas.height = 560;
+  const ctx = canvas.getContext('2d');
+  const grad = ctx.createLinearGradient(0,0,900,560);
+  grad.addColorStop(0,'#1F4E79'); grad.addColorStop(1,'#2E75B6');
+  ctx.fillStyle = grad; ctx.fillRect(0,0,900,560);
+  ctx.strokeStyle = '#E8763B'; ctx.lineWidth = 8; ctx.strokeRect(20,20,860,520);
+  ctx.strokeStyle = 'rgba(255,255,255,0.35)'; ctx.lineWidth = 2; ctx.strokeRect(32,32,836,496);
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#fff'; ctx.font = 'bold 28px Arial';
+  ctx.fillText('RESULTADO — MISIÓN MRU', 450, 100);
+  ctx.font = '18px Arial'; ctx.fillStyle = 'rgba(255,255,255,0.9)';
+  ctx.fillText('Movimiento Rectilíneo Uniforme', 450, 140);
+  ctx.font = '18px Arial';
+  ctx.fillText('Se reporta el siguiente desempeño:', 450, 190);
+  ctx.fillStyle = '#E8763B'; ctx.font = 'bold 40px Arial';
+  ctx.fillText(studentName, 450, 250);
+  ctx.fillStyle = 'rgba(255,255,255,0.9)'; ctx.font = '18px Arial';
+  ctx.fillText('3er Año — Sección ' + studentSection, 450, 290);
+  ctx.fillStyle = '#fff'; ctx.font = '24px Arial';
+  ctx.fillText('Puntos totales: ' + totalPointsAllLevels, 450, 340);
+  ctx.fillStyle = '#E8763B'; ctx.font = 'bold 32px Arial';
+  ctx.fillText('Nota: ' + finalGrade20 + ' / 20', 450, 385);
+  ctx.fillStyle = '#b8f0c8'; ctx.font = 'bold 22px Arial';
+  ctx.fillText(lastBadge, 450, 430);
+  const fecha = new Date().toLocaleDateString('es-VE',{year:'numeric',month:'long',day:'numeric'});
+  ctx.fillStyle = 'rgba(255,255,255,0.7)'; ctx.font = '16px Arial';
+  ctx.fillText(fecha, 450, 475);
+  ctx.fillStyle = 'rgba(255,255,255,0.9)'; ctx.font = 'italic 18px Arial';
+  ctx.fillText('Profesor GILAST', 450, 510);
+  return canvas;
+}
+
+async function notifyTeacher(){
+  computeGrade20();
+  lastVerifyCode = studentCode || makeVerificationCode('MRU', studentName, studentSection, totalPointsAllLevels, finalGrade20);
+  const subject = 'Logro: ' + studentName + ' (3ero ' + studentSection + ') - Misión MRU [' + lastVerifyCode + ']';
+  const body =
+    'Juego: Misión MRU\n' +
+    'Estudiante: ' + studentName + '\n' +
+    'Sección: 3ero ' + studentSection + '\n' +
+    'Puntos: ' + totalPointsAllLevels + '\n' +
+    'Nota: ' + finalGrade20 + ' / 20\n' +
+    'Código verificación: ' + lastVerifyCode + '\n' +
+    'Insignia: ' + lastBadge;
+  await downloadAchievement();
+  const mailto = 'mailto:fisicajmc@gmail.com?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body + '\n\nAdjunta el certificado descargado (tiene QR y código).');
+  try {
+    const a = document.createElement('a'); a.href = mailto; a.style.display = 'none';
+    document.body.appendChild(a); a.click();
+    setTimeout(function(){ try{ document.body.removeChild(a);}catch(e){} }, 500);
+  } catch (e) { window.location.href = mailto; }
+  alert('1) Se descargó el certificado (con código y QR).\n2) Se abrió el correo.\n\nAdjunta el certificado y pulsa ENVIAR.\nCódigo: ' + lastVerifyCode);
+}
+
+
+/* ===================== INICIO ===================== */
+
+if(progress.studentName){
+  studentName = progress.studentName;
+  studentSection = progress.studentSection || 'A';
+  studentCode = progress.studentCode || studentCode || '';
+  if (progress.studentName) studentName = progress.studentName;
+  document.getElementById("tabbar").classList.remove("hidden");
+  showTab("levels");
+} else {
+  renderSetup();
+}
+</script>
+<script>
+(function(){
+  var SAAS_API = localStorage.getItem('saas_api_base') || '';
+  async function saasCheckAccess(){
+    var gate = document.getElementById('licenseGate');
+    var st = document.getElementById('licenseStatus');
+    var code = localStorage.getItem('saas_classCode') || '';
+    if(!code){ if(st) st.innerHTML='<b style="color:#fca5a5">Sin código de clase.</b> Vuelve al catálogo.'; if(gate) gate.className='license-gate blocked'; return false; }
+    try{
+      var r = await fetch(SAAS_API + '/api/access/check?classCode=' + encodeURIComponent(code));
+      var data = await r.json();
+      if(!data.allowed){ if(st) st.innerHTML='<b style="color:#fca5a5">Acceso bloqueado.</b>'; if(gate) gate.className='license-gate blocked'; return false; }
+      if(st) st.innerHTML='<b style="color:#86efac">Licencia activa.</b> '+(data.teacherName||'');
+      if(gate) gate.className='license-gate ok';
+      try{ localStorage.setItem('saas_access_ok','1'); }catch(e){}
+      var ni=document.getElementById('studentNameInput');
+      if(ni && !ni.value && localStorage.getItem('saas_studentName')){ ni.value=localStorage.getItem('saas_studentName'); }
+      return true;
+    }catch(e){ if(st) st.innerHTML='<b style="color:#fca5a5">Sin servidor.</b> '+e.message; if(gate) gate.className='license-gate blocked'; return false; }
+  }
+  window.saasCheckAccess = saasCheckAccess;
+  function wrapFn(name){
+    var orig = window[name];
+    if(typeof orig !== 'function' || orig._saasWrapped) return;
+    var wrapped = async function(){
+      if(!(await saasCheckAccess())){ alert('Sin acceso. Usa el catálogo con el código de clase.'); return; }
+      return orig.apply(this, arguments);
+    };
+    wrapped._saasWrapped = true;
+    window[name] = wrapped;
+  }
+  function install(){
+    ['startRetoLevel','startLevel','startChallenge','beginLevel','startGame','startReto'].forEach(wrapFn);
+    saasCheckAccess();
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', install);
+  else setTimeout(install, 0);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Juegos de Reto para Física — Catálogo</title>
+<style>
+:root{--bg:#0b1220;--card:#111827;--line:#1e293b;--text:#e2e8f0;--muted:#94a3b8;--accent:#38bdf8}
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,sans-serif;background:linear-gradient(160deg,#0b1220,#0f172a 40%,#082f49);color:var(--text);min-height:100vh}
+header{text-align:center;padding:28px 16px 12px}
+header h1{margin:0;color:#7dd3fc;font-size:1.55rem}
+.slogan{color:#7dd3fc;font-weight:600;margin:8px 0 0}
+.sub{color:var(--muted);margin:8px 0 0;font-size:.92rem}
+.wrap{max-width:980px;margin:0 auto;padding:12px 16px 48px}
+.gate{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:18px}
+.gate h2{margin:0 0 8px;color:#7dd3fc;font-size:1.1rem}
+label{display:block;font-size:.85rem;color:#cbd5e1;margin:10px 0 4px}
+input{width:100%;max-width:420px;padding:11px 12px;border-radius:10px;border:2px solid #475569;background:#f8fafc;color:#0f172a;font-size:1rem}
+.btn{border:none;border-radius:12px;padding:12px 16px;font-weight:800;cursor:pointer;margin:8px 8px 0 0;font-size:.95rem}
+.btn-primary{background:#0284c7;color:#fff}
+.btn-outline{background:transparent;border:2px solid #64748b;color:#e2e8f0}
+.err{display:none;color:#fca5a5;background:#450a0a;border:1px solid #7f1d1d;padding:10px;border-radius:10px;margin-top:10px}
+.ok{display:none;color:#86efac;background:#052e16;border:1px solid #166534;padding:10px;border-radius:10px;margin-top:10px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
+.card-mod{display:block;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;text-decoration:none;color:var(--text);transition:.15s}
+.card-mod:hover{border-color:#38bdf8;transform:translateY(-2px)}
+.card-title{font-weight:800;color:#7dd3fc;margin-bottom:6px}
+.card-desc{color:var(--muted);font-size:.88rem;line-height:1.4}
+.card-go{margin-top:10px;color:#38bdf8;font-weight:700;font-size:.9rem}
+.locked-overlay{opacity:.45;pointer-events:none;filter:grayscale(.7)}
+.badge{display:inline-block;padding:4px 10px;border-radius:999px;font-size:.75rem;font-weight:700}
+.badge-ok{background:#14532d;color:#86efac}
+.badge-bad{background:#7f1d1d;color:#fecaca}
+.nav{margin:12px 0;text-align:center}
+.nav a{color:#7dd3fc;margin:0 8px;font-size:.9rem}
+footer{text-align:center;color:#64748b;font-size:.8rem;padding:24px 12px}
+.muted{color:var(--muted);font-size:.9rem;line-height:1.5}
+</style>
+</head>
+<body>
+<header>
+  <h1>Juegos de Reto para Física</h1>
+  <p class="slogan">Aprende física resolviendo retos</p>
+  <p class="sub">Producido por GILAST · 13 módulos</p>
+</header>
+<div class="wrap">
+  <div class="gate">
+    <h2>Acceso al catálogo</h2>
+    <p class="muted">Ingresa el <b>código de clase</b> de tu profesor (o deja vacío solo si el administrador habilita modo demo en el servidor). Sin licencia activa los juegos permanecen bloqueados.</p>
+    <label>Código de clase</label>
+    <input id="classCode" placeholder="Ej: C1A2B3" style="text-transform:uppercase">
+    <label>Tu nombre (alumnos)</label>
+    <input id="studentName" placeholder="Nombre y apellido">
+    <div>
+      <button type="button" class="btn btn-primary" onclick="unlockCatalog()">Comprobar acceso</button>
+      <button type="button" class="btn btn-outline" onclick="clearAccess()">Cerrar sesión de clase</button>
+    </div>
+    <div class="err" id="err"></div>
+    <div class="ok" id="ok"></div>
+    <p class="muted" style="margin-top:12px">Profesores: <a href="/profesor.html" style="color:#7dd3fc">panel docente</a> · Admin: <a href="/admin.html" style="color:#7dd3fc">licencias</a></p>
+  </div>
+
+  <div id="statusLine" class="muted" style="margin-bottom:10px"></div>
+  <div class="grid locked-overlay" id="grid">
+    
+    <a class="card-mod" href="games/notacion-saas/index.html" data-module="notacion">
+      <div class="card-title">Notación científica</div>
+      <div class="card-desc">Potencias de 10 y conversión</div>
+      <div class="card-go">Entrar →</div>
+    </a>
+    <a class="card-mod" href="games/despejes-saas/index.html" data-module="despejes">
+      <div class="card-title">Despejes</div>
+      <div class="card-desc">Despejar fórmulas paso a paso</div>
+      <div class="card-go">Entrar →</div>
+    </a>
+    <a class="card-mod" href="games/mru-saas/index.html" data-module="mru">
+      <div class="card-title">MRU</div>
+      <div class="card-desc">Movimiento rectilíneo uniforme</div>
+      <div class="card-go">Entrar →</div>
+    </a>
+    <a class="card-mod" href="games/mru-ii-saas/index.html" data-module="mru2">
+      <div class="card-title">MRU II</div>
+      <div class="card-desc">Encuentro de móviles y relativo</div>
+      <div class="card-go">Entrar →</div>
+    </a>
+    <a class="card-mod" href="games/mruv-saas/index.html" data-module="mruv">
+      <div class="card-title">MRUV</div>
+      <div class="card-desc">Movimiento con aceleración</div>
+      <div class="card-go">Entrar →</div>
+    </a>
+    <a class="card-mod" href="games/caida-libre-saas/index.html" data-module="caida">
+      <div class="card-title">Caída libre y lanzamiento vertical</div>
+      <div class="card-desc">g, tiro vertical y MRUV vertical</div>
+      <div class="card-go">Entrar →</div>
+    </a>
+    <a class="card-mod" href="games/proyectiles-saas/index.html" data-module="proyectiles">
+      <div class="card-title">Movimiento de proyectiles</div>
+      <div class="card-desc">Parábola, alcance y altura máxima</div>
+      <div class="card-go">Entrar →</div>
+    </a>
+    <a class="card-mod" href="games/newton-saas/index.html" data-module="newton">
+      <div class="card-title">Leyes de Newton</div>
+      <div class="card-desc">Inercia, F=ma y acción-reacción</div>
+      <div class="card-go">Entrar →</div>
+    </a>
+    <a class="card-mod" href="games/gravitacion-saas/index.html" data-module="gravitacion">
+      <div class="card-title">Ley de gravitación universal</div>
+      <div class="card-desc">F ∝ m₁m₂/r²</div>
+      <div class="card-go">Entrar →</div>
+    </a>
+    <a class="card-mod" href="games/energia-saas/index.html" data-module="energia">
+      <div class="card-title">Energía mecánica</div>
+      <div class="card-desc">Cinética, potencial y trabajo</div>
+      <div class="card-go">Entrar →</div>
+    </a>
+    <a class="card-mod" href="games/momento-saas/index.html" data-module="momento">
+      <div class="card-title">Cantidad de movimiento</div>
+      <div class="card-desc">Impulso y choques</div>
+      <div class="card-go">Entrar →</div>
+    </a>
+    <a class="card-mod" href="games/carga-saas/index.html" data-module="carga">
+      <div class="card-title">Carga eléctrica</div>
+      <div class="card-desc">Ley de Coulomb</div>
+      <div class="card-go">Entrar →</div>
+    </a>
+    <a class="card-mod" href="games/electricidad-saas/index.html" data-module="electricidad">
+      <div class="card-title">Taller de electricidad</div>
+      <div class="card-desc">Ohm, Watts, motor y planos</div>
+      <div class="card-go">Entrar →</div>
+    </a>
+  </div>
+</div>
+<footer>Juegos de Reto para Física · Aprende física resolviendo retos · Producido por GILAST</footer>
+<script>
+// API base: same origin when served by saas-platform; override if games on another host
+const API_BASE = localStorage.getItem('saas_api_base') || '';
+
+function show(el, msg){ el.style.display='block'; el.textContent=msg; }
+function hide(el){ el.style.display='none'; }
+
+async function unlockCatalog(){
+  const err=document.getElementById('err'), ok=document.getElementById('ok');
+  hide(err); hide(ok);
+  const code=(document.getElementById('classCode').value||'').trim().toUpperCase();
+  const name=(document.getElementById('studentName').value||'').trim();
+  if(!code){ show(err,'Escribe el código de clase'); return; }
+  if(!name){ show(err,'Escribe tu nombre'); return; }
+  try{
+    const r = await fetch(API_BASE + '/api/access/check?classCode=' + encodeURIComponent(code));
+    const data = await r.json();
+    if(!data.allowed){
+      const map={
+        license_inactive:'La licencia del profesor está vencida o suspendida.',
+        invalid_class_code:'Código de clase inválido.',
+        no_credentials:'Falta el código de clase.'
+      };
+      show(err, map[data.reason]||'Acceso denegado');
+      lockGrid(true);
+      return;
+    }
+    localStorage.setItem('saas_classCode', code);
+    localStorage.setItem('saas_studentName', name);
+    localStorage.setItem('saas_certEmail', data.certificateEmail||'');
+    localStorage.setItem('saas_teacherName', data.teacherName||'');
+    localStorage.setItem('saas_access_ok', '1');
+    show(ok, 'Acceso concedido · Profesor: ' + (data.teacherName||'') + ' · Puedes entrar a los módulos');
+    lockGrid(false);
+    statusLine();
+  }catch(e){
+    show(err, 'No se pudo contactar el servidor de licencias. ¿Está en marcha la plataforma? (' + e.message + ')');
+    lockGrid(true);
+  }
+}
+
+function clearAccess(){
+  ['saas_classCode','saas_studentName','saas_certEmail','saas_teacherName','saas_access_ok'].forEach(k=>localStorage.removeItem(k));
+  document.getElementById('classCode').value='';
+  document.getElementById('studentName').value='';
+  lockGrid(true);
+  statusLine();
+  hide(document.getElementById('ok'));
+  hide(document.getElementById('err'));
+}
+
+function lockGrid(locked){
+  const g=document.getElementById('grid');
+  if(locked) g.classList.add('locked-overlay'); else g.classList.remove('locked-overlay');
+}
+
+function statusLine(){
+  const el=document.getElementById('statusLine');
+  if(localStorage.getItem('saas_access_ok')==='1'){
+    el.innerHTML = '<span class="badge badge-ok">ACCESO ACTIVO</span> ' +
+      (localStorage.getItem('saas_studentName')||'') + ' · clase ' + (localStorage.getItem('saas_classCode')||'');
+    lockGrid(false);
+  } else {
+    el.innerHTML = '<span class="badge badge-bad">BLOQUEADO</span> Introduce el código de clase para desbloquear el catálogo';
+    lockGrid(true);
+  }
+}
+
+// Intercept module clicks if locked
+document.getElementById('grid').addEventListener('click', function(ev){
+  if(localStorage.getItem('saas_access_ok')==='1') return;
+  const a = ev.target.closest('a.card-mod');
+  if(a){ ev.preventDefault(); show(document.getElementById('err'), 'Primero comprueba el acceso con el código de clase'); }
+});
+
+statusLine();
+if(localStorage.getItem('saas_classCode')) document.getElementById('classCode').value=localStorage.getItem('saas_classCode');
+if(localStorage.getItem('saas_studentName')) document.getElementById('studentName').value=localStorage.getItem('saas_studentName');
+</script>
+</body>
+</html>

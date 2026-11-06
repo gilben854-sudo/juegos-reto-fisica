@@ -1,0 +1,1796 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light only">
+<title>Carga Eléctrica y Ley de Coulomb - Juego</title>
+<style>
+  html { color-scheme: light only; }
+  button, input, select, textarea {
+    -webkit-appearance: none;
+    appearance: none;
+    color-scheme: light only;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: #0f172a;
+    min-height: 100vh;
+    color: #f1f5f9;
+    padding: 16px;
+  }
+  .container { max-width: 720px; margin: 0 auto; }
+  header { text-align: center; margin-bottom: 20px; }
+  header .teacher { font-size: 0.85em; color: #94a3b8; margin-bottom: 4px; }
+  header h1 { font-size: 1.6em; margin-bottom: 4px; color: #fbbf24; }
+  header p { color: #cbd5e1; font-size: 0.9em; }
+
+  .menu { display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; justify-content: center; }
+  .menu button {
+    flex: 1; min-width: 140px; padding: 14px; border: 2px solid #334155; border-radius: 12px;
+    font-size: 1em; font-weight: bold; cursor: pointer;
+    background: #1e293b; color: #e2e8f0; transition: 0.2s;
+  }
+  .menu button.active { background: #fbbf24; color: #0f172a; border-color: #fbbf24; }
+  .menu button:hover { background: #334155; color: #fff; }
+  .menu button.active:hover { background: #f59e0b; color: #0f172a; }
+
+  .panel {
+    background: #1e293b; border: 1px solid #334155;
+    border-radius: 16px; padding: 20px; display: none;
+  }
+  .panel.visible { display: block; }
+
+  .subtabs { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+  .subtabs button {
+    flex: 1; min-width: 120px; padding: 10px; border: 2px solid #334155; border-radius: 8px; cursor: pointer;
+    background: #0f172a; color: #e2e8f0; font-weight: bold;
+  }
+  .subtabs button.active { background: #fbbf24; color: #0f172a; border-color: #fbbf24; }
+
+  .sub-panel { display: none; }
+  .sub-panel.visible { display: block; }
+
+  .form-row { display: flex; gap: 10px; align-items: center; margin-bottom: 14px; flex-wrap: wrap; }
+  .form-row label { min-width: 130px; font-size: 0.95em; color: #e2e8f0; font-weight: 600; }
+  .form-row select, .form-row input {
+    flex: 1; padding: 10px 12px; border-radius: 8px; border: 2px solid #475569;
+    font-size: 1em; min-width: 100px; background: #f8fafc; color: #0f172a; font-weight: 500;
+  }
+  .form-row select:focus, .form-row input:focus {
+    outline: none; border-color: #fbbf24; box-shadow: 0 0 0 3px rgba(251,191,36,0.25);
+  }
+
+  .eq-display {
+    background: #0f172a; border: 2px solid #fbbf24; border-radius: 10px; padding: 16px; text-align: center;
+    font-size: 1.2em; margin: 14px 0; min-height: 48px; color: #fef3c7; font-weight: 600;
+  }
+
+  .steps-box {
+    background: #0f172a; border: 1px solid #475569; border-radius: 10px; padding: 16px; margin-top: 10px;
+    font-size: 1em; line-height: 1.9; color: #e2e8f0;
+  }
+  .steps-box .step-line { display: block; }
+  .steps-box .step-num { color: #fbbf24; font-weight: bold; margin-right: 6px; }
+
+  .action-row { display: flex; gap: 10px; justify-content: center; margin-top: 10px; flex-wrap: wrap; }
+  .action-row button {
+    padding: 12px 24px; border-radius: 10px; border: none; background: #fbbf24;
+    color: #0f172a; font-weight: bold; font-size: 1em; cursor: pointer;
+  }
+  .action-row button:hover { background: #f59e0b; }
+  .action-row button:disabled { opacity: 0.5; cursor: default; }
+  .action-row button.btn-success { background: #16a34a; color: #ffffff; }
+  .action-row button.btn-success:hover { background: #15803d; }
+  .action-row button.btn-info { background: #2563eb; color: #ffffff; }
+  .action-row button.btn-info:hover { background: #1d4ed8; }
+  .action-row button.btn-secondary {
+    background: #334155; color: #f1f5f9; border: 2px solid #64748b;
+  }
+  .action-row button.btn-secondary:hover { background: #475569; }
+
+  .unlock-hint { font-size: 0.9em; color: #fde68a; margin-top: 10px; text-align: center; line-height: 1.5; }
+  .achievement-hint { font-size: 0.9em; color: #fde68a; margin-top: 10px; text-align: center; }
+  .hint { font-size: 0.9em; color: #94a3b8; margin-top: 8px; text-align: center; }
+
+  .charge-demo {
+    display: flex; justify-content: center; align-items: center; gap: 24px; margin: 16px 0; flex-wrap: wrap;
+  }
+  .charge-ball {
+    width: 70px; height: 70px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    font-size: 1.8em; font-weight: bold; box-shadow: 0 4px 12px rgba(0,0,0,0.4); color: #fff;
+  }
+  .charge-ball.pos { background: #dc2626; }
+  .charge-ball.neg { background: #2563eb; }
+  .charge-ball.neu { background: #64748b; }
+  .force-arrow { font-size: 2em; color: #fbbf24; }
+
+  .level-select { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; justify-content: center; }
+  .level-btn {
+    padding: 10px 14px; border-radius: 10px; border: 2px solid #475569;
+    background: #0f172a; color: #e2e8f0; cursor: pointer; font-weight: bold; font-size: 0.9em;
+    position: relative; min-width: 120px;
+  }
+  .level-btn:hover { border-color: #fbbf24; }
+  .level-btn.selected { background: #fbbf24; color: #0f172a; border-color: #fbbf24; }
+  .level-btn.locked {
+    opacity: 0.5; cursor: not-allowed;
+    background: #1e293b; border-color: #334155; color: #94a3b8;
+  }
+  .level-btn.locked:hover { border-color: #334155; }
+  .level-btn .lock-icon { display: none; font-size: 0.9em; }
+  .level-btn.locked .lock-icon { display: inline; }
+
+  .stats {
+    display: flex; justify-content: space-between; margin-bottom: 14px; font-size: 0.95em;
+    background: #0f172a; border: 1px solid #334155; padding: 10px 14px; border-radius: 10px; color: #e2e8f0;
+  }
+  .stats b { color: #fbbf24; }
+
+  .question-box {
+    background: #0f172a; border: 2px solid #475569; border-radius: 12px; padding: 16px 18px;
+    text-align: left; font-size: 1.02em; margin-bottom: 16px; color: #f1f5f9; line-height: 1.55;
+  }
+  .question-box b { color: #fbbf24; }
+  .q-block { margin-bottom: 10px; }
+  .q-label {
+    display: inline-block; font-size: 0.72rem; font-weight: 800; letter-spacing: 0.04em;
+    text-transform: uppercase; color: #0f172a; background: #fbbf24; padding: 2px 8px;
+    border-radius: 6px; margin-bottom: 6px;
+  }
+  .q-datos { color: #e2e8f0; }
+  .q-ask { color: #f8fafc; font-weight: 700; font-size: 1.05em; margin-top: 4px; }
+  .q-formula {
+    margin-top: 10px; padding: 10px 12px; border-radius: 10px;
+    background: #1e293b; border: 1px dashed #64748b; color: #cbd5e1; font-size: 0.92em;
+  }
+  .q-tip { margin-top: 8px; font-size: 0.85em; color: #94a3b8; }
+
+  .answer-area { display: flex; gap: 10px; justify-content: center; margin-bottom: 14px; flex-wrap: wrap; align-items: center; }
+  .answer-area input {
+    padding: 12px; border-radius: 8px; border: 2px solid #475569; font-size: 1.2em; width: 140px; text-align: center;
+    background: #f8fafc; color: #0f172a; font-weight: 600;
+  }
+  .answer-area input:focus { outline: none; border-color: #fbbf24; }
+  .answer-area span { color: #e2e8f0; }
+
+  .mc-options { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+  .mc-options button {
+    padding: 12px; border-radius: 10px; border: 2px solid #475569; background: #0f172a;
+    color: #f1f5f9; font-size: 1em; cursor: pointer; font-weight: 500;
+  }
+  .mc-options button:hover { background: #334155; border-color: #fbbf24; }
+  .mc-options button.correct { background: #16a34a !important; color: #fff; border-color: #16a34a !important; }
+  .mc-options button.wrong { background: #dc2626 !important; color: #fff; border-color: #dc2626 !important; }
+
+  .feedback { text-align: center; margin: 10px 0; font-size: 1.1em; min-height: 26px; font-weight: bold; }
+  .feedback.ok { color: #4ade80; }
+  .feedback.bad { color: #f87171; }
+
+  .progress-bar-outer { width: 100%; background: #0f172a; border: 1px solid #334155; border-radius: 8px; height: 12px; overflow: hidden; margin-bottom: 16px; }
+  .progress-bar-inner { height: 100%; background: #fbbf24; width: 0%; transition: width 0.3s; }
+
+  .end-screen { text-align: center; }
+  .end-screen h2 { font-size: 1.8em; margin-bottom: 10px; color: #fbbf24; }
+  .end-screen p { margin-bottom: 6px; color: #e2e8f0; }
+  .badge { display: inline-block; background: #fbbf24; color: #0f172a; padding: 8px 16px; border-radius: 20px; font-weight: bold; margin-top: 10px; }
+
+  footer { text-align: center; margin-top: 20px; font-size: 0.8em; color: #64748b; }
+
+  .const-box {
+    background: #0f172a; border: 1px solid #fbbf24; border-radius: 10px; padding: 12px; margin: 10px 0;
+    font-size: 0.95em; text-align: center; color: #fef3c7; font-weight: 600;
+  }
+
+  h3 { color: #f1f5f9; }
+
+  /* Protección básica anti-copia */
+  html, body {
+    -webkit-user-select: none !important;
+    -moz-user-select: none !important;
+    -ms-user-select: none !important;
+    user-select: none !important;
+  }
+  input, textarea, select {
+    -webkit-user-select: text !important;
+    -moz-user-select: text !important;
+    user-select: text !important;
+  }
+
+
+  .btn-sign {
+    flex: 0 0 auto; min-width: 48px; height: 48px; padding: 0 10px;
+    border-radius: 10px; border: 2px solid #fbbf24; background: #422006;
+    color: #fbbf24; font-size: 1.4em; font-weight: 900; cursor: pointer;
+    line-height: 1; touch-action: manipulation; -webkit-tap-highlight-color: transparent;
+  }
+  .btn-sign:active { background: #78350f; }
+  .btn-negative {
+    display: block; width: 100%; margin: 8px 0 10px; padding: 12px;
+    border-radius: 10px; border: 2px dashed #fbbf24; background: #1c1917;
+    color: #fde68a; font-size: 0.95rem; font-weight: 800; cursor: pointer;
+    touch-action: manipulation;
+  }
+  .btn-negative.is-neg { border-style: solid; background: #fbbf24; color: #0f172a; }
+  #ansValue.is-neg { border-color: #fbbf24; background: #fffbeb; color: #78350f; }
+
+
+.license-gate{background:#0f172a;border:1px solid #334155;border-radius:14px;padding:14px;margin:10px 0}.license-gate.blocked{border-color:#7f1d1d;background:#450a0a}.license-gate.ok{border-color:#166534;background:#052e16}</style>
+</head>
+<body>
+<div id="licenseGate" class="license-gate"><div id="licenseStatus" class="muted">Comprobando acceso…</div></div>
+
+<div class="container">
+  <header>
+    <p class="teacher">Profesor GILAST</p>
+    <h1>⚡ Carga Eléctrica y Ley de Coulomb</h1>
+    <p>Simulador y desafíos: interacciones, carga elemental y fuerza eléctrica</p>
+  </header>
+
+  <div class="menu">
+    <button id="btnInstr" onclick="showPanel('instr')">📖 Instrucciones</button>
+    <button id="btnSim" class="active" onclick="showPanel('sim')">🧮 Simulador</button>
+    <button id="btnGame" onclick="showPanel('game')">🎮 Modo Desafíos</button>
+  </div>
+
+  <!-- ============ PANEL INSTRUCCIONES ============ -->
+  <div id="panelInstr" class="panel">
+    <h3 style="margin-bottom:12px;">📖 ¿Cómo jugar?</h3>
+
+    <div class="steps-box" style="margin-bottom:16px;">
+      <span class="step-line"><span class="step-num">🧮</span><b>Modo Simulador:</b> practica sin puntaje ni vidas, ideal para aprender el procedimiento.</span>
+      <span class="step-line"><span class="step-num">1.</span>"Interacciones": elige el signo de dos cargas y observa si se atraen, se repelen o no interactúan.</span>
+      <span class="step-line"><span class="step-num">2.</span>"Ley de Coulomb": ingresa q₁, q₂ y la distancia r, y presiona "Calcular fuerza F" para ver el procedimiento completo.</span>
+      <span class="step-line"><span class="step-num">3.</span>"Geometría y vectores": elige una figura (triángulo o cuadrado) con varias cargas en los vértices y calcula la fuerza neta sobre una de ellas mediante suma vectorial.</span>
+    </div>
+
+    <div class="steps-box" style="margin-bottom:16px;">
+      <span class="step-line"><span class="step-num">🎮</span><b>Modo Desafíos:</b> aquí sí acumulas puntos y tienes vidas. <b>Importante:</b> si durante un desafío sales al Simulador o a Instrucciones, el intento se reinicia y los ejercicios cambian.</span>
+      <span class="step-line"><span class="step-num">1.</span>Escribe tu nombre (el curso queda fijo en 5to año, Sección B).</span>
+      <span class="step-line"><span class="step-num">2.</span>Elige un nivel. Solo el Nivel 1 está disponible al inicio; cada nivel se desbloquea al completar el anterior sin quedarte sin vidas.</span>
+      <span class="step-line"><span class="step-num">3.</span>Presiona "Comenzar" y responde las 5 preguntas de cada nivel. Tienes 3 vidas: si te equivocas demasiadas veces, el nivel termina.</span>
+      <span class="step-line"><span class="step-num">4.</span>Al completar los 4 niveles sin quedarte sin vidas en ninguno, se desbloquea tu certificado.</span>
+      <span class="step-line"><span class="step-num">5.</span>Presiona "Descargar mi logro" para guardar tu certificado como imagen, y "Avisar a mi profesor" para generar una imagen del resultado y compartirla o enviarla por correo.</span>
+    </div>
+
+    <p class="hint">💡 Puedes rejugar cualquier nivel las veces que quieras. Tu progreso se guarda en <b>este mismo navegador y dispositivo</b>. Abre siempre el archivo descargado (no la vista previa de Drive).</p>
+  </div>
+
+  <!-- ============ PANEL SIMULADOR ============ -->
+  <div id="panelSim" class="panel visible">
+    <div class="subtabs">
+      <button id="tabInter" class="active" onclick="showSubTab('inter')">➕➖ Interacciones</button>
+      <button id="tabCoulomb" onclick="showSubTab('coulomb')">📐 Ley de Coulomb</button>
+      <button id="tabGeo" onclick="showSubTab('geo')">△□ Geometría y vectores</button>
+    </div>
+
+    <!-- --- INTERACCIONES --- -->
+    <div id="subInter" class="sub-panel visible">
+      <div class="form-row">
+        <label>Carga 1:</label>
+        <select id="c1Type" onchange="updateInteraction()">
+          <option value="+">Positiva (+)</option>
+          <option value="-">Negativa (−)</option>
+          <option value="0">Neutra (0)</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <label>Carga 2:</label>
+        <select id="c2Type" onchange="updateInteraction()">
+          <option value="-">Negativa (−)</option>
+          <option value="+">Positiva (+)</option>
+          <option value="0">Neutra (0)</option>
+        </select>
+      </div>
+      <div class="charge-demo" id="chargeDemo"></div>
+      <div class="eq-display" id="interResult">Elige dos cargas para ver la interacción</div>
+      <div class="steps-box" id="interSteps" style="display:none;"></div>
+      <p class="hint">💡 Cargas del mismo signo se repelen. Cargas de signo contrario se atraen. Una carga neutra no ejerce fuerza electrostática neta.</p>
+    </div>
+
+    <!-- --- LEY DE COULOMB --- -->
+    <div id="subCoulomb" class="sub-panel">
+      <div class="const-box">k = 9 × 10<sup>9</sup> N·m²/C² &nbsp;|&nbsp; F = k · |q₁ · q₂| / r²</div>
+      <div class="form-row">
+        <label>q₁ (C):</label>
+        <input type="text" id="q1Input" placeholder="Ej: 2e-6 o 0.000002" value="2e-6">
+      </div>
+      <div class="form-row">
+        <label>q₂ (C):</label>
+        <input type="text" id="q2Input" placeholder="Ej: -3e-6" value="-3e-6">
+      </div>
+      <div class="form-row">
+        <label>r (m):</label>
+        <input type="text" id="rInput" placeholder="Ej: 0.05" value="0.05">
+      </div>
+      <div class="action-row">
+        <button onclick="calcCoulomb()">Calcular fuerza F</button>
+      </div>
+      <div class="eq-display" id="coulombResult">Completa los valores y pulsa Calcular</div>
+      <div class="steps-box" id="coulombSteps" style="display:none;"></div>
+      <p class="hint">💡 Puedes escribir potencias de 5 como 2e-6 (equivale a 2×10⁻⁶). El signo de las cargas indica atracción o repulsión, pero F se reporta en valor absoluto.</p>
+    </div>
+
+    <!-- --- GEOMETRÍA Y VECTORES --- -->
+    <div id="subGeo" class="sub-panel">
+      <div class="const-box">F = k · |q₁ q₂| / r² &nbsp;|&nbsp; Se recomienda descomponer fuerzas en componentes (vectores)</div>
+      <div class="form-row">
+        <label>Figura:</label>
+        <select id="geoShape" onchange="updateGeoUI()">
+          <option value="right">Triángulo rectángulo</option>
+          <option value="equil">Triángulo equilátero</option>
+          <option value="square">Cuadrado</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <label>Lado / cateto a (m):</label>
+        <input type="text" id="geoSide" value="0.1" placeholder="Ej: 0.1">
+      </div>
+      <div class="form-row" id="geoSideBRow" style="display:none;">
+        <label>Cateto b (m):</label>
+        <input type="text" id="geoSideB" value="0.1" placeholder="Ej: 0.1">
+      </div>
+      <div class="form-row">
+        <label>q₁ (C) — vértice A:</label>
+        <input type="text" id="geoQ1" value="2e-6" placeholder="Ej: 2e-6">
+      </div>
+      <div class="form-row">
+        <label>q₂ (C) — vértice B:</label>
+        <input type="text" id="geoQ2" value="2e-6" placeholder="Ej: 2e-6">
+      </div>
+      <div class="form-row">
+        <label>q₃ (C) — vértice C:</label>
+        <input type="text" id="geoQ3" value="2e-6" placeholder="Ej: 2e-6">
+      </div>
+      <div class="form-row" id="geoQ4Row" style="display:none;">
+        <label>q₄ (C) — vértice D:</label>
+        <input type="text" id="geoQ4" value="2e-6" placeholder="Ej: 2e-6">
+      </div>
+      <div class="form-row">
+        <label>Calcular fuerza neta sobre:</label>
+        <select id="geoTarget">
+          <option value="1">Carga q₁ (A)</option>
+          <option value="2">Carga q₂ (B)</option>
+          <option value="3">Carga q₃ (C)</option>
+        </select>
+      </div>
+      <div class="action-row">
+        <button onclick="calcGeoForce()">Calcular fuerza neta</button>
+      </div>
+      <div class="eq-display" id="geoResult">Elige la figura, las cargas y pulsa Calcular</div>
+      <div class="steps-box" id="geoSteps" style="display:none;"></div>
+      <p class="hint">💡 Puedes resolverlo como prefieras (magnitudes, componentes Fx y Fy, o teorema de Pitágoras). Se sugiere el método de <b>operaciones vectoriales</b>: descomponer cada fuerza en ejes X e Y y sumar componentes.</p>
+    </div>
+  </div>
+
+  <!-- ============ PANEL JUEGO ============ -->
+  <div id="panelGame" class="panel">
+
+    <div id="levelSelectScreen">
+      <p style="text-align:center; color:#fbbf24; font-weight:bold; margin-bottom:10px; font-size:1.05em;">5to año — Sección B</p>
+      <div class="form-row" style="margin-bottom:12px;">
+        <label>Tu nombre:</label>
+        <select id="studentNameSelect">
+          <option value="">— Elige tu nombre —</option>
+          <option value="0">ACOSTA PADROS, ABRAHAM JOSUÉ</option>
+          <option value="1">ÁLVAREZ PÁEZ, DENISMAR VALENTINA</option>
+          <option value="2">APONTE GUEVARA, ORIANNE ISABEL</option>
+          <option value="3">ARAQUE SUBERO, LUIYIMBER EDUARDO</option>
+          <option value="4">BELLO MEDINA, ALEJANDRA NAZARETH</option>
+          <option value="5">BRICEÑO RODRÍGUEZ, DUARNIELYS VALENTINA</option>
+          <option value="6">BURGOS GARCÍA, DANIELA STEFANIA</option>
+          <option value="7">BUSTAMANTE SALCEDO, YUSLEIDI BEALI</option>
+          <option value="8">CAMACHO RAMOS, AMANDA MICHELLE</option>
+          <option value="9">CARABALLO PIÑERO, ABIMAEL ABRAHAM</option>
+          <option value="10">CASTILLO PEDRÓN, VICTORIA JOHSIRE</option>
+          <option value="11">DURAND MORALES, KEYBER ALEJANDRO</option>
+          <option value="12">ECHEZURÍA ORDOÑEZ, IAN MARCUS</option>
+          <option value="13">GONZÁLEZ BLANCO, ÁNGEL DAVID</option>
+          <option value="14">GUEVARA INFANTE, GABRIEL ALEXANDER</option>
+          <option value="15">HENRÍQUEZ MARTÍNEZ, JEANISABEL CRISTINA</option>
+          <option value="16">HERNÁNDEZ ARANGUREN, SEBASTIÁN ISAAC</option>
+          <option value="17">LIMA PÉREZ, FABIANA VICTORIA</option>
+          <option value="18">LINARES MORENO, WILMARY VALENTINA</option>
+          <option value="19">MACÍAS BURGOS, JUAN CARLOS</option>
+          <option value="20">MARÍN CARABALLO, MARIANA ESTER</option>
+          <option value="21">MARTÍNEZ RODRÍGUEZ, GILBERLIS ARAIKA</option>
+          <option value="22">MEDINA HERNÁNDEZ, JONATHAN MANUEL</option>
+          <option value="23">NIÑO MERCADO, VÍCTOR MANUEL</option>
+          <option value="24">QUINTERO CALDERÍN, ALESKA DAVIERLYS</option>
+          <option value="25">RAMOS NARVARTE, DIEGO ABRAHAM</option>
+          <option value="26">RODRÍGUEZ FERNÁNDEZ, ISSI VICTORIA</option>
+          <option value="27">SEGOVIA PIAR, SAULYMAR ANAVIC</option>
+          <option value="28">SEQUERA ORDOÑEZ, SAMANTHA STEPHANIA</option>
+          <option value="29">SERRANO SOLÓRZANO, CAMILA ANAILETH</option>
+          <option value="30">TINEO PERDOMO, SOFÍA VALENTINA</option>
+          <option value="31">TISOY TANDIOT, ANDERSON OSMAR</option>
+          <option value="32">TORRES VARGAS, ASHLEY FABIANA</option>
+          <option value="33">URBINA MONTILLA, LEIDIMAR GABRIELA</option>
+          <option value="34">VILLANUEVA PIÑERO, JESÚS GABRIEL</option>
+          <option value="35">VOLCÁN GUDIÑO, BÁRBARA</option>
+          <option value="36">ZAMBRANO TAVAREZ, GEORDALIS GUADALUPE</option>
+        </select>
+      </div>
+      <p style="text-align:center; color:#94a3b8; margin-bottom:14px; font-size:0.9em;">Elige tu nombre de la lista. No se escribe a mano.</p>
+      <h3 style="text-align:center; margin-bottom:14px;">Elige tu nivel</h3>
+      <div class="level-select">
+        <button class="level-btn" data-level="1" onclick="selectLevel(1)">Nivel 1<br><small>Interacciones</small></button>
+        <button class="level-btn locked" data-level="2" onclick="selectLevel(2)"><span class="lock-icon">🔒 </span>Nivel 2<br><small>Calcular F</small></button>
+        <button class="level-btn locked" data-level="3" onclick="selectLevel(3)"><span class="lock-icon">🔒 </span>Nivel 3<br><small>Despejar q o r</small></button>
+        <button class="level-btn locked" data-level="4" onclick="selectLevel(4)"><span class="lock-icon">🔒 </span>Nivel 4<br><small>△□ Vectores y geometría</small></button>
+      </div>
+      <p id="unlockMessage" class="unlock-hint" style="margin-top:12px;">🔒 Completa un nivel para desbloquear el siguiente.</p>
+      <div class="action-row">
+        <button onclick="startGame()">▶ Comenzar</button>
+      </div>
+    </div>
+
+    <div id="playScreen" style="display:none;">
+      <div class="stats">
+        <span>⭐ Puntos: <b id="scoreDisplay">0</b></span>
+        <span>❤️ Vidas: <b id="livesDisplay">3</b></span>
+        <span>Pregunta <b id="qNumDisplay">1</b>/5</span>
+      </div>
+      <div class="progress-bar-outer"><div class="progress-bar-inner" id="progressBar"></div></div>
+
+      <div class="question-box" id="questionText">Cargando...</div>
+
+      <div id="mcArea" class="mc-options" style="display:none;"></div>
+
+      <div id="inputArea" class="answer-area" style="display:none; flex-direction:column; align-items:stretch;">
+        <div style="display:flex; gap:10px; justify-content:center; align-items:center; flex-wrap:wrap; width:100%;">
+          <button type="button" class="btn-sign" id="ansSignBtn" aria-label="Signo negativo">−</button>
+          <span id="ansPrefix" style="font-size:1.1em;"></span>
+          <input type="text" id="ansValue" inputmode="decimal" placeholder="Solo números" autocomplete="off" enterkeyhint="done">
+          <span id="ansUnit" style="font-size:1em; opacity:0.85;"></span>
+        </div>
+        <button type="button" class="btn-negative" id="ansNegBtn">Tocar aquí si el resultado es NEGATIVO (−)</button>
+        <p style="text-align:center;font-size:0.8em;color:#94a3b8;margin:0;">En iPhone el teclado no trae el menos: usa el botón <b>−</b>.</p>
+      </div>
+
+      <div class="feedback" id="feedbackText"></div>
+
+      <div class="action-row">
+        <button id="checkBtn" onclick="checkAnswer()">Verificar</button>
+        <button id="nextBtn" onclick="nextQuestion()" style="display:none;">Siguiente ➜</button>
+      </div>
+    </div>
+
+    <div id="endScreen" class="end-screen" style="display:none;">
+      <h2 id="finalGreeting">🏁 ¡Juego terminado!</h2>
+      <p id="finalScoreText"></p>
+      <p id="finalMsg"></p>
+      <div class="badge" id="badgeText"></div>
+
+      <div id="achievementSection" style="display:none;">
+        <div class="action-row" style="margin-top:20px; flex-wrap:wrap;">
+          <button class="btn-success" onclick="downloadAchievement()">📥 Descargar mi logro</button>
+          <button class="btn-info" onclick="notifyTeacher()">📧 Avisar a mi profesor</button>
+        </div>
+        <p class="achievement-hint">💡 "Descargar mi logro" guarda el certificado. "Avisar a mi profesor" genera la imagen del resultado para compartir (Gmail, etc.) o adjuntar al correo.</p>
+      </div>
+
+      <p id="incompleteHint" class="unlock-hint" style="display:none;">🔒 El certificado y el aviso al profesor se desbloquean al completar los 4 niveles (cada uno con 5 preguntas, sin quedarte sin vidas).</p>
+
+      <div class="action-row" style="margin-top:14px; flex-wrap:wrap; gap:10px; justify-content:center;">
+        <button id="nextLevelBtn" class="btn-success" onclick="goToNextLevel()" style="display:none;">Siguiente nivel ➜</button>
+        <button class="btn-secondary" onclick="backToLevels()">🔄 Jugar de nuevo</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel visible" style="text-align:center; margin-top:20px;">
+    <h3 style="margin-bottom:10px;">📲 Descarga este juego</h3>
+    <p class="hint" style="margin-bottom:14px;">Escanea el código con la cámara de tu teléfono para descargar el archivo y jugar sin conexión.<br><b>Importante:</b> el enlace debe descargar el archivo directamente. Si en cambio se abre una vista previa dentro de Drive, el juego no funcionará (los botones no responden); en ese caso, busca la opción "Descargar" (ícono ⬇ o menú ⋮) y luego abre el archivo ya descargado.</p>
+    <img src="https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=https%3A%2F%2Fdrive.google.com%2Fuc%3Fexport%3Ddownload%26id%3D13HVGS3da3A81pOlUnjochyKvNvH59-FR"
+         alt="Código QR para descargar el juego Carga Eléctrica y Ley de Coulomb"
+         width="220" height="220"
+         style="background:#fff; padding:10px; border-radius:12px; border:2px solid #fbbf24;">
+    <p class="hint" style="margin-top:10px;">O accede directamente: <a href="https://drive.google.com/uc?export=download&id=13HVGS3da3A81pOlUnjochyKvNvH59-FR" target="_blank" style="color:#fbbf24;">enlace de Google Drive</a></p>
+  </div>
+
+  <footer>Carga Eléctrica y Ley de Coulomb · Juego educativo offline · Producido por GILAST</footer>
+</div>
+
+<script>
+const K = 9e9;
+const E = 1.6e-19;
+
+/* ============================================================
+   NAVEGACIÓN
+   ============================================================ */
+
+function abortChallengeIfLeaving() {
+  // Si estaba resolviendo un desafío y cambia a Simulador/Instrucciones,
+  // se reinicia el intento: pierde el progreso de ese intento y los ejercicios cambian.
+  if (!challengeActive) return;
+  try {
+    challengeActive = false;
+    score = 0;
+    lives = 3;
+    questionIndex = 0;
+    answered = false;
+    const play = document.getElementById('playScreen');
+    if (play) play.style.display = 'none';
+    const end = document.getElementById('endScreen');
+    if (end) end.style.display = 'none';
+    const sel = document.getElementById('levelSelectScreen');
+    if (sel) sel.style.display = 'block';
+    if (typeof updateLevelButtons === 'function') updateLevelButtons();
+    alert('⚠️ Saliste del desafío. El intento se reinició y los ejercicios cambiarán al volver a jugar.');
+  } catch (e) {}
+}
+
+function showPanel(name) {
+  if (name !== 'game') {
+    abortChallengeIfLeaving();
+  }
+  document.getElementById('panelInstr').classList.toggle('visible', name === 'instr');
+  document.getElementById('panelSim').classList.toggle('visible', name === 'sim');
+  document.getElementById('panelGame').classList.toggle('visible', name === 'game');
+  if (name === 'game') { try { fillNameSelect(); } catch (e) {} }
+  document.getElementById('btnInstr').classList.toggle('active', name === 'instr');
+  document.getElementById('btnSim').classList.toggle('active', name === 'sim');
+  document.getElementById('btnGame').classList.toggle('active', name === 'game');
+  if (name === 'game') {
+    loadProgress();
+    updateLevelButtons();
+  }
+}
+function showSubTab(name) {
+  document.getElementById('subInter').classList.toggle('visible', name === 'inter');
+  document.getElementById('subCoulomb').classList.toggle('visible', name === 'coulomb');
+  document.getElementById('subGeo').classList.toggle('visible', name === 'geo');
+  document.getElementById('tabInter').classList.toggle('active', name === 'inter');
+  document.getElementById('tabCoulomb').classList.toggle('active', name === 'coulomb');
+  document.getElementById('tabGeo').classList.toggle('active', name === 'geo');
+}
+
+function randInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+function randChoice(arr) { return arr[randInt(0, arr.length - 1)]; }
+function shuffle(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = randInt(0, i);
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+function fmtSci(num, digits = 2) {
+  if (num === 0) return '0';
+  const exp = Math.floor(Math.log10(Math.abs(num)));
+  let coef = num / Math.pow(10, exp);
+  coef = Math.round(coef * Math.pow(10, digits)) / Math.pow(10, digits);
+  if (Math.abs(coef) >= 10) { coef /= 10; return `${coef} × 10<sup>${exp + 1}</sup>`; }
+  if (Math.abs(coef) < 1) { coef *= 10; return `${coef} × 10<sup>${exp - 1}</sup>`; }
+  return `${coef} × 10<sup>${exp}</sup>`;
+}
+function parseNum(str) {
+  if (str === undefined || str === null) return NaN;
+  let s = String(str).trim().replace(',', '.');
+  if (s === '') return NaN;
+  // acepta formatos tipo 9e-1, 9×10^-1, 9 x 10^2
+  s = s.replace(/×/g, 'x').replace(/\s+/g, '');
+  s = s.replace(/x10\^?/gi, 'e').replace(/x10/gi, 'e');
+  return parseFloat(s);
+}
+
+/* ============================================================
+   SIMULADOR - INTERACCIONES
+   ============================================================ */
+function updateInteraction() {
+  const c1 = document.getElementById('c1Type').value;
+  const c2 = document.getElementById('c2Type').value;
+  const demo = document.getElementById('chargeDemo');
+  const res = document.getElementById('interResult');
+  const stepsBox = document.getElementById('interSteps');
+
+  const label = v => v === '+' ? '+' : (v === '-' ? '−' : '0');
+  const cls = v => v === '+' ? 'pos' : (v === '-' ? 'neg' : 'neu');
+  const nombre = v => v === '+' ? 'positiva (+)' : (v === '-' ? 'negativa (−)' : 'neutra (0)');
+
+  let interaction, arrow, steps;
+  if (c1 === '0' || c2 === '0') {
+    interaction = 'No hay fuerza electrostática neta (al menos una carga es neutra).';
+    arrow = '· · ·';
+    steps = [
+      `<b>Carga 1:</b> ${nombre(c1)}`,
+      `<b>Carga 2:</b> ${nombre(c2)}`,
+      `<b>Regla:</b> una carga neutra no tiene exceso ni déficit de electrones (carga neta = 0).`,
+      `Por lo tanto no produce campo eléctrico neto ni fuerza electrostática sobre la otra carga.`,
+      `<b>Conclusión:</b> F = 0 (no hay interacción electrostática neta).`
+    ];
+  } else if (c1 === c2) {
+    interaction = 'Se <b>REPELEN</b> (mismo signo).';
+    arrow = '← →';
+    steps = [
+      `<b>Carga 1:</b> ${nombre(c1)}`,
+      `<b>Carga 2:</b> ${nombre(c2)}`,
+      `<b>Regla fundamental:</b> cargas del <b>mismo signo</b> se repelen.`,
+      c1 === '+'
+        ? `Ambas son positivas → cada una “empuja” a la otra alejándola.`
+        : `Ambas son negativas → cada una “empuja” a la otra alejándola.`,
+      `<b>Conclusión:</b> la fuerza es de <b>repulsión</b> (flechas hacia afuera).`
+    ];
+  } else {
+    interaction = 'Se <b>ATRAEN</b> (signos contrarios).';
+    arrow = '→ ←';
+    steps = [
+      `<b>Carga 1:</b> ${nombre(c1)}`,
+      `<b>Carga 2:</b> ${nombre(c2)}`,
+      `<b>Regla fundamental:</b> cargas de <b>signos contrarios</b> se atraen.`,
+      `Una positiva y una negativa se “jalan” mutuamente.`,
+      `<b>Conclusión:</b> la fuerza es de <b>atracción</b> (flechas hacia adentro).`
+    ];
+  }
+
+  demo.innerHTML = `
+    <div class="charge-ball ${cls(c1)}">${label(c1)}</div>
+    <div class="force-arrow">${arrow}</div>
+    <div class="charge-ball ${cls(c2)}">${label(c2)}</div>
+  `;
+  res.innerHTML = interaction;
+  stepsBox.innerHTML = steps.map((s, i) => `<span class="step-line"><span class="step-num">${i + 1}.</span>${s}</span>`).join('');
+  stepsBox.style.display = 'block';
+}
+updateInteraction();
+
+/* ============================================================
+   SIMULADOR - LEY DE COULOMB
+   ============================================================ */
+function calcCoulomb() {
+  const q1 = parseNum(document.getElementById('q1Input').value);
+  const q2 = parseNum(document.getElementById('q2Input').value);
+  const r = parseNum(document.getElementById('rInput').value);
+  const res = document.getElementById('coulombResult');
+  const stepsBox = document.getElementById('coulombSteps');
+
+  if (isNaN(q1) || isNaN(q2) || isNaN(r) || r === 0) {
+    res.textContent = 'Ingresa valores numéricos válidos (r ≠ 0).';
+    stepsBox.style.display = 'none';
+    return;
+  }
+
+  const prod = q1 * q2;
+  const absProd = Math.abs(prod);
+  const r2 = r * r;
+  const F = K * absProd / r2;
+  const sameSign = (q1 > 0 && q2 > 0) || (q1 < 0 && q2 < 0);
+  const tipo = (q1 === 0 || q2 === 0) ? 'sin fuerza neta' : (sameSign ? 'repulsión' : 'atracción');
+
+  res.innerHTML = `<b>F = ${fmtSci(F)} N</b> (${tipo})`;
+
+  const steps = [
+    `<b>Datos</b>`,
+    `q₁ = ${q1} C`,
+    `q₂ = ${q2} C`,
+    `r = ${r} m`,
+    `k = 9 × 10⁹ N·m²/C²`,
+    `<b>Fórmula de la ley de Coulomb</b>`,
+    `F = k · |q₁ · q₂| / r²`,
+    `<b>Producto de las cargas</b>`,
+    `q₁ · q₂ = (${q1}) · (${q2}) = ${prod}`,
+    `|q₁ · q₂| = |${prod}| = ${absProd}`,
+    `<b>Cuadrado de la distancia</b>`,
+    `r² = (${r})² = ${r2}`,
+    `<b>Sustitución</b>`,
+    `F = (9 × 10⁹) · (${absProd}) / (${r2})`,
+    `F = ${(K * absProd)} / ${r2}`,
+    `F = <b>${fmtSci(F)} N</b>`,
+    `<b>Interpretación del signo</b>`,
+    sameSign
+      ? `q₁ y q₂ tienen el mismo signo → las cargas se <b>repelen</b>.`
+      : (q1 === 0 || q2 === 0)
+        ? `Al menos una carga es cero → <b>no hay fuerza electrostática neta</b>.`
+        : `q₁ y q₂ tienen signos contrarios → las cargas se <b>atraen</b>.`,
+    `<b>Resultado final:</b> magnitud F = ${fmtSci(F)} N (${tipo}).`
+  ];
+
+  stepsBox.innerHTML = steps.map((s, i) => `<span class="step-line"><span class="step-num">${i + 1}.</span>${s}</span>`).join('');
+  stepsBox.style.display = 'block';
+}
+
+/* ============================================================
+   SIMULADOR - GEOMETRÍA Y VECTORES
+   ============================================================ */
+function updateGeoUI() {
+  const shapeEl = document.getElementById('geoShape');
+  const target = document.getElementById('geoTarget');
+  const sideB = document.getElementById('geoSideBRow');
+  const q4row = document.getElementById('geoQ4Row');
+  const res = document.getElementById('geoResult');
+  const steps = document.getElementById('geoSteps');
+  if (!shapeEl || !target) return;
+  const shape = shapeEl.value;
+  if (sideB) sideB.style.display = shape === 'right' ? 'flex' : 'none';
+  if (q4row) q4row.style.display = shape === 'square' ? 'flex' : 'none';
+  try {
+    const opts = target.options ? Array.from(target.options) : [];
+    const has4 = opts.some(o => o.value === '4');
+    if (shape === 'square' && !has4) {
+      const opt = document.createElement('option');
+      opt.value = '4'; opt.textContent = 'Carga q₄ (D)';
+      target.appendChild(opt);
+    } else if (shape !== 'square' && has4) {
+      target.remove(target.options.length - 1);
+      if (target.value === '4') target.value = '1';
+    }
+  } catch (e) {}
+  if (res) res.textContent = 'Elige la figura, las cargas y pulsa Calcular';
+  if (steps) steps.style.display = 'none';
+}
+
+function coulombMag(qA, qB, r) {
+  return K * Math.abs(qA * qB) / (r * r);
+}
+
+function calcGeoForce() {
+  const shape = document.getElementById('geoShape').value;
+  const a = parseNum(document.getElementById('geoSide').value);
+  const b = parseNum(document.getElementById('geoSideB').value);
+  const q1 = parseNum(document.getElementById('geoQ1').value);
+  const q2 = parseNum(document.getElementById('geoQ2').value);
+  const q3 = parseNum(document.getElementById('geoQ3').value);
+  const q4 = parseNum(document.getElementById('geoQ4').value);
+  const target = document.getElementById('geoTarget').value;
+  const res = document.getElementById('geoResult');
+  const stepsBox = document.getElementById('geoSteps');
+
+  if (isNaN(a) || a <= 0 || isNaN(q1) || isNaN(q2) || isNaN(q3)) {
+    res.textContent = 'Ingresa valores válidos (lado > 0 y cargas numéricas).';
+    stepsBox.style.display = 'none';
+    return;
+  }
+  if (shape === 'right' && (isNaN(b) || b <= 0)) {
+    res.textContent = 'Ingresa el cateto b válido.';
+    stepsBox.style.display = 'none';
+    return;
+  }
+  if (shape === 'square' && isNaN(q4)) {
+    res.textContent = 'Ingresa q₄ válida.';
+    stepsBox.style.display = 'none';
+    return;
+  }
+
+  // Posiciones: A en origen, ejes estándar
+  // right: A(0,0), B(a,0), C(0,b)
+  // equil: A(0,0), B(a,0), C(a/2, (√3/2)a)
+  // square: A(0,0), B(a,0), C(a,a), D(0,a)
+  let positions = {};
+  let labels = {};
+  if (shape === 'right') {
+    positions = { 1: [0, 0], 2: [a, 0], 3: [0, b] };
+    labels = { 1: 'A', 2: 'B', 3: 'C' };
+  } else if (shape === 'equil') {
+    const h = (Math.sqrt(3) / 2) * a;
+    positions = { 1: [0, 0], 2: [a, 0], 3: [a / 2, h] };
+    labels = { 1: 'A', 2: 'B', 3: 'C' };
+  } else {
+    positions = { 1: [0, 0], 2: [a, 0], 3: [a, a], 4: [0, a] };
+    labels = { 1: 'A', 2: 'B', 3: 'C', 4: 'D' };
+  }
+
+  const qs = { 1: q1, 2: q2, 3: q3, 4: q4 };
+  const t = parseInt(target, 10);
+  const [tx, ty] = positions[t];
+  let Fx = 0, Fy = 0;
+  const stepLines = [];
+
+  const shapeName = shape === 'right' ? 'triángulo rectángulo' : (shape === 'equil' ? 'triángulo equilátero' : 'cuadrado');
+  stepLines.push(`<b>Figura:</b> ${shapeName}`);
+  stepLines.push(`<b>Objetivo:</b> fuerza neta sobre la carga ${labels[t]} (q = ${qs[t]} C)`);
+  stepLines.push(`<b>Método:</b> operaciones vectoriales (descomponer cada fuerza en Fx y Fy y sumar)`);
+  stepLines.push(`<b>Fórmula de cada fuerza:</b> F = k · |q<sub>a</sub> · q<sub>b</sub>| / r² &nbsp;(k = 9×10⁹)`);
+
+  Object.keys(positions).forEach(key => {
+    const i = parseInt(key, 10);
+    if (i === t) return;
+    const [px, py] = positions[i];
+    const dx = px - tx;
+    const dy = py - ty;
+    const r = Math.sqrt(dx * dx + dy * dy);
+    if (r === 0) return;
+    const Fmag = coulombMag(qs[t], qs[i], r);
+    const ux = dx / r;
+    const uy = dy / r;
+    const sameSign = (qs[t] * qs[i]) > 0;
+    const sx = sameSign ? -ux : ux;
+    const sy = sameSign ? -uy : uy;
+    const fxi = Fmag * sx;
+    const fyi = Fmag * sy;
+    Fx += fxi;
+    Fy += fyi;
+    stepLines.push(`<b>Fuerza de ${labels[i]} sobre ${labels[t]}</b>`);
+    stepLines.push(`Distancia r<sub>${labels[t]}${labels[i]}</sub> = ${r.toFixed(4)} m`);
+    stepLines.push(`F<sub>${labels[t]}${labels[i]}</sub> = (9×10⁹)·|${qs[t]}·${qs[i]}| / (${r.toFixed(4)})² = ${fmtSci(Fmag)} N`);
+    stepLines.push(`Tipo: ${sameSign ? 'repulsión (mismo signo)' : 'atracción (signos contrarios)'}`);
+    stepLines.push(`Componentes: Fx = ${fmtSci(fxi)} N &nbsp;|&nbsp; Fy = ${fmtSci(fyi)} N`);
+  });
+
+  const Fnet = Math.sqrt(Fx * Fx + Fy * Fy);
+
+  res.innerHTML = `<b>|F<sub>neta</sub>| = ${fmtSci(Fnet)} N</b><br>Fx = ${fmtSci(Fx)} N &nbsp;|&nbsp; Fy = ${fmtSci(Fy)} N`;
+  stepLines.push(`<b>Suma de componentes</b>`);
+  stepLines.push(`ΣFx = ${fmtSci(Fx)} N`);
+  stepLines.push(`ΣFy = ${fmtSci(Fy)} N`);
+  stepLines.push(`<b>Magnitud de la fuerza neta</b>`);
+  stepLines.push(`|F<sub>neta</sub>| = √(Fx² + Fy²) = √((${fmtSci(Fx)})² + (${fmtSci(Fy)})²)`);
+  stepLines.push(`|F<sub>neta</sub>| = <b>${fmtSci(Fnet)} N</b>`);
+
+  stepsBox.innerHTML = stepLines.map((s, i) => `<span class="step-line"><span class="step-num">${i + 1}.</span>${s}</span>`).join('');
+  stepsBox.style.display = 'block';
+}
+updateGeoUI();
+
+/* ============================================================
+   MODO DESAFÍOS
+   ============================================================ */
+let currentLevel = 1;
+let score = 0;
+let lives = 3;
+let questionIndex = 0;
+let totalQuestions = 5;
+let currentAnswer = null;
+let currentType = null;
+let answered = false;
+let challengeActive = false;
+let selectedMCButton = null;
+let selectedMCValue = null;
+let answerTolerance = 0.08; // relativo para números científicos
+
+const STORAGE_KEY = 'cargaCoulomb_maxUnlocked';
+let maxUnlockedLevel = 1;
+
+function loadProgress() {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      const n = parseInt(saved, 10);
+      if (!isNaN(n) && n >= 1 && n <= 4) maxUnlockedLevel = n;
+    }
+  } catch (e) {
+    console.warn('No se pudo leer progreso:', e);
+  }
+}
+function saveProgress() {
+  try {
+    localStorage.setItem(STORAGE_KEY, String(maxUnlockedLevel));
+    return true;
+  } catch (e) {
+    console.warn('No se pudo guardar progreso:', e);
+    return false;
+  }
+}
+function unlockNextLevel() {
+  if (maxUnlockedLevel < 4) {
+    maxUnlockedLevel = Math.max(maxUnlockedLevel, currentLevel + 1);
+    saveProgress();
+  }
+}
+function updateLevelButtons() {
+  document.querySelectorAll('.level-btn').forEach(btn => {
+    const lvl = parseInt(btn.getAttribute('data-level'), 10);
+    if (lvl <= maxUnlockedLevel) btn.classList.remove('locked');
+    else btn.classList.add('locked');
+  });
+  const msg = document.getElementById('unlockMessage');
+  if (msg) {
+    if (maxUnlockedLevel >= 4) msg.textContent = '🏆 ¡Todos los niveles desbloqueados!';
+    else msg.textContent = `🔓 Niveles desbloqueados: 1 a ${maxUnlockedLevel}. Completa el nivel ${maxUnlockedLevel} para desbloquear el siguiente.`;
+  }
+}
+function selectLevel(lvl) {
+  if (lvl > maxUnlockedLevel) {
+    const fb = document.getElementById('unlockMessage');
+    if (fb) fb.textContent = `🔒 El Nivel ${lvl} está bloqueado. Completa el Nivel ${maxUnlockedLevel} primero.`;
+    return;
+  }
+  currentLevel = lvl;
+  document.querySelectorAll('.level-btn').forEach(b => b.classList.remove('selected'));
+  const btn = document.querySelector(`.level-btn[data-level="${lvl}"]`);
+  if (btn) btn.classList.add('selected');
+}
+loadProgress();
+updateLevelButtons();
+selectLevel(1);
+
+/* ---- Generadores de preguntas ---- */
+function generateQuestion(level) {
+  if (level === 1) return genInteractionQ();
+  if (level === 2) return genForceQ();
+  if (level === 3) return genSolveQR();
+  if (level === 4) return genGeoVectorQ();
+}
+
+function qCard(datosHtml, askHtml, formulaHtml, tipHtml) {
+  let h = `<div class="q-block"><span class="q-label">Datos</span><div class="q-datos">${datosHtml}</div></div>`;
+  h += `<div class="q-block"><span class="q-label">Pregunta</span><div class="q-ask">${askHtml}</div></div>`;
+  if (formulaHtml) h += `<div class="q-formula">📐 <b>Fórmula:</b> ${formulaHtml}</div>`;
+  if (tipHtml) h += `<div class="q-tip">💡 ${tipHtml}</div>`;
+  return h;
+}
+
+function genInteractionQ() {
+  const types = [
+    { a: '+', b: '+', ans: 'Se repelen', why: 'Mismo signo → se repelen' },
+    { a: '−', b: '−', ans: 'Se repelen', why: 'Mismo signo → se repelen' },
+    { a: '+', b: '−', ans: 'Se atraen', why: 'Signos opuestos → se atraen' },
+    { a: '−', b: '+', ans: 'Se atraen', why: 'Signos opuestos → se atraen' },
+    { a: '+', b: 'neutra (0)', ans: 'No hay fuerza neta', why: 'Si una carga es cero/neutra, F ≈ 0' },
+    { a: 'neutra (0)', b: '−', ans: 'No hay fuerza neta', why: 'Si una carga es cero/neutra, F ≈ 0' },
+  ];
+  const t = randChoice(types);
+  const text = qCard(
+    `Carga 1: <b>${t.a}</b><br>Carga 2: <b>${t.b}</b>`,
+    `¿Qué ocurre entre estas dos cargas?`,
+    `Cargas del <b>mismo signo</b> se <b>repelen</b>. Signos <b>opuestos</b> se <b>atraen</b>.`,
+    t.why
+  );
+  const options = shuffle(['Se atraen', 'Se repelen', 'No hay fuerza neta', 'Se anulan mutuamente']);
+  return { text, type: 'mc', answer: t.ans, options };
+}
+
+function genForceQ() {
+  // Valores que dan fuerzas con orden de magnitud claro
+  const q1u = randChoice([1, 2, 3, 4, 5]);
+  const q2u = randChoice([1, 2, 3, 4, 5]);
+  const sign1 = randChoice([1, -1]);
+  const sign2 = randChoice([1, -1]);
+  const r = randChoice([0.1, 0.2, 0.5, 1, 2]);
+  const q1 = sign1 * q1u * 1e-6;
+  const q2 = sign2 * q2u * 1e-6;
+  const F = K * Math.abs(q1 * q2) / (r * r);
+  const tipo = (sign1 * sign2 > 0) ? 'repulsión (mismo signo)' : 'atracción (signos opuestos)';
+  const s1 = sign1 > 0 ? '+' : '−';
+  const s2 = sign2 > 0 ? '+' : '−';
+
+  const text = qCard(
+    `q₁ = <b>${s1}${q1u} µC</b><br>q₂ = <b>${s2}${q2u} µC</b><br>Distancia r = <b>${r} m</b><br>k = <b>9×10⁹</b> N·m²/C²`,
+    `Calcula la <b>magnitud</b> de la fuerza eléctrica F (en newtons).`,
+    `F = k · |q₁| · |q₂| / r²<br>Pasa µC a C: 1 µC = 1×10⁻⁶ C`,
+    `El tipo de fuerza es: <b>${tipo}</b>. Escribe solo el número de F (puedes usar notación científica, ej. 2.25e-1).`
+  );
+  return {
+    text, type: 'input', answer: F,
+    prefix: 'F ≈', unit: 'N',
+    hintAnswer: `${fmtSci(F)} N (${tipo})`
+  };
+}
+
+function genSolveQR() {
+  const mode = randChoice(['r', 'q']);
+  const q1u = randChoice([2, 3, 4, 5]);
+  const q2u = randChoice([2, 3, 4, 5]);
+  const r = randChoice([0.1, 0.2, 0.5, 1]);
+  const q1 = q1u * 1e-6;
+  const q2 = q2u * 1e-6;
+  const F = K * (q1 * q2) / (r * r);
+
+  if (mode === 'r') {
+    const text = qCard(
+      `q₁ = <b>${q1u} µC</b><br>q₂ = <b>${q2u} µC</b><br>F = <b>${fmtSci(F)} N</b> (repulsión)<br>k = <b>9×10⁹</b>`,
+      `¿Cuál es la distancia <b>r</b> entre las cargas?`,
+      `F = k · q₁ · q₂ / r²  →  r = √(k · q₁ · q₂ / F)<br>Recuerda: q en coulomb (×10⁻⁶).`,
+      `La respuesta debe salir cerca de un valor simple (0.1, 0.2, 0.5 o 1 m).`
+    );
+    return { text, type: 'input', answer: r, prefix: 'r ≈', unit: 'm', hintAnswer: `${r} m` };
+  }
+
+  const text = qCard(
+    `q₁ = <b>${q1u} µC</b><br>r = <b>${r} m</b><br>F = <b>${fmtSci(F)} N</b><br>k = <b>9×10⁹</b>`,
+    `¿Cuánto vale la otra carga <b>|q₂|</b> en microcoulomb (µC)?`,
+    `F = k · |q₁| · |q₂| / r²  →  |q₂| = F · r² / (k · |q₁|)`,
+    `Escribe el número en µC (ej. 3 o 4), no en coulomb.`
+  );
+  return { text, type: 'input', answer: q2u, prefix: '|q₂| ≈', unit: 'µC', hintAnswer: `${q2u} µC` };
+}
+
+function genGeoVectorQ() {
+  // Solo casos más claros para 5to: dos cargas en línea O tres en triángulo equilátero
+  const shape = randChoice(['line', 'equil', 'right']);
+  const qu = randChoice([1, 2, 3, 4]);
+  const a = randChoice([0.1, 0.2, 0.5, 1]);
+  const q = qu * 1e-6;
+
+  if (shape === 'line') {
+    // q, q, q en línea: A —a— B —a— C. Fuerza neta sobre B (centro)
+    // Sobre B: F_BA a la izquierda, F_BC a la derecha, iguales → Fneta = 0
+    // Better: force on end charge A: from B (repel right) + from C (repel right, weaker)
+    const Fnear = K * q * q / (a * a);
+    const Ffar = K * q * q / ((2 * a) * (2 * a));
+    const Fnet = Fnear + Ffar;
+    const text = qCard(
+      `Tres cargas iguales <b>+${qu} µC</b> alineadas:<br>` +
+      `A —— ${a} m —— B —— ${a} m —— C<br>` +
+      `Todas positivas (se repelen). k = 9×10⁹`,
+      `¿Cuál es la magnitud de la fuerza neta sobre la carga del <b>extremo A</b>?`,
+      `Sobre A: F<sub>AB</sub> = k q² / a² (hacia afuera) y F<sub>AC</sub> = k q² / (2a)² (misma dirección).<br>` +
+      `|F<sub>neta</sub>| = F<sub>AB</sub> + F<sub>AC</sub>`,
+      `Como están en línea y se repelen, las dos fuerzas sobre A apuntan al mismo lado: se <b>suman</b>.`
+    );
+    return { text, type: 'input', answer: Fnet, prefix: '|Fneta| ≈', unit: 'N', hintAnswer: `${fmtSci(Fnet)} N` };
+  }
+
+  if (shape === 'equil') {
+    // Tres +q en equilátero: |Fneta| = k q²/a²  (resultado clásico)
+    const Fnet = K * q * q / (a * a);
+    const text = qCard(
+      `Tres cargas iguales <b>+${qu} µC</b> en los vértices de un <b>triángulo equilátero</b>.<br>` +
+      `Lado a = <b>${a} m</b>. k = 9×10⁹`,
+      `¿Cuál es la magnitud de la fuerza neta sobre <b>una</b> de las tres cargas?`,
+      `Cada par: F = k q² / a².<br>` +
+      `Sobre una carga hay 2 fuerzas iguales a 60°.<br>` +
+      `|F<sub>neta</sub>| = F = k q² / a²`,
+      `En el equilátero con 3 cargas iguales, |Fneta| sale igual a la fuerza de un solo par (k q² / a²).`
+    );
+    return { text, type: 'input', answer: Fnet, prefix: '|Fneta| ≈', unit: 'N', hintAnswer: `${fmtSci(Fnet)} N` };
+  }
+
+  // Rectángulo isósceles: catetos a,a; fuerza sobre ángulo recto = √2 · kq²/a²
+  const Fpair = K * q * q / (a * a);
+  const Fnet = Fpair * Math.SQRT2;
+  const text = qCard(
+    `Tres cargas <b>+${qu} µC</b> en un triángulo <b>rectángulo isósceles</b>.<br>` +
+    `Catetos: <b>${a} m</b> y <b>${a} m</b>. k = 9×10⁹`,
+    `¿Cuál es |F<sub>neta</sub>| sobre la carga del <b>ángulo recto</b>?`,
+    `Las dos fuerzas perpendiculares valen cada una F = k q² / a².<br>` +
+    `|F<sub>neta</sub>| = √(F² + F²) = F√2`,
+    `Dibuja el ángulo recto: una flecha horizontal y otra vertical del mismo tamaño; la diagonal es F√2.`
+  );
+  return { text, type: 'input', answer: Fnet, prefix: '|Fneta| ≈', unit: 'N', hintAnswer: `${fmtSci(Fnet)} N` };
+}
+
+/* ---- Flujo del juego ---- */
+const STUDENT_ROSTER = {
+  "B": [
+    {name: 'ACOSTA PADROS, ABRAHAM JOSUÉ', code: 'MD5-HM3-HJR'},
+    {name: 'ÁLVAREZ PÁEZ, DENISMAR VALENTINA', code: '5PV-92H-CGN'},
+    {name: 'APONTE GUEVARA, ORIANNE ISABEL', code: 'XU4-RFK-8LH'},
+    {name: 'ARAQUE SUBERO, LUIYIMBER EDUARDO', code: '79X-5R9-82Y'},
+    {name: 'BELLO MEDINA, ALEJANDRA NAZARETH', code: 'RG4-G5J-BDH'},
+    {name: 'BRICEÑO RODRÍGUEZ, DUARNIELYS VALENTINA', code: 'ACS-4LA-26T'},
+    {name: 'BURGOS GARCÍA, DANIELA STEFANIA', code: 'JQ6-QHU-2QV'},
+    {name: 'BUSTAMANTE SALCEDO, YUSLEIDI BEALI', code: 'C7C-VA7-FE9'},
+    {name: 'CAMACHO RAMOS, AMANDA MICHELLE', code: 'LRX-L36-R4E'},
+    {name: 'CARABALLO PIÑERO, ABIMAEL ABRAHAM', code: 'R6H-9CL-J65'},
+    {name: 'CASTILLO PEDRÓN, VICTORIA JOHSIRE', code: '84Q-EA8-3UK'},
+    {name: 'DURAND MORALES, KEYBER ALEJANDRO', code: '6SF-ZJD-GHT'},
+    {name: 'ECHEZURÍA ORDOÑEZ, IAN MARCUS', code: '5AU-NGA-VRK'},
+    {name: 'GONZÁLEZ BLANCO, ÁNGEL DAVID', code: 'K95-VVP-HM9'},
+    {name: 'GUEVARA INFANTE, GABRIEL ALEXANDER', code: 'EJ9-94Y-5NV'},
+    {name: 'HENRÍQUEZ MARTÍNEZ, JEANISABEL CRISTINA', code: 'WA3-H53-GMA'},
+    {name: 'HERNÁNDEZ ARANGUREN, SEBASTIÁN ISAAC', code: 'FDL-JFX-NLC'},
+    {name: 'LIMA PÉREZ, FABIANA VICTORIA', code: 'PKV-ZME-HXQ'},
+    {name: 'LINARES MORENO, WILMARY VALENTINA', code: 'Y59-7S5-UGE'},
+    {name: 'MACÍAS BURGOS, JUAN CARLOS', code: 'BGS-Z8B-RFE'},
+    {name: 'MARÍN CARABALLO, MARIANA ESTER', code: 'YSL-6XV-75N'},
+    {name: 'MARTÍNEZ RODRÍGUEZ, GILBERLIS ARAIKA', code: '8CM-MVF-SZX'},
+    {name: 'MEDINA HERNÁNDEZ, JONATHAN MANUEL', code: 'EVV-RNF-92E'},
+    {name: 'NIÑO MERCADO, VÍCTOR MANUEL', code: 'ZMD-DW5-UJX'},
+    {name: 'QUINTERO CALDERÍN, ALESKA DAVIERLYS', code: '9XU-T3N-R9V'},
+    {name: 'RAMOS NARVARTE, DIEGO ABRAHAM', code: 'CPB-SQM-92E'},
+    {name: 'RODRÍGUEZ FERNÁNDEZ, ISSI VICTORIA', code: 'HVZ-FCV-QAW'},
+    {name: 'SEGOVIA PIAR, SAULYMAR ANAVIC', code: 'BA5-TDB-KTN'},
+    {name: 'SEQUERA ORDOÑEZ, SAMANTHA STEPHANIA', code: 'YEH-PE9-YDP'},
+    {name: 'SERRANO SOLÓRZANO, CAMILA ANAILETH', code: 'N8X-8JV-P9C'},
+    {name: 'TINEO PERDOMO, SOFÍA VALENTINA', code: 'G9M-RBD-2NZ'},
+    {name: 'TISOY TANDIOT, ANDERSON OSMAR', code: '2NK-DXW-LR9'},
+    {name: 'TORRES VARGAS, ASHLEY FABIANA', code: 'F9Y-K9C-7G4'},
+    {name: 'URBINA MONTILLA, LEIDIMAR GABRIELA', code: 'F95-YB4-USE'},
+    {name: 'VILLANUEVA PIÑERO, JESÚS GABRIEL', code: 'M78-RL3-FK6'},
+    {name: 'VOLCÁN GUDIÑO, BÁRBARA', code: '2QU-QWM-649'},
+    {name: 'ZAMBRANO TAVAREZ, GEORDALIS GUADALUPE', code: '2YZ-74Y-FN9'},
+  ],
+};
+
+let studentCode = '';
+
+function fillNameSelect() {
+  const sel = document.getElementById('studentNameSelect');
+  if (!sel) return;
+  sel.innerHTML = '';
+  const list = (STUDENT_ROSTER && STUDENT_ROSTER['B']) || [];
+  const opt0 = document.createElement('option');
+  opt0.value = '';
+  opt0.textContent = '— Elige tu nombre —';
+  sel.appendChild(opt0);
+  list.forEach(function(st, idx) {
+    const opt = document.createElement('option');
+    opt.value = String(idx);
+    opt.textContent = st.name;
+    sel.appendChild(opt);
+  });
+}
+
+function getSelectedStudent() {
+  const sel = document.getElementById('studentNameSelect');
+  if (!sel || sel.value === '') return null;
+  const list = (STUDENT_ROSTER && STUDENT_ROSTER['B']) || [];
+  const idx = parseInt(sel.value, 10);
+  if (isNaN(idx) || idx < 0 || idx >= list.length) return null;
+  return { section: 'B', name: list[idx].name, code: list[idx].code };
+}
+
+let studentName = 'Estudiante';
+let studentSection = 'B';
+let lastHintAnswer = '';
+
+function startGame() {
+  if (currentLevel > maxUnlockedLevel) {
+    const msg = document.getElementById('unlockMessage');
+    if (msg) msg.textContent = `🔒 Ese nivel está bloqueado. Completa el Nivel ${maxUnlockedLevel} primero.`;
+    return;
+  }
+  const st = getSelectedStudent();
+  if (!st) {
+    const msg = document.getElementById('unlockMessage');
+    if (msg) msg.textContent = '⚠️ Elige tu nombre de la lista antes de comenzar.';
+    alert('Elige tu nombre de la lista.');
+    return;
+  }
+  studentName = st.name;
+  studentSection = 'B';
+  studentCode = st.code;
+  lastVerifyCode = st.code;
+  try {
+    const ni = document.getElementById('studentNameSelect');
+    if (ni) ni.disabled = true;
+  } catch (e) {}
+  score = 0; lives = 3; questionIndex = 0; answered = false;
+  document.getElementById('levelSelectScreen').style.display = 'none';
+  document.getElementById('endScreen').style.display = 'none';
+  document.getElementById('playScreen').style.display = 'block';
+  challengeActive = true;
+  loadQuestion();
+}
+
+function loadQuestion() {
+  answered = false;
+  document.getElementById('feedbackText').textContent = '';
+  document.getElementById('checkBtn').style.display = 'inline-block';
+  document.getElementById('nextBtn').style.display = 'none';
+  document.getElementById('checkBtn').disabled = false;
+  selectedMCButton = null; selectedMCValue = null;
+
+  const q = generateQuestion(currentLevel);
+  if (!q) {
+    document.getElementById('questionText').textContent = 'No se pudo generar la pregunta. Toca Siguiente o vuelve a niveles.';
+    document.getElementById('checkBtn').style.display = 'none';
+    document.getElementById('nextBtn').style.display = 'inline-block';
+    return;
+  }
+  currentAnswer = q.answer;
+  currentType = q.type;
+  lastHintAnswer = q.hintAnswer || String(q.answer);
+
+  document.getElementById('questionText').innerHTML = q.text;
+  document.getElementById('scoreDisplay').textContent = score;
+  document.getElementById('livesDisplay').textContent = '❤️'.repeat(lives) || '💀';
+  document.getElementById('qNumDisplay').textContent = questionIndex + 1;
+  document.getElementById('progressBar').style.width = `${(questionIndex / totalQuestions) * 100}%`;
+
+  const mcArea = document.getElementById('mcArea');
+  const inputArea = document.getElementById('inputArea');
+
+  if (q.type === 'mc') {
+    mcArea.style.display = 'grid';
+    inputArea.style.display = 'none';
+    mcArea.innerHTML = '';
+    q.options.forEach(opt => {
+      const btn = document.createElement('button');
+      btn.textContent = opt;
+      btn.onclick = () => selectMC(btn, opt);
+      mcArea.appendChild(btn);
+    });
+  } else {
+    mcArea.style.display = 'none';
+    inputArea.style.display = 'flex';
+    document.getElementById('ansValue').value = '';
+    document.getElementById('ansValue').disabled = false;
+    document.getElementById('ansPrefix').textContent = q.prefix || '';
+    document.getElementById('ansUnit').textContent = q.unit || '';
+    wireAnsSignControls();
+  }
+}
+
+function selectMC(btn, val) {
+  if (answered) return;
+  document.querySelectorAll('#mcArea button').forEach(b => b.style.outline = 'none');
+  btn.style.outline = '3px solid #ffcc00';
+  selectedMCButton = btn;
+  selectedMCValue = val;
+}
+
+
+function toggleAnsSign() {
+  const inp = document.getElementById('ansValue');
+  if (!inp || inp.disabled) return;
+  let v = (inp.value || '').trim().replace(/−/g, '-').replace(',', '.');
+  if (!v || v === '-') { inp.value = '-'; }
+  else if (v.startsWith('-')) { inp.value = v.slice(1); }
+  else { inp.value = '-' + v.replace(/^\+/, ''); }
+  syncAnsSignUI();
+}
+function syncAnsSignUI() {
+  const inp = document.getElementById('ansValue');
+  const negBtn = document.getElementById('ansNegBtn');
+  if (!inp) return;
+  const isNeg = (inp.value || '').trim().startsWith('-') || (inp.value || '').trim().startsWith('−');
+  inp.classList.toggle('is-neg', isNeg);
+  if (negBtn) {
+    negBtn.classList.toggle('is-neg', isNeg);
+    negBtn.textContent = isNeg
+      ? 'Resultado NEGATIVO activado (tocar para quitar)'
+      : 'Tocar aquí si el resultado es NEGATIVO (−)';
+  }
+}
+function wireAnsSignControls() {
+  const inp = document.getElementById('ansValue');
+  const signBtn = document.getElementById('ansSignBtn');
+  const negBtn = document.getElementById('ansNegBtn');
+  if (signBtn) signBtn.onclick = function(e){ e.preventDefault(); toggleAnsSign(); };
+  if (negBtn) negBtn.onclick = function(e){ e.preventDefault(); toggleAnsSign(); };
+  if (inp) {
+    inp.oninput = function() {
+      let v = inp.value.replace(/−/g, '-').replace(/[^0-9.eE+\-,]/g, '');
+      // allow scientific notation and leading minus
+      inp.value = v;
+      syncAnsSignUI();
+    };
+  }
+  syncAnsSignUI();
+}
+
+function checkAnswer() {
+  if (answered) return;
+  let isCorrect = false;
+
+  if (currentType === 'mc') {
+    if (!selectedMCButton) {
+      document.getElementById('feedbackText').textContent = 'Selecciona una opción primero';
+      document.getElementById('feedbackText').className = 'feedback bad';
+      return;
+    }
+    isCorrect = selectedMCValue === currentAnswer;
+    document.querySelectorAll('#mcArea button').forEach(b => {
+      if (b.textContent === currentAnswer) b.classList.add('correct');
+      else if (b === selectedMCButton && !isCorrect) b.classList.add('wrong');
+      b.disabled = true;
+    });
+  } else {
+    const val = parseNum(document.getElementById('ansValue').value);
+    if (isNaN(val)) {
+      document.getElementById('feedbackText').textContent = 'Escribe un número válido';
+      document.getElementById('feedbackText').className = 'feedback bad';
+      return;
+    }
+    const tol = Math.max(Math.abs(currentAnswer) * answerTolerance, 0.05);
+    isCorrect = Math.abs(val - currentAnswer) <= tol;
+  }
+
+  answered = true;
+  const fb = document.getElementById('feedbackText');
+  if (isCorrect) {
+    score += 10 * currentLevel;
+    fb.textContent = '✅ ¡Correcto!';
+    fb.className = 'feedback ok';
+  } else {
+    lives -= 1;
+    fb.innerHTML = `❌ Incorrecto. Respuesta: <b>${lastHintAnswer}</b>`;
+    fb.className = 'feedback bad';
+  }
+
+  document.getElementById('scoreDisplay').textContent = score;
+  document.getElementById('livesDisplay').textContent = '❤️'.repeat(Math.max(lives, 0)) || '💀';
+  document.getElementById('checkBtn').style.display = 'none';
+  document.getElementById('nextBtn').style.display = 'inline-block';
+  if (lives <= 0 || questionIndex + 1 >= totalQuestions) {
+    document.getElementById('nextBtn').textContent = 'Ver resultado ➜';
+  } else {
+    document.getElementById('nextBtn').textContent = 'Siguiente ➜';
+  }
+}
+
+function nextQuestion() {
+  questionIndex++;
+  if (lives <= 0 || questionIndex >= totalQuestions) {
+    endGame();
+    return;
+  }
+  loadQuestion();
+}
+
+let lastBadge = '';
+let lastVerifyCode = '';
+let lastScore = 0;
+let finalGrade20 = 0;
+let totalPointsAllLevels = 0;
+const SCORES_KEY = 'cargaCoulomb_levelScores';
+const MAX_TOTAL_POINTS = 500; // 5 preguntas/nivel: 50+100+150+200
+let levelScores = { 1: 0, 2: 0, 3: 0, 4: 0 };
+
+function loadLevelScores() {
+  try {
+    const s = localStorage.getItem(SCORES_KEY);
+    if (s) {
+      const parsed = JSON.parse(s);
+      levelScores = { 1: 0, 2: 0, 3: 0, 4: 0, ...parsed };
+    }
+  } catch (e) {}
+}
+function saveLevelScores() {
+  try {
+    localStorage.setItem(SCORES_KEY, JSON.stringify(levelScores));
+    return true;
+  } catch (e) {
+    console.warn('No se pudieron guardar puntajes:', e);
+    return false;
+  }
+}
+function computeGrade20() {
+  totalPointsAllLevels = [1, 2, 3, 4].reduce((sum, L) => sum + (levelScores[L] || 0), 0);
+  // 500 pts máx (5×10×1 + 5×20 + 5×30 + 5×40) → 20/20
+  let g = Math.round((totalPointsAllLevels / MAX_TOTAL_POINTS) * 20);
+  if (totalPointsAllLevels > 0 && g < 1) g = 1;
+  if (g > 20) g = 20;
+  finalGrade20 = g;
+  return g;
+}
+loadLevelScores();
+
+function endGame() {
+  challengeActive = false;
+  document.getElementById('playScreen').style.display = 'none';
+  document.getElementById('endScreen').style.display = 'block';
+  document.getElementById('progressBar').style.width = '100%';
+
+  const completedAll = lives > 0;
+
+  document.getElementById('finalGreeting').textContent = completedAll
+    ? `🏁 ¡Felicidades, ${studentName}!`
+    : `🏁 ¡Sigue intentando, ${studentName}!`;
+  document.getElementById('finalScoreText').textContent = `Puntuación de este nivel: ${score} / ${5 * 10 * currentLevel} puntos`;
+
+  let badge = '', msg = '';
+  // Máximo del nivel = 5 preguntas × 10 × número de nivel
+  const maxThisLevel = 5 * 10 * currentLevel;
+  const pct = maxThisLevel > 0 ? (score / maxThisLevel) * 100 : 0;
+  if (!completedAll) {
+    msg = 'Se acabaron las vidas. ¡Vuelve a intentarlo, cada error es aprendizaje!';
+    badge = '🔄 Sigue practicando';
+  } else if (pct >= 90) {
+    msg = '¡Dominas la carga eléctrica y la ley de Coulomb!';
+    badge = '🏆 Experto en Electroestática';
+  } else if (pct >= 60) {
+    msg = 'Muy buen desempeño, con un poco más de práctica lo dominarás.';
+    badge = '🥈 Nivel Avanzado';
+  } else {
+    msg = 'Buen intento. Repasa la fórmula de Coulomb y las interacciones.';
+    badge = '🥉 Nivel en progreso';
+  }
+
+  document.getElementById('finalMsg').textContent = msg;
+  document.getElementById('badgeText').textContent = badge;
+  lastBadge = badge;
+  lastScore = score;
+
+  if (completedAll) {
+    levelScores[currentLevel] = Math.max(levelScores[currentLevel] || 0, score);
+    const okScores = saveLevelScores();
+    computeGrade20();
+    unlockNextLevel();
+    updateLevelButtons();
+    if (!okScores) {
+      const hint = document.getElementById('incompleteHint');
+      if (hint) {
+        hint.style.display = 'block';
+        hint.textContent = '⚠️ No se pudo guardar el progreso en este dispositivo. Usa el mismo navegador y no borres los datos del sitio.';
+      }
+    }
+  }
+
+  const allLevelsDone = completedAll && currentLevel === 4;
+  if (allLevelsDone) {
+    document.getElementById('finalScoreText').textContent =
+      `Puntos totales: ${totalPointsAllLevels} · Nota: ${finalGrade20} / 20`;
+  }
+
+  document.getElementById('achievementSection').style.display = allLevelsDone ? 'block' : 'none';
+  document.getElementById('incompleteHint').style.display = allLevelsDone ? 'none' : 'block';
+
+  const nextLevelBtn = document.getElementById('nextLevelBtn');
+  if (completedAll && currentLevel < 4) {
+    nextLevelBtn.style.display = 'inline-block';
+    nextLevelBtn.textContent = `Siguiente nivel (${currentLevel + 1}) ➜`;
+  } else {
+    nextLevelBtn.style.display = 'none';
+  }
+}
+
+function goToNextLevel() {
+  if (currentLevel >= 4) return;
+  unlockNextLevel();
+  updateLevelButtons();
+  currentLevel += 1;
+  selectLevel(currentLevel);
+  score = 0; lives = 3; questionIndex = 0; answered = false;
+  document.getElementById('endScreen').style.display = 'none';
+  document.getElementById('levelSelectScreen').style.display = 'none';
+  document.getElementById('playScreen').style.display = 'block';
+  challengeActive = true;
+  loadQuestion();
+}
+
+function backToLevels() {
+  challengeActive = false;
+  document.getElementById('endScreen').style.display = 'none';
+  document.getElementById('playScreen').style.display = 'none';
+  document.getElementById('levelSelectScreen').style.display = 'block';
+  updateLevelButtons();
+  // Mantener el nombre ya elegido (deshabilitado) para no perder el código
+  try {
+    const sel = document.getElementById('studentNameSelect');
+    if (sel && (!sel.options || sel.options.length <= 1)) fillNameSelect();
+  } catch (e) {}
+}
+
+
+/* ============================================================
+   VERIFICACIÓN ANTI-PLAGIO (código + QR)
+   ============================================================ */
+const VERIFY_SECRET = 'JMC-GILBERTO-FISICA-2026';
+
+function simpleHash(str) {
+  let h = 2166136261;
+  for (let i = 0; i < str.length; i++) {
+    h ^= str.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return (h >>> 0).toString(36).toUpperCase().padStart(7, '0').slice(0, 7);
+}
+
+function makeVerificationCode(gameId, name, section, points, grade) {
+  const base = [gameId, (name || '').trim().toUpperCase(), section, String(points), String(grade), VERIFY_SECRET].join('|');
+  const h = simpleHash(base);
+  const pref = (gameId || 'JUE').replace(/[^A-Z0-9]/gi, '').slice(0, 3).toUpperCase() || 'JUE';
+  return pref + '-' + h.slice(0, 3) + '-' + h.slice(3, 6);
+}
+
+function buildVerifyPayload(gameTitle, name, section, yearLabel, points, grade, badge, code) {
+  return [
+    'VERIFICACION DE LOGRO',
+    'Colegio: U.E.P. Jose Maria Carreno',
+    'Profesor: GILAST',
+    'Juego: ' + gameTitle,
+    'Estudiante: ' + name,
+    'Curso: ' + yearLabel,
+    'Seccion: ' + section,
+    'Puntos: ' + points,
+    'Nota: ' + grade + ' / 20',
+    'Insignia: ' + (badge || ''),
+    'Codigo: ' + code,
+    'Fecha: ' + new Date().toLocaleString('es-VE')
+  ].join('\\n');
+}
+
+function drawCertificateChrome(ctx, w, h, accent) {
+  // patrón de fondo sutil (marca de agua)
+  ctx.save();
+  ctx.globalAlpha = 0.06;
+  ctx.fillStyle = '#ffffff';
+  ctx.font = '12px Arial';
+  for (let y = 40; y < h; y += 28) {
+    for (let x = 20; x < w; x += 120) {
+      ctx.fillText('JMC', x + ((y / 28) % 2) * 40, y);
+    }
+  }
+  ctx.restore();
+}
+
+function loadQrImage(text, size) {
+  return new Promise(function(resolve) {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    const url = 'https://api.qrserver.com/v1/create-qr-code/?size=' + size + 'x' + size + '&margin=8&data=' + encodeURIComponent(text);
+    img.onload = function() { resolve(img); };
+    img.onerror = function() { resolve(null); };
+    img.src = url;
+    setTimeout(function() { if (!img.complete) resolve(null); }, 4000);
+  });
+}
+
+
+/* ============================================================
+   CERTIFICADO
+   ============================================================ */
+async function downloadAchievement() {
+  computeGrade20();
+  lastVerifyCode = studentCode || makeVerificationCode('COU', studentName, studentSection, totalPointsAllLevels, finalGrade20);
+  const payload = buildVerifyPayload('Carga Eléctrica y Ley de Coulomb', studentName, studentSection, '5to Año', totalPointsAllLevels, finalGrade20, lastBadge, lastVerifyCode);
+
+  const canvas = document.createElement('canvas');
+  canvas.width = 900;
+  canvas.height = 640;
+  const ctx = canvas.getContext('2d');
+
+  const grad = ctx.createLinearGradient(0, 0, 900, 640);
+  grad.addColorStop(0, '#1e3c72');
+  grad.addColorStop(1, '#2a5298');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, 900, 640);
+  drawCertificateChrome(ctx, 900, 640);
+
+  ctx.strokeStyle = '#ffcc00';
+  ctx.lineWidth = 8;
+  ctx.strokeRect(20, 20, 860, 600);
+  ctx.strokeStyle = 'rgba(255,255,255,0.4)';
+  ctx.lineWidth = 2;
+  ctx.strokeRect(32, 32, 836, 576);
+
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#ffcc00';
+  ctx.font = 'bold 28px Arial';
+  ctx.fillText('CERTIFICADO DE LOGRO', 450, 90);
+
+  ctx.fillStyle = '#ffffff';
+  ctx.font = '18px Arial';
+  ctx.fillText('Carga Eléctrica y Ley de Coulomb', 450, 125);
+
+  ctx.fillStyle = 'rgba(255,255,255,0.85)';
+  ctx.font = '16px Arial';
+  ctx.fillText('GILAST — Producido por GILAST', 450, 155);
+
+  ctx.fillStyle = 'rgba(255,255,255,0.85)';
+  ctx.font = '18px Arial';
+  ctx.fillText('Se otorga el presente reconocimiento a:', 450, 200);
+
+  ctx.fillStyle = '#ffcc00';
+  ctx.font = 'bold 40px Arial';
+  ctx.fillText(studentName, 450, 255);
+
+  ctx.fillStyle = 'rgba(255,255,255,0.9)';
+  ctx.font = '18px Arial';
+  ctx.fillText('5to Año - Sección ' + studentSection, 450, 290);
+
+  ctx.fillStyle = '#ffffff';
+  ctx.font = '22px Arial';
+  ctx.fillText('Puntos totales: ' + totalPointsAllLevels, 450, 330);
+  ctx.fillStyle = '#ffcc00';
+  ctx.font = 'bold 26px Arial';
+  ctx.fillText('Nota: ' + finalGrade20 + ' / 20', 450, 368);
+
+  ctx.fillStyle = '#7CFC7C';
+  ctx.font = 'bold 20px Arial';
+  ctx.fillText(lastBadge, 450, 405);
+
+  ctx.fillStyle = '#ffcc00';
+  ctx.font = 'bold 18px Arial';
+  ctx.fillText('Código de verificación: ' + lastVerifyCode, 450, 445);
+
+  const fecha = new Date().toLocaleDateString('es-VE', { year: 'numeric', month: 'long', day: 'numeric' });
+  ctx.fillStyle = 'rgba(255,255,255,0.7)';
+  ctx.font = '14px Arial';
+  ctx.fillText(fecha, 450, 475);
+
+  // QR con información completa
+  const qrImg = await loadQrImage(payload, 140);
+  if (qrImg) {
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(378, 490, 144, 144);
+    ctx.drawImage(qrImg, 380, 492, 140, 140);
+  } else {
+    ctx.fillStyle = 'rgba(255,255,255,0.85)';
+    ctx.font = '12px Arial';
+    ctx.fillText('(QR no disponible sin conexión — use el código de verificación)', 450, 530);
+  }
+
+  const link = document.createElement('a');
+  const safeName = studentName.replace(/[^a-zA-Z0-9À-ÿ ]/g, '').trim().replace(/\s+/g, '_') || 'estudiante';
+  link.download = 'logro_carga_coulomb_' + safeName + '.png';
+  link.href = canvas.toDataURL('image/png');
+  link.click();
+}
+
+
+function buildResultCanvas() {
+  const canvas = document.createElement('canvas');
+  canvas.width = 900;
+  canvas.height = 560;
+  const ctx = canvas.getContext('2d');
+
+  const grad = ctx.createLinearGradient(0, 0, 900, 560);
+  grad.addColorStop(0, '#0f172a');
+  grad.addColorStop(1, '#1e3a5f');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, 900, 560);
+
+  ctx.strokeStyle = '#fbbf24';
+  ctx.lineWidth = 8;
+  ctx.strokeRect(20, 20, 860, 520);
+  ctx.strokeStyle = 'rgba(255,255,255,0.35)';
+  ctx.lineWidth = 2;
+  ctx.strokeRect(32, 32, 836, 496);
+
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#fbbf24';
+  ctx.font = 'bold 26px Arial';
+  ctx.fillText('RESULTADO — CARGA Y COULOMB', 450, 100);
+
+  ctx.fillStyle = '#ffffff';
+  ctx.font = '18px Arial';
+  ctx.fillText('Carga eléctrica y Ley de Coulomb', 450, 140);
+
+  ctx.fillStyle = 'rgba(255,255,255,0.85)';
+  ctx.font = '18px Arial';
+  ctx.fillText('Se reporta el siguiente desempeño:', 450, 190);
+
+  ctx.fillStyle = '#fbbf24';
+  ctx.font = 'bold 40px Arial';
+  ctx.fillText(studentName, 450, 250);
+
+  ctx.fillStyle = 'rgba(255,255,255,0.9)';
+  ctx.font = '18px Arial';
+  ctx.fillText('5to Año — Sección ' + studentSection, 450, 290);
+
+  ctx.fillStyle = '#ffffff';
+  ctx.font = '24px Arial';
+  ctx.fillText('Puntos totales: ' + totalPointsAllLevels, 450, 340);
+
+  ctx.fillStyle = '#fbbf24';
+  ctx.font = 'bold 32px Arial';
+  ctx.fillText('Nota: ' + finalGrade20 + ' / 20', 450, 385);
+
+  ctx.fillStyle = '#4ade80';
+  ctx.font = 'bold 22px Arial';
+  ctx.fillText(lastBadge, 450, 430);
+
+  const fecha = new Date().toLocaleDateString('es-VE', { year: 'numeric', month: 'long', day: 'numeric' });
+  ctx.fillStyle = 'rgba(255,255,255,0.7)';
+  ctx.font = '16px Arial';
+  ctx.fillText(fecha, 450, 475);
+  ctx.fillStyle = 'rgba(255,255,255,0.85)';
+  ctx.font = 'italic 18px Arial';
+  ctx.fillText('Profesor GILAST', 450, 510);
+
+  return canvas;
+}
+
+async function notifyTeacher() {
+  computeGrade20();
+  lastVerifyCode = studentCode || makeVerificationCode('COU', studentName, studentSection, totalPointsAllLevels, finalGrade20);
+
+  const teacherEmail = 'fisicajmc@gmail.com';
+  const subject = 'Logro completado: ' + studentName + ' (5to ' + studentSection + ') - Carga Eléctrica y Coulomb';
+  const body =
+    'Juego: Carga Eléctrica y Ley de Coulomb\n' +
+    'Estudiante: ' + studentName + '\n' +
+    'Sección: 5to ' + studentSection + '\n' +
+    'Puntos: ' + totalPointsAllLevels + '\n' +
+    'Nota: ' + finalGrade20 + ' / 20\n' +
+    'Código verificación: ' + lastVerifyCode + '\n' +
+    'Insignia: ' + lastBadge;
+
+  const canvas = buildResultCanvas();
+  const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+  if (!blob) {
+    alert('No se pudo generar la imagen del resultado.');
+    return;
+  }
+  const safeName = (studentName || 'estudiante').replace(/[^a-zA-Z0-9À-ÿ ]/g, '').trim().replace(/\s+/g, '_') || 'estudiante';
+  const file = new File([blob], 'resultado_coulomb_' + safeName + '.png', { type: 'image/png' });
+
+  if (navigator.canShare && navigator.canShare({ files: [file] })) {
+    try {
+      await navigator.share({ files: [file], title: subject, text: body });
+      return;
+    } catch (e) {
+      if (e && e.name === 'AbortError') return;
+    }
+  }
+
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = file.name;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 2000);
+
+  const mailto = 'mailto:' + teacherEmail + '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body + '\n\nAdjunta la imagen descargada: ' + file.name);
+  try {
+    const link = document.createElement('a');
+    link.href = mailto;
+    link.style.display = 'none';
+    document.body.appendChild(link);
+    link.click();
+    setTimeout(() => { try { document.body.removeChild(link); } catch (e) {} }, 500);
+  } catch (e) {
+    window.location.href = mailto;
+  }
+  alert('1) Se descargó la imagen del resultado.\n2) Se abrió el correo.\n\nAdjunta esa imagen y pulsa ENVIAR.');
+}
+
+// Inicializar lista de nombres (después de definir STUDENT_ROSTER)
+function initStudentNameList() {
+  try { fillNameSelect(); } catch (e) { console.warn('fillNameSelect', e); }
+}
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initStudentNameList);
+} else {
+  initStudentNameList();
+}
+</script>
+<script>
+
+/* ========== PROTECCIÓN DEL RECURSO EDUCATIVO ==========
+   Versión para estudiantes: se puede jugar, no editar.
+   La versión editable la conserva el profesor.
+   ====================================================== */
+(function(){
+  'use strict';
+  // Desactivar menú contextual
+  document.addEventListener('contextmenu', function(e){ e.preventDefault(); return false; }, true);
+  // Bloquear atajos comunes de ver código / guardar / DevTools
+  document.addEventListener('keydown', function(e){
+    var k = (e.key || '').toLowerCase();
+    var ctrl = e.ctrlKey || e.metaKey;
+    var shift = e.shiftKey;
+    var block = false;
+    if (ctrl && (k === 'u' || k === 's' || k === 'p')) block = true; // ver código, guardar, imprimir
+    if (ctrl && shift && (k === 'i' || k === 'j' || k === 'c')) block = true; // DevTools
+    if (k === 'f12') block = true;
+    if (ctrl && k === 'a') block = true; // seleccionar todo
+    if (block) { e.preventDefault(); e.stopPropagation(); return false; }
+  }, true);
+  // Evitar arrastrar elementos
+  document.addEventListener('dragstart', function(e){ e.preventDefault(); return false; }, true);
+  // Advertencia al intentar ver el código de forma obvia
+  document.addEventListener('keyup', function(e){
+    if (e.key === 'F12') { e.preventDefault(); }
+  }, true);
+})();
+
+</script>
+<script>
+(function(){
+  var SAAS_API = localStorage.getItem('saas_api_base') || '';
+  async function saasCheckAccess(){
+    var gate = document.getElementById('licenseGate');
+    var st = document.getElementById('licenseStatus');
+    var code = localStorage.getItem('saas_classCode') || '';
+    if(!code){ if(st) st.innerHTML='<b style="color:#fca5a5">Sin código de clase.</b> Vuelve al catálogo.'; if(gate) gate.className='license-gate blocked'; return false; }
+    try{
+      var r = await fetch(SAAS_API + '/api/access/check?classCode=' + encodeURIComponent(code));
+      var data = await r.json();
+      if(!data.allowed){ if(st) st.innerHTML='<b style="color:#fca5a5">Acceso bloqueado.</b>'; if(gate) gate.className='license-gate blocked'; return false; }
+      if(st) st.innerHTML='<b style="color:#86efac">Licencia activa.</b> '+(data.teacherName||'');
+      if(gate) gate.className='license-gate ok';
+      try{ localStorage.setItem('saas_access_ok','1'); }catch(e){}
+      var ni=document.getElementById('studentNameInput');
+      if(ni && !ni.value && localStorage.getItem('saas_studentName')){ ni.value=localStorage.getItem('saas_studentName'); }
+      return true;
+    }catch(e){ if(st) st.innerHTML='<b style="color:#fca5a5">Sin servidor.</b> '+e.message; if(gate) gate.className='license-gate blocked'; return false; }
+  }
+  window.saasCheckAccess = saasCheckAccess;
+  function wrapFn(name){
+    var orig = window[name];
+    if(typeof orig !== 'function' || orig._saasWrapped) return;
+    var wrapped = async function(){
+      if(!(await saasCheckAccess())){ alert('Sin acceso. Usa el catálogo con el código de clase.'); return; }
+      return orig.apply(this, arguments);
+    };
+    wrapped._saasWrapped = true;
+    window[name] = wrapped;
+  }
+  function install(){
+    ['startRetoLevel','startLevel','startChallenge','beginLevel','startGame','startReto'].forEach(wrapFn);
+    saasCheckAccess();
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', install);
+  else setTimeout(install, 0);
+})();
+</script>
+</body>
+</html>

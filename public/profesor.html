@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Panel del profesor — Juegos de Reto para Física</title>
+<link rel="stylesheet" href="/css/app.css">
+<style>
+  .code-box{background:#0f172a;border:2px solid #38bdf8;border-radius:14px;padding:16px;margin:12px 0;text-align:center}
+  .code-box .big{font-size:2rem;font-weight:800;color:#7dd3fc;letter-spacing:3px;margin:8px 0}
+  .msg{padding:12px;border-radius:10px;margin:10px 0;display:none}
+  .msg.show{display:block}
+  .msg.ok{background:#052e16;border:1px solid #166534;color:#86efac}
+  .msg.bad{background:#450a0a;border:1px solid #7f1d1d;color:#fca5a5}
+</style>
+</head>
+<body>
+<header>
+  <h1>Panel del profesor</h1>
+  <p style="color:#7dd3fc;font-weight:600;margin:8px 0 0">Aprende física resolviendo retos</p>
+  <p>Aquí obtienes tu código de clase</p>
+</header>
+<div class="wrap">
+
+  <div class="card" id="authBox">
+    <div class="msg bad" id="msg"></div>
+
+    <h2>1. Crear cuenta (recomendado)</h2>
+    <label>Nombre</label>
+    <input id="rName" placeholder="Tu nombre">
+    <label>Correo</label>
+    <input id="rEmail" type="email" placeholder="correo@ejemplo.com">
+    <label>Contraseña (mínimo 6 caracteres)</label>
+    <input id="rPass" type="password" placeholder="******">
+    <label>Colegio (opcional)</label>
+    <input id="rSchool" placeholder="Nombre del colegio">
+    <p style="margin-top:12px">
+      <button class="btn btn-primary" type="button" id="btnReg">Crear cuenta y ver código</button>
+    </p>
+
+    <hr style="border-color:#334155;margin:20px 0">
+
+    <h2>2. Ya tengo cuenta — Entrar</h2>
+    <label>Correo</label>
+    <input id="email" type="email">
+    <label>Contraseña</label>
+    <input id="pass" type="password">
+    <p style="margin-top:12px">
+      <button class="btn btn-outline" type="button" id="btnLogin">Entrar</button>
+    </p>
+  </div>
+
+  <div class="card" id="dash" style="display:none">
+    <p id="banner"></p>
+    <div class="code-box">
+      <div style="color:#94a3b8;font-size:.9rem">TU CÓDIGO DE CLASE</div>
+      <div class="big" id="classCode">—</div>
+      <button class="btn btn-primary" type="button" id="btnCopy">Copiar código</button>
+    </div>
+    <p><b>Profesor:</b> <span id="tName"></span></p>
+    <p><b>Vence:</b> <span id="tUntil"></span></p>
+    <p class="muted">Ve al catálogo, pega este código y tu nombre para jugar.</p>
+    <p>
+      <a class="btn btn-primary" href="/catalogo.html">Ir al catálogo</a>
+      <button class="btn btn-outline" type="button" id="btnOut">Salir</button>
+    </p>
+  </div>
+
+</div>
+<script>
+(function(){
+  function showMsg(text, ok){
+    var el = document.getElementById('msg');
+    el.className = 'msg show ' + (ok ? 'ok' : 'bad');
+    el.textContent = text;
+  }
+  function hideMsg(){
+    var el = document.getElementById('msg');
+    el.className = 'msg';
+    el.textContent = '';
+  }
+  async function api(path, body){
+    var opts = {
+      method: body ? 'POST' : 'GET',
+      headers: { 'Content-Type': 'application/json' }
+    };
+    var token = localStorage.getItem('saas_token') || '';
+    if (token) opts.headers.Authorization = 'Bearer ' + token;
+    if (body) opts.body = JSON.stringify(body);
+    var r = await fetch(path, opts);
+    var data = {};
+    try { data = await r.json(); } catch(e) {}
+    if (!r.ok) throw new Error(data.error || ('Error ' + r.status));
+    return data;
+  }
+  function showDash(teacher){
+    document.getElementById('authBox').style.display = 'none';
+    document.getElementById('dash').style.display = 'block';
+    document.getElementById('classCode').textContent = teacher.classCode || '—';
+    document.getElementById('tName').textContent = teacher.name || '';
+    document.getElementById('tUntil').textContent = teacher.validUntil
+      ? new Date(teacher.validUntil).toLocaleDateString()
+      : '—';
+    document.getElementById('banner').innerHTML = (teacher.licenseOk || teacher.active)
+      ? '<span style="color:#86efac">Licencia activa</span>'
+      : '<span style="color:#fca5a5">Licencia inactiva</span>';
+    window._classCode = teacher.classCode || '';
+    alert('Tu codigo de clase es:\n\n' + (teacher.classCode || '') + '\n\nCopialo para el catalogo.');
+  }
+
+  document.getElementById('btnReg').onclick = async function(){
+    hideMsg();
+    var name = document.getElementById('rName').value.trim();
+    var email = document.getElementById('rEmail').value.trim();
+    var pass = document.getElementById('rPass').value;
+    var school = document.getElementById('rSchool').value.trim();
+    if (!name || !email || !pass) {
+      showMsg('Completa nombre, correo y contraseña', false);
+      alert('Completa nombre, correo y contraseña');
+      return;
+    }
+    if (pass.length < 6) {
+      showMsg('La contraseña debe tener al menos 6 caracteres', false);
+      alert('La contraseña debe tener al menos 6 caracteres');
+      return;
+    }
+    try {
+      showMsg('Creando cuenta...', true);
+      var data = await api('/api/teacher/register', { name: name, email: email, password: pass, school: school });
+      var code = data.teacher && data.teacher.classCode;
+      showMsg('Cuenta creada. Codigo: ' + code, true);
+      var login = await api('/api/teacher/login', { email: email, password: pass });
+      localStorage.setItem('saas_token', login.token);
+      localStorage.setItem('saas_role', 'teacher');
+      showDash(login.teacher || data.teacher);
+    } catch (e) {
+      showMsg(e.message || String(e), false);
+      alert('Error: ' + (e.message || e));
+    }
+  };
+
+  document.getElementById('btnLogin').onclick = async function(){
+    hideMsg();
+    var email = document.getElementById('email').value.trim();
+    var pass = document.getElementById('pass').value;
+    if (!email || !pass) {
+      showMsg('Escribe correo y contraseña', false);
+      return;
+    }
+    try {
+      var login = await api('/api/teacher/login', { email: email, password: pass });
+      localStorage.setItem('saas_token', login.token);
+      localStorage.setItem('saas_role', 'teacher');
+      showDash(login.teacher);
+    } catch (e) {
+      showMsg(e.message || String(e), false);
+      alert('Error: ' + (e.message || e));
+    }
+  };
+
+  document.getElementById('btnCopy').onclick = function(){
+    var c = window._classCode || document.getElementById('classCode').textContent;
+    try { if (navigator.clipboard) navigator.clipboard.writeText(c); } catch(e) {}
+    alert('Codigo copiado: ' + c);
+  };
+  document.getElementById('btnOut').onclick = function(){
+    localStorage.removeItem('saas_token');
+    localStorage.removeItem('saas_role');
+    location.reload();
+  };
+
+  if (localStorage.getItem('saas_token') && localStorage.getItem('saas_role') === 'teacher') {
+    api('/api/teacher/me').then(function(data){ showDash(data.teacher); }).catch(function(){});
+  }
+})();
+</script>
+</body>
+</html>

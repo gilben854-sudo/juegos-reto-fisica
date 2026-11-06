@@ -1,0 +1,3352 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="color-scheme" content="light only">
+<title>Electricidad Aplicada — Motor, Circuitos, Ohm y Watts</title>
+<style>
+  :root{
+    --bg:#0c1222; --panel:#151c2e; --card:#1a2438; --line:#2a3650;
+    --text:#e8eef8; --muted:#8b9bb8; --accent:#38bdf8; --accent2:#fbbf24;
+    --ok:#34d399; --bad:#f87171; --orange:#fb923c; --purple:#a78bfa;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.45;-webkit-font-smoothing:antialiased;}
+  input,select,button,textarea{color-scheme:light only;font:inherit;}
+  .wrap{max-width:720px;margin:0 auto;padding:0 0 48px;}
+  header.top{
+    background:linear-gradient(135deg,#0f172a 0%,#1e3a5f 60%,#0c4a6e 100%);
+    padding:18px 16px 14px;border-bottom:3px solid var(--accent);text-align:center;
+  }
+  header.top .teacher{font-size:.85rem;color:#bae6fd;margin:0 0 4px;font-weight:600;}
+  header.top h1{margin:0;font-size:1.35rem;color:#f8fafc;}
+  header.top p{margin:6px 0 0;font-size:.88rem;color:#94a3b8;}
+  .tabs{
+    display:flex;flex-wrap:wrap;gap:6px;padding:10px 12px;background:var(--panel);
+    border-bottom:1px solid var(--line);position:sticky;top:0;z-index:20;
+  }
+  .tabs button{
+    flex:1 1 auto;min-width:calc(33% - 8px);padding:10px 8px;border-radius:10px;
+    border:1px solid var(--line);background:#0f172a;color:var(--muted);
+    font-size:.75rem;font-weight:700;cursor:pointer;
+  }
+  .tabs button.active{background:var(--accent);color:#0c1222;border-color:var(--accent);}
+  main{padding:14px 12px;}
+  .panel{display:none;}
+  .panel.active{display:block;}
+  .card{
+    background:var(--card);border:1px solid var(--line);border-radius:14px;
+    padding:16px;margin-bottom:14px;
+  }
+  .card h2{margin:0 0 8px;font-size:1.1rem;color:var(--accent2);}
+  .card h3{margin:12px 0 6px;font-size:.95rem;color:var(--accent);}
+  .muted{color:var(--muted);font-size:.88rem;}
+  .btn{
+    display:inline-block;width:100%;padding:12px 14px;border:none;border-radius:12px;
+    font-weight:800;font-size:.95rem;cursor:pointer;margin-top:8px;text-align:center;
+  }
+  .btn-primary{background:var(--accent);color:#0c1222;}
+  .btn-gold{background:var(--accent2);color:#1c1917;}
+  .btn-outline{background:transparent;border:2px solid var(--line);color:var(--text);}
+  .btn-ok{background:var(--ok);color:#064e3b;}
+  .btn-row{display:flex;gap:8px;flex-wrap:wrap;}
+  .btn-row .btn{flex:1;min-width:110px;}
+  label.field{display:block;font-size:.8rem;color:var(--muted);margin:10px 0 4px;font-weight:700;}
+  input[type=text],input[type=number],select,textarea{
+    width:100%;padding:11px 12px;border-radius:10px;border:2px solid var(--line);
+    background:#0f172a;color:#e8eef8;font-size:1rem;
+    -webkit-appearance:menulist;appearance:menulist;
+  }
+  select option,select optgroup{
+    background:#0f172a;color:#e8eef8;
+  }
+  input:focus,select:focus{outline:none;border-color:var(--accent);}
+  .readout{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0;}
+  .pill{
+    flex:1;min-width:90px;background:#0f172a;border:1px solid var(--line);
+    border-radius:10px;padding:10px;text-align:center;
+  }
+  .pill .k{font-size:.72rem;color:var(--muted);font-weight:700;}
+  .pill .v{font-size:1.1rem;font-weight:800;color:var(--accent2);margin-top:2px;}
+  .slider-box{margin:12px 0;padding:12px;border-radius:12px;border:2px solid var(--line);background:#0f172a;}
+  .slider-box.v{border-color:#38bdf8;}
+  .slider-box.i{border-color:#34d399;}
+  .slider-box.r{border-color:#fb923c;}
+  .slider-box label{display:flex;justify-content:space-between;font-weight:800;font-size:.9rem;margin-bottom:8px;}
+  .slider-box input[type=range]{width:100%;-webkit-appearance:none;height:10px;border-radius:6px;outline:none;}
+  .v input[type=range]{background:linear-gradient(90deg,#0ea5e9,#38bdf8);}
+  .i input[type=range]{background:linear-gradient(90deg,#059669,#34d399);}
+  .r input[type=range]{background:linear-gradient(90deg,#ea580c,#fb923c);}
+  .formula-box{
+    background:#0f172a;border:1px dashed var(--accent);border-radius:10px;
+    padding:10px 12px;font-size:.9rem;color:#bae6fd;margin:10px 0;
+  }
+  .motor-stage{
+    position:relative;background:#0a0f1a;border-radius:14px;border:1px solid var(--line);
+    overflow:hidden;padding:12px;text-align:center;
+  }
+  canvas.circuitCanvas,#motorCanvas,#circuitCanvas{width:100%;max-width:480px;height:auto;display:block;background:#0a0f1a;margin:0 auto;background:#0a0f1a;border-radius:10px;}
+  .slots-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;margin:8px 0 12px;}
+  .slot-btn{
+    padding:12px 10px;border-radius:12px;border:2px dashed #64748b;
+    background:#0f172a;color:#94a3b8;font-size:.78rem;font-weight:700;cursor:pointer;text-align:center;
+  }
+  .slot-btn.filled{border-style:solid;border-color:#34d399;color:#e2e8f0;background:#052e1a;}
+  .slot-btn.target{border-color:#38bdf8;color:#7dd3fc;box-shadow:0 0 0 2px rgba(56,189,248,.25);}
+  .slot-btn.wrong{border-color:#f87171;animation:slotShake .35s ease;}
+  @keyframes slotShake{0%,100%{transform:translateX(0)}25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+  .part-btn.selected{border-color:#38bdf8;box-shadow:0 0 0 2px rgba(56,189,248,.35);background:#0c4a6e;}
+  .part-btn.used{opacity:.4;pointer-events:none;}
+  .parts-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px;}
+  .part-btn{
+    padding:12px 8px;border-radius:12px;border:2px solid var(--line);
+    background:#0f172a;color:var(--text);font-weight:700;font-size:.82rem;cursor:pointer;
+  }
+  .part-btn.on{border-color:var(--ok);background:#064e3b;color:#a7f3d0;}
+  .status-ok{color:var(--ok);font-weight:800;}
+  .status-bad{color:var(--bad);font-weight:800;}
+  .mode-row{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0;}
+  .mode-row button{
+    flex:1;min-width:90px;padding:10px;border-radius:10px;border:2px solid var(--line);
+    background:#0f172a;color:var(--muted);font-weight:800;font-size:.8rem;cursor:pointer;
+  }
+  .mode-row button.on{border-color:var(--accent);background:#0c4a6e;color:#e0f2fe;}
+  .comp-row{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0;}
+  .comp-chip{
+    padding:10px 12px;border-radius:999px;border:2px solid var(--line);
+    background:#0f172a;color:var(--text);font-size:.78rem;font-weight:700;cursor:pointer;
+  }
+  .comp-chip.sel{border-color:var(--accent2);background:#422006;color:#fde68a;}
+  .branch-list{margin:8px 0;}
+  .branch-item{
+    display:flex;align-items:center;gap:8px;background:#0f172a;border:1px solid var(--line);
+    border-radius:10px;padding:8px 10px;margin-bottom:6px;font-size:.85rem;
+  }
+  .branch-item button{
+    margin-left:auto;border:none;background:#7f1d1d;color:#fecaca;border-radius:8px;
+    padding:6px 10px;font-weight:700;cursor:pointer;
+  }
+  .lamp-dot{width:14px;height:14px;border-radius:50%;display:inline-block;background:#475569;box-shadow:none;}
+  .lamp-dot.on{background:#fbbf24;box-shadow:0 0 12px #fbbf24;}
+  .print-sheet{background:#fff;color:#111;border-radius:4px;padding:16px;margin-top:10px;}
+  .print-sheet h2{color:#0f172a;margin:0 0 8px;font-size:1.1rem;}
+  .title-block{
+    border:2px solid #111;display:grid;grid-template-columns:1.4fr 1fr 1fr;
+    font-size:.75rem;margin-bottom:12px;
+  }
+  .title-block div{font-size:.75rem;}
+  .title-block div{border:1px solid #111;padding:6px 8px;min-height:36px;}
+  .title-block .big{grid-row:span 2;font-weight:600;font-size:.75rem;display:flex;align-items:center;line-height:1.3;}
+  .drawing-area{
+    border:2px solid #111;min-height:320px;position:relative;
+    background:linear-gradient(#e2e8f0 1px,transparent 1px),linear-gradient(90deg,#e2e8f0 1px,transparent 1px);
+    background-size:20px 20px;
+  }
+  .ortho-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+  .ortho-box{border:2px solid #111;min-height:140px;padding:6px;font-size:.75rem;background:#fff;}
+  .ortho-box .lab{font-weight:800;border-bottom:1px solid #ccc;margin-bottom:4px;}
+  .q-card{background:#0f172a;border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:12px;}
+  .q-ask{font-weight:700;margin-bottom:10px;}
+  .mc button{
+    display:block;width:100%;text-align:left;margin:6px 0;padding:11px 12px;
+    border-radius:10px;border:2px solid var(--line);background:var(--card);color:var(--text);
+    font-weight:600;cursor:pointer;
+  }
+  .mc button.sel{border-color:var(--accent);background:#0c4a6e;}
+  .feedback{margin-top:10px;padding:10px 12px;border-radius:10px;font-weight:700;}
+  .feedback.ok{background:#064e3b;color:#a7f3d0;}
+  .feedback.bad{background:#7f1d1d;color:#fecaca;}
+  .chip-row{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0;}
+  .chip{
+    padding:8px 12px;border-radius:999px;border:2px solid var(--line);
+    background:#0f172a;color:var(--text);font-size:.8rem;font-weight:700;cursor:pointer;
+  }
+  .chip.sel{border-color:var(--accent);background:#0c4a6e;color:#e0f2fe;}
+  .schematic-wrap{background:#fff;color:#111;border-radius:8px;padding:12px;overflow:auto;}
+  #schematicSvg{width:100%;min-height:280px;background:#fff;}
+  @media print{
+    @page{ size: letter landscape; margin: 10mm; }
+    html, body{
+      background:#fff !important; color:#000 !important;
+      margin:0 !important; padding:0 !important;
+      -webkit-print-color-adjust:exact !important;
+      print-color-adjust:exact !important;
+    }
+    /* Ocultar todo excepto el contenedor de impresión */
+    body *{ visibility:hidden !important; }
+    #printRoot, #printRoot *{ visibility:visible !important; }
+    #printRoot{
+      position:absolute !important; left:0 !important; top:0 !important;
+      width:100% !important; margin:0 !important; padding:0 !important;
+      background:#fff !important; color:#000 !important;
+      display:block !important;
+    }
+    .no-print, .tabs, header.top, #studentGate, footer.note, nav{ display:none !important; }
+    .print-sheet{ width:100%; }
+    .title-block{ font-size:9pt !important; margin-bottom:3mm !important; }
+    .title-block div{ min-height:0 !important; padding:3px 6px !important; }
+    .title-block .big{ font-size:9pt !important; font-weight:600 !important; }
+    #printRoot img, #printRoot svg{
+      max-height:105mm !important; width:100% !important;
+      page-break-inside:avoid !important;
+    }
+  }
+  
+  .draw-toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:10px 0;}
+  .draw-toolbar button{
+    padding:10px 12px;border-radius:10px;border:2px solid var(--line);
+    background:#0f172a;color:var(--text);font-weight:700;font-size:.8rem;cursor:pointer;
+  }
+  .draw-toolbar button.on{border-color:var(--accent2);background:#422006;color:#fde68a;}
+  .draw-toolbar label{font-size:.78rem;color:var(--muted);font-weight:700;}
+  .draw-toolbar input[type=color]{width:42px;height:36px;border:none;background:transparent;padding:0;}
+  .draw-toolbar input[type=range]{width:90px;}
+  #drawCanvas{
+    width:100%;max-width:100%;height:auto;display:block;
+    background:#fff;border:2px solid #111;border-radius:4px;
+    touch-action:none;cursor:crosshair;
+  }
+  .draw-canvas-wrap{background:#fff;padding:8px;border-radius:8px;margin-top:8px;}
+
+  .glos-item{border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin:8px 0;background:#0f172a;}
+  .glos-item b{color:var(--accent2);}
+  .pract-card{border:1px solid var(--line);border-radius:12px;padding:12px;margin:10px 0;background:#0f172a;}
+  .pract-card h3{margin:0 0 8px;font-size:.95rem;color:var(--accent);}
+  .pract-card label{display:block;margin:6px 0;font-size:.82rem;color:var(--text);cursor:pointer;}
+  .pract-card input{margin-right:8px;}
+  .band-bar{position:absolute;top:0;bottom:0;width:10px;border-radius:2px;}
+
+  #tab-practicas .btn, #tab-practicas .mode-row button, #tab-practicas .comp-chip,
+  #tab-multimetro .btn, #tab-multimetro .mode-row button, #tab-multimetro .comp-chip {
+    pointer-events: auto !important;
+    position: relative;
+    z-index: 2;
+    cursor: pointer;
+  }
+  #tab-practicas canvas.circuitCanvas, #tab-multimetro canvas.circuitCanvas {
+    max-width: 100%;
+    touch-action: none;
+  }
+#retoLevelRow{display:flex;flex-wrap:wrap;gap:4px;}
+  #retoLevelRow button{flex:0 0 auto;min-width:48px;padding:8px 5px;font-size:.7rem;}
+  
+  .fb-celeb{text-align:center;padding:14px 10px;margin:10px 0;border-radius:14px;background:linear-gradient(135deg,#052e16,#14532d);border:1px solid #22c55e;animation:celebPop .45s ease;}
+  .fb-celeb .big{font-size:2rem;line-height:1.2;}
+  .fb-celeb .msg{color:#86efac;font-weight:800;font-size:1.05rem;margin-top:4px;}
+  .fb-sad{text-align:center;padding:14px 10px;margin:10px 0;border-radius:14px;background:linear-gradient(135deg,#450a0a,#7f1d1d);border:1px solid #f87171;animation:sadDrop .4s ease;}
+  .fb-sad .big{font-size:2.2rem;line-height:1.2;filter:grayscale(.1);}
+  .fb-sad .msg{color:#fecaca;font-weight:800;font-size:1rem;margin-top:4px;}
+  @keyframes celebPop{0%{transform:scale(.6);opacity:0}60%{transform:scale(1.08)}100%{transform:scale(1);opacity:1}}
+  @keyframes sadDrop{0%{transform:translateY(-8px);opacity:0}100%{transform:translateY(0);opacity:1}}
+  .sparkle{position:fixed;pointer-events:none;z-index:9999;font-size:1.4rem;animation:sparkFly 1s ease-out forwards;}
+  @keyframes sparkFly{0%{opacity:1;transform:translate(0,0) scale(1)}100%{opacity:0;transform:translate(var(--dx),var(--dy)) scale(.4)}}
+
+  footer.note{text-align:center;color:var(--muted);font-size:.72rem;padding:16px;}
+
+.license-gate{background:#0f172a;border:1px solid #334155;border-radius:14px;padding:14px;margin:10px 0}.license-gate.blocked{border-color:#7f1d1d;background:#450a0a}.license-gate.ok{border-color:#166534;background:#052e16}</style>
+</head>
+<body>
+<div id="licenseGate" class="license-gate"><div id="licenseStatus" class="muted">Comprobando acceso…</div></div>
+
+<div class="wrap">
+  <header class="top no-print">
+    <p class="teacher">GILAST · Profesor de Electricidad</p>
+    <p class="teacher" style="margin-top:2px;font-size:.75rem;color:#94a3b8;">GILAST · Monseñor Juan José Bernal · 3° año Electricidad</p>
+    <h1>⚡ Electricidad Aplicada</h1>
+    <p>Taller · Motor · Multímetro · Prácticas · Ohm · Watts · Planos · Reto</p>
+  </header>
+
+  <nav class="tabs no-print" id="tabs">
+    <button class="active" data-tab="intro">📖 Guía</button>
+    <button data-tab="motor">🌀 Motor</button>
+    <button data-tab="ohm">Ω Ohm</button>
+    <button data-tab="watts">💡 Watts</button>
+    <button data-tab="colores">🎨 Colores R</button>
+    <button data-tab="multimetro">📏 Multímetro</button>
+    <button data-tab="planos">📐 Planos</button>
+    <button data-tab="dibujo">✏️ Dibujo</button>
+    <button data-tab="practicas">📋 Prácticas</button>
+    <button data-tab="seguridad">⚠️ Seguridad</button>
+    <button data-tab="glosario">📚 Glosario</button>
+    <button data-tab="reto">🎮 Reto</button>
+    <button data-tab="certificado">🏆 Certificado</button>
+  </nav>
+
+  <main>
+
+  <div class="card no-print" id="studentGate" style="margin:12px;">
+    <h2 style="font-size:1rem;">Identificación</h2>
+    <p class="muted">3° año — Electricidad · GILAST</p>
+    <label class="field">¿Cuántos trabajan?</label>
+    <div class="mode-row" id="workModeRow">
+      <button type="button" class="on" id="mode1" data-size="1">1 persona</button>
+      <button type="button" id="mode2" data-size="2">2 personas</button>
+      <button type="button" id="mode3" data-size="3">3 personas</button>
+    </div>
+    <div id="memberFields">
+      <div id="memberWrap1">
+        <label class="field" id="label1">Estudiante 1</label>
+        <select id="groupSel1"><option value="">— Elige nombre —</option></select>
+      </div>
+      <div id="memberWrap2" style="display:none;">
+        <label class="field">Estudiante 2</label>
+        <select id="groupSel2"><option value="">— Elige nombre —</option></select>
+      </div>
+      <div id="memberWrap3" style="display:none;">
+        <label class="field">Estudiante 3</label>
+        <select id="groupSel3"><option value="">— Elige nombre —</option></select>
+      </div>
+    </div>
+    <p class="muted" id="studentCodeHint" style="margin-top:8px;">El reto es solo individual (1 persona).</p>
+  </div>
+
+<section class="panel active" id="tab-intro">
+      <div class="card">
+        <h2>Taller de electricidad</h2>
+        <p class="muted">Aquí practicas de forma guiada. Puedes <b>guardar el HTML</b> y usarlo sin internet; solo el aviso al profesor necesita red. En cada sección verás <b>pasos numerados</b>: solo síguelos en orden.</p>
+        <h3>Orden recomendado</h3>
+        <ol class="muted" style="margin:0;padding-left:18px;font-size:.9rem;line-height:1.7;">
+          <li><b>Motor</b> — arma las 6 piezas y hazlo girar.</li>
+          <li><b>Multímetro</b> — arma el circuito y mide V, I, R o P aquí mismo.</li>
+          <li><b>Prácticas</b> — guías con armado y medición en el mismo lugar.</li>
+          <li><b>Ohm y Watts</b> — mueve los controles y observa los resultados.</li>
+          <li><b>Planos y Dibujo</b> — genera e imprime tu lámina.</li>
+          <li><b>Reto y Certificado</b> — evalúa e imprime.</li>
+        </ol>
+      </div>
+      <div class="card">
+        <h2>Reglas simples</h2>
+        <p class="muted" style="margin:0 0 8px;">1. Lee el recuadro <b>Pasos</b> de cada pantalla antes de tocar botones.</p>
+        <p class="muted" style="margin:0 0 8px;">2. En circuitos: primero elige el <b>tipo</b>, luego <b>agrega piezas</b>, después <b>enciende fuente y suiche</b>.</p>
+        <p class="muted" style="margin:0;">3. Para imprimir: pulsa <b>Generar</b> y luego <b>Imprimir</b>.</p>
+      </div>
+    </section>
+
+    <!-- MOTOR -->
+    <section class="panel" id="tab-motor">
+      <div class="card">
+        <h2>Motor eléctrico (corriente continua)</h2>
+        <div class="formula-box">
+          <b>¿Qué es?</b> Una máquina que transforma electricidad en giro.<br><br>
+          <b>Cómo armarlo (tú colocas cada pieza):</b><br>
+          <b>1.</b> Elige una <b>pieza</b> de la bandeja (se marca en azul).<br>
+          <b>2.</b> Toca el <b>sitio</b> correcto abajo. Si aciertas, queda fija en el dibujo; si no, prueba otro sitio.<br>
+          <b>3.</b> Cuando las <b>6</b> estén bien puestas: enciende <b>Batería</b> y cierra el <b>Suiche</b>.<br>
+          <b>4.</b> Solo entonces el motor <b>gira</b>.
+        </div>
+        <div class="motor-stage">
+          <canvas id="motorCanvas" width="420" height="300"></canvas>
+          <p id="motorStatus" class="status-bad">Elige una pieza y colócala en su sitio</p>
+        </div>
+        <h3>1 — Piezas disponibles</h3>
+        <p class="muted" style="margin-top:0;">Toca una pieza para seleccionarla. Luego toca el lugar correcto abajo o en el dibujo.</p>
+        <div class="parts-grid" id="partsGrid"></div>
+        <h3>2 — Sitios del motor (coloca aquí)</h3>
+        <div class="slots-grid" id="slotsGrid"></div>
+        <p class="muted" id="motorHint">Selecciona una pieza primero.</p>
+        <h3>3 — Energía</h3>
+        <div class="btn-row">
+          <button type="button" class="btn btn-outline" id="btnBattery">🔋 Batería: OFF</button>
+          <button type="button" class="btn btn-outline" id="btnSwitch">⏻ Suiche: abierto</button>
+        </div>
+        <button type="button" class="btn btn-primary" id="btnResetMotor">Desarmar y empezar de nuevo</button>
+        <div class="formula-box" style="margin-top:12px;">
+          <b>¿Para qué es cada pieza?</b><br>
+          📦 <b>Carcasa</b> — soporta todo el conjunto.<br>
+          🧲 <b>Imán / estator</b> — campo magnético fijo (N y S).<br>
+          🔄 <b>Rotor</b> — bobina que gira en el centro.<br>
+          ⚙️ <b>Conmutador</b> — invierte la corriente a tiempo.<br>
+          🔌 <b>Escobillas</b> — entregan corriente al rotor.<br>
+          📏 <b>Eje</b> — transmite el giro hacia afuera.
+        </div>
+      </div>
+    </section>
+
+    <!-- CIRCUITOS -->
+    <section class="panel" id="tab-ohm">
+      <div class="card">
+        <h2>Ley de Ohm</h2>
+        <div class="formula-box">
+          <b>Idea simple:</b> Voltaje = Corriente × Resistencia.<br>
+          <b>V</b> en voltios &nbsp;·&nbsp; <b>I</b> en amperios &nbsp;·&nbsp; <b>R</b> en ohmios (Ω)<br><br>
+          <b>Cómo usar esta pantalla:</b><br>
+          1. Mueve la barra de <b>V</b> y la de <b>R</b>.<br>
+          2. Observa cómo cambia la <b>corriente I</b>.<br>
+          3. Si quieres calcular a mano, usa la calculadora de abajo.
+        </div>
+        <div class="slider-box v">
+          <label><span>Voltaje V</span><span id="ohmVlab">12 V</span></label>
+          <input type="range" id="ohmV" min="1" max="48" step="1" value="12">
+        </div>
+        <div class="slider-box r">
+          <label><span>Resistencia R</span><span id="ohmRlab">6 Ω</span></label>
+          <input type="range" id="ohmR" min="1" max="100" step="1" value="6">
+        </div>
+        <div class="readout">
+          <div class="pill"><div class="k">CORRIENTE I</div><div class="v" id="ohmIout">2.00 A</div></div>
+          <div class="pill"><div class="k">Comprobación</div><div class="v" id="ohmCheck">12 = 2·6</div></div>
+        </div>
+        <h3>Calculadora</h3>
+        <label class="field">Incógnita</label>
+        <select id="ohmMode">
+          <option value="I">I (conoces V y R)</option>
+          <option value="V">V (conoces I y R)</option>
+          <option value="R">R (conoces V e I)</option>
+        </select>
+        <div id="ohmCalcFields"></div>
+        <button class="btn btn-gold" id="ohmCalcBtn">Calcular</button>
+        <div class="readout" id="ohmCalcResult"></div>
+      </div>
+    </section>
+
+    <!-- WATTS -->
+    <section class="panel" id="tab-watts">
+      <div class="card">
+        <h2>Ley de Watts (potencia)</h2>
+        <div class="formula-box">
+          <b>Idea simple:</b> Potencia = Voltaje × Corriente (P = V · I).<br>
+          <b>P</b> se mide en vatios (W).<br><br>
+          <b>Pasos:</b><br>
+          1. Ajusta V e I con las barras.<br>
+          2. Lee la potencia P y la resistencia equivalente.<br>
+          3. Opcional: pon horas de uso y calcula energía (kWh).
+        </div>
+        <div class="slider-box v">
+          <label><span>Voltaje V</span><span id="wVlab">120 V</span></label>
+          <input type="range" id="wV" min="5" max="240" step="5" value="120">
+        </div>
+        <div class="slider-box i">
+          <label><span>Corriente I</span><span id="wIlab">2.0 A</span></label>
+          <input type="range" id="wI" min="0.1" max="20" step="0.1" value="2">
+        </div>
+        <div class="readout">
+          <div class="pill"><div class="k">POTENCIA</div><div class="v" id="wPout">240 W</div></div>
+          <div class="pill"><div class="k">R eq.</div><div class="v" id="wRout">60 Ω</div></div>
+          <div class="pill"><div class="k">E en 1 h</div><div class="v" id="wEout">0.24 kWh</div></div>
+        </div>
+        <label class="field">Horas de uso</label>
+        <input type="number" id="wHours" value="5" min="0.1" step="0.5">
+        <label class="field">Costo por kWh (opcional)</label>
+        <input type="number" id="wCost" value="0" min="0" step="0.01">
+        <button class="btn btn-primary" id="wCostBtn">Calcular energía / costo</button>
+        <div class="readout" id="wCostOut"></div>
+      </div>
+    </section>
+
+    <!-- PLANOS -->
+    <section class="panel" id="tab-planos">
+      <div class="card no-print">
+        <h2>Planos eléctricos imprimibles</h2>
+        <div class="formula-box">
+          <b>Pasos para tu plano:</b><br>
+          <b>1.</b> Escribe el nombre del plano.<br>
+          <b>2.</b> Toca los elementos (suiche, bombillo, toma, cable…).<br>
+          <b>3.</b> Elige fuente DC o AC.<br>
+          <b>4.</b> Pulsa <b>Generar</b>: se nombra el tipo de circuito según los componentes y se dibuja el esquema en <b>serie cerrado</b>.<br>
+          <b>5.</b> Revisa que el cable de abajo cierre el circuito y pulsa <b>Imprimir</b>.
+        </div>
+        <label class="field">1. Nombre del plano (se sugiere según los componentes)</label>
+        <input type="text" id="planTitle" value="" placeholder="Se completa solo según los componentes">
+        <label class="field">Elementos</label>
+        <div class="chip-row" id="planChips"></div>
+        <label class="field">Fuente</label>
+        <select id="planSource">
+          <option value="dc">DC (batería)</option>
+          <option value="ac">AC (red)</option>
+        </select>
+        <label class="field">Tipo de conexión del plano</label>
+        <div class="mode-row" id="planTopoRow">
+          <button type="button" class="on" id="planTopoSerie" data-topo="serie">Serie</button>
+          <button type="button" id="planTopoParalelo" data-topo="paralelo">Paralelo</button>
+          <button type="button" id="planTopoMixto" data-topo="mixto">Mixto</button>
+        </div>
+        <p class="muted" id="planTopoHint">Serie: una línea. Paralelo: ramas. Mixto: control en serie + cargas en paralelo.</p>
+        <div class="btn-row">
+          <button type="button" class="btn btn-primary" id="planDraw">Generar</button>
+          <button type="button" class="btn btn-gold" id="planPrint">🖨️ Imprimir</button>
+        </div>
+        <p class="muted">Vista previa del plano (circuito cerrado):</p>
+      </div>
+      <div class="card" id="planPreviewCard" style="background:#fff;color:#111;padding:8px;">
+        <div class="schematic-wrap" style="margin:0;">
+          <svg id="schematicSvgScreen" viewBox="0 0 640 360" xmlns="http://www.w3.org/2000/svg" style="width:100%;min-height:220px;background:#fff;"></svg>
+        </div>
+      </div>
+      <div class="print-only" id="planPrintArea">
+        <div class="print-sheet">
+          <div class="title-block" id="planCajetin">
+            <div class="big" id="planTitleOut">Circuito</div>
+            <div>Escala: s/e</div>
+            <div>Fecha: <span id="planDate"></span></div>
+            <div id="planStudentOut">Elaboró: —</div>
+            <div id="planCodeOut">Prof.: GILAST</div>
+          </div>
+          <div class="schematic-wrap">
+            <svg id="schematicSvg" viewBox="0 0 720 280" xmlns="http://www.w3.org/2000/svg"></svg>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- DIBUJO -->
+    <section class="panel" id="tab-dibujo">
+      <div class="card no-print">
+        <h2>Dibujo técnico — dibuja e imprime</h2>
+        <div class="formula-box">
+          <b>Boceto de proyecto (dibujo técnico básico)</b><br>
+          <b>1.</b> Completa cajetín: título, nombre, curso y escala.<br>
+          <b>2.</b> Elige una guía y pulsa <b>Aplicar guía</b>.<br>
+          <b>3.</b> Dibuja el boceto respetando las reglas de abajo.<br>
+          <b>4.</b> Imprime cuando esté listo.<br><br>
+          <b>Reglas del boceto técnico:</b><br>
+          • Deja <b>margen</b> respecto al borde del recuadro.<br>
+          • Usa línea <b>gruesa</b> para contornos visibles.<br>
+          • Usa línea <b>fina</b> para ejes, cotas y guías.<br>
+          • Letras y números <b>claros</b> (mayúsculas recomendadas).<br>
+          • Indica la <b>escala</b> en el cajetín (o s/e si es a mano alzada).<br>
+          • El boceto muestra la <b>idea del proyecto</b>; no hace falta detalle industrial.
+        </div>
+        <label class="field">Título del proyecto</label>
+        <input type="text" id="drawTitle" value="Proyecto de electricidad">
+        <label class="field">Tu nombre</label>
+        <input type="text" id="drawStudent" placeholder="Apellidos y nombres">
+        <label class="field">Curso</label>
+        <input type="text" id="drawCourse" placeholder="Curso / sección">
+        <label class="field">Escala</label>
+        <select id="drawScale"><option>1:1</option><option selected>1:2</option><option>1:5</option><option>s/e</option></select>
+        <label class="field">Guía en el lienzo (opcional)</label>
+        <select id="drawType">
+          <option value="blank">Boceto libre (hoja en blanco)</option>
+          <option value="grid">Boceto con cuadrícula</option>
+          <option value="margins">Lámina con márgenes y cajetín guía</option>
+          <option value="ortho">Vistas ortogonales (frontal / superior / lateral)</option>
+          <option value="motor">Boceto del motor (despiece)</option>
+          <option value="circuito">Boceto de circuitos (serie / paralelo / mixto)</option>
+          <option value="project">Proyecto: vista general + notas</option>
+        </select>
+        <div class="draw-toolbar">
+          <button type="button" class="on" id="toolPencil">✏️ Lápiz</button>
+          <button type="button" id="toolEraser">🧽 Borrador</button>
+          <label>Color <input type="color" id="drawColor" value="#111111"></label>
+          <label>Grosor <input type="range" id="drawSize" min="1" max="16" value="3"></label>
+          <button type="button" id="toolUndo">↩️ Deshacer</button>
+          <button type="button" id="toolClear">🗑️ Limpiar</button>
+        </div>
+        <div class="draw-canvas-wrap">
+          <canvas id="drawCanvas" width="900" height="600"></canvas>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-primary" id="drawGuideBtn">Aplicar guía</button>
+          <button class="btn btn-gold" id="drawPrint">🖨️ Imprimir dibujo</button>
+        </div>
+        <p class="muted">Consejo: en el celular dibuja con el dedo; en la computadora usa el mouse.</p>
+      </div>
+      <div class="print-only" id="drawPrintArea">
+        <div class="print-sheet" id="drawSheet"></div>
+      </div>
+    </section>
+
+
+    <!-- COLORES RESISTENCIA -->
+    <section class="panel" id="tab-colores">
+      <div class="card no-print">
+        <h2>Código de colores de resistencias</h2>
+        <div class="formula-box">
+          Elige 4 bandas. El valor se calcula solo.<br>
+          <b>Banda 1 y 2:</b> dígitos · <b>Banda 3:</b> multiplicador · <b>Banda 4:</b> tolerancia.
+        </div>
+        <div class="readout">
+          <div class="pill"><div class="k">VALOR</div><div class="v" id="resValue">—</div></div>
+          <div class="pill"><div class="k">TOLERANCIA</div><div class="v" id="resTol">—</div></div>
+        </div>
+        <label class="field">Banda 1 (1.er dígito)</label>
+        <select id="band1"></select>
+        <label class="field">Banda 2 (2.º dígito)</label>
+        <select id="band2"></select>
+        <label class="field">Banda 3 (multiplicador)</label>
+        <select id="band3"></select>
+        <label class="field">Banda 4 (tolerancia)</label>
+        <select id="band4"></select>
+        <div id="resPreview" style="margin:12px 0;height:48px;border-radius:8px;background:linear-gradient(90deg,#c4a574 0%,#c4a574 100%);position:relative;border:2px solid #333;"></div>
+        <p class="muted" id="resExplain"></p>
+      </div>
+    </section>
+
+    <!-- MULTIMETRO -->
+    <section class="panel" id="tab-multimetro">
+      <div class="card no-print">
+        <h2>Multímetro y armado de circuitos</h2>
+        <div class="formula-box">Arma el circuito y mide <b>en el mismo lugar</b>.</div>
+
+        <h3>Armar el circuito</h3>
+        <div class="formula-box">
+          <b>1.</b> Serie, Paralelo o Mixto.<br>
+          <b>2.</b> Agrega componentes.<br>
+          <b>3.</b> Voltaje, suiche y fuente.<br>
+          <b>4.</b> Analiza y mide.
+        </div>
+        <h3>Tipo de circuito</h3>
+        <div class="mode-row circ-mode-row">
+          <button type="button" class="on" data-mode="serie">Serie</button>
+          <button type="button" data-mode="paralelo">Paralelo</button>
+          <button type="button" data-mode="mixto">Mixto</button>
+        </div>
+        <div class="formula-box circ-theory"></div>
+        <h3>Fuente y suiche</h3>
+        <div class="slider-box v">
+          <label><span>Voltaje V</span><span class="cVlab">12 V</span></label>
+          <input type="range" class="cV" min="3" max="48" step="1" value="12">
+        </div>
+        <div class="btn-row">
+          <button type="button" class="btn btn-outline cSuiche">⏻ Suiche: abierto</button>
+          <button type="button" class="btn btn-outline cPower">🔋 Fuente: OFF</button>
+        </div>
+        <h3>Componentes</h3>
+        <div class="comp-row comp-palette"></div>
+        <p class="muted branch-hint"></p>
+        <div class="branch-list branch-list-el"></div>
+        <div class="btn-row">
+          <button type="button" class="btn btn-outline cClear">Vaciar</button>
+          <button type="button" class="btn btn-primary cAnalyze">Analizar</button>
+        </div>
+        <div class="motor-stage" style="margin-top:12px;">
+          <canvas class="circuitCanvas" width="480" height="300"></canvas>
+        </div>
+        <div class="readout circ-readout"></div>
+        <div class="formula-box circ-explain"></div>
+
+        <h3>Medición</h3>
+        <label class="field">Función</label>
+        <select id="mmFunc">
+          <option value="V">Voltaje (V)</option>
+          <option value="I">Corriente (A)</option>
+          <option value="R">Resistencia (Ω)</option>
+          <option value="P">Potencia (W)</option>
+        </select>
+        <div class="btn-row">
+          <button type="button" class="btn btn-primary" id="mmMeasure">Medir</button>
+        </div>
+        <div class="readout">
+          <div class="pill"><div class="k">LECTURA</div><div class="v" id="mmRead">—</div></div>
+          <div class="pill"><div class="k">UNIDAD</div><div class="v" id="mmUnit">—</div></div>
+        </div>
+        <p class="muted" id="mmNote">Cierra el suiche, enciende la fuente y pulsa Medir.</p>
+      </div>
+    </section>
+<section class="panel" id="tab-practicas">
+      <div class="card no-print">
+        <h2>Prácticas guiadas</h2>
+        <div class="formula-box">Arma y mide el circuito <b>aquí mismo</b>; marca cada paso.</div>
+
+        <h3>Armar el circuito</h3>
+        <div class="formula-box">
+          <b>1.</b> Serie, Paralelo o Mixto.<br>
+          <b>2.</b> Agrega componentes.<br>
+          <b>3.</b> Voltaje, suiche y fuente.<br>
+          <b>4.</b> Analiza y mide.
+        </div>
+        <h3>Tipo de circuito</h3>
+        <div class="mode-row circ-mode-row">
+          <button type="button" class="on" data-mode="serie">Serie</button>
+          <button type="button" data-mode="paralelo">Paralelo</button>
+          <button type="button" data-mode="mixto">Mixto</button>
+        </div>
+        <div class="formula-box circ-theory"></div>
+        <h3>Fuente y suiche</h3>
+        <div class="slider-box v">
+          <label><span>Voltaje V</span><span class="cVlab">12 V</span></label>
+          <input type="range" class="cV" min="3" max="48" step="1" value="12">
+        </div>
+        <div class="btn-row">
+          <button type="button" class="btn btn-outline cSuiche">⏻ Suiche: abierto</button>
+          <button type="button" class="btn btn-outline cPower">🔋 Fuente: OFF</button>
+        </div>
+        <h3>Componentes</h3>
+        <div class="comp-row comp-palette"></div>
+        <p class="muted branch-hint"></p>
+        <div class="branch-list branch-list-el"></div>
+        <div class="btn-row">
+          <button type="button" class="btn btn-outline cClear">Vaciar</button>
+          <button type="button" class="btn btn-primary cAnalyze">Analizar</button>
+        </div>
+        <div class="motor-stage" style="margin-top:12px;">
+          <canvas class="circuitCanvas" width="480" height="300"></canvas>
+        </div>
+        <div class="readout circ-readout"></div>
+        <div class="formula-box circ-explain"></div>
+
+        <h3>Medición rápida</h3>
+        <div class="btn-row">
+          <button type="button" class="btn btn-outline" data-mm="V">Medir V</button>
+          <button type="button" class="btn btn-outline" data-mm="I">Medir I</button>
+          <button type="button" class="btn btn-outline" data-mm="R">Medir R</button>
+          <button type="button" class="btn btn-outline" data-mm="P">Medir P</button>
+        </div>
+        <div class="readout">
+          <div class="pill"><div class="k">LECTURA</div><div class="v" id="practMmRead">—</div></div>
+          <div class="pill"><div class="k">UNIDAD</div><div class="v" id="practMmUnit">—</div></div>
+        </div>
+        <p class="muted" id="practMmNote">Energiza el circuito y elige una medición.</p>
+        <h3>Lista de prácticas</h3>
+        <div id="practList"></div>
+        <div class="btn-row">
+          <button type="button" class="btn btn-gold" id="practMail">✉️ Avisar al profesor (prácticas)</button>
+        </div>
+        <p class="muted" id="practStatus"></p>
+      </div>
+    </section>
+<section class="panel" id="tab-seguridad">
+      <div class="card no-print">
+        <h2>Seguridad en el taller</h2>
+        <div class="formula-box">
+          <b>1.</b> Nunca trabajes con las manos mojadas.<br>
+          <b>2.</b> Desconecta la fuente antes de armar o modificar un circuito.<br>
+          <b>3.</b> Usa herramientas con mango aislado.<br>
+          <b>4.</b> No sobrecargues tomacorrientes ni cables delgados.<br>
+          <b>5.</b> Si hay chispa, olor a quemado o calentamiento, apaga y avisa al profesor.<br>
+          <b>6.</b> Mantén el área ordenada: sin cables sueltos en el piso.<br>
+          <b>7.</b> No uses joyas metálicas al manipular circuitos energizados.<br>
+          <b>8.</b> Respeta fusibles y protecciones: no los puentes sin autorización.
+        </div>
+        <div class="btn-row">
+          <button type="button" class="btn btn-primary" id="segPrint">🖨️ Imprimir ficha de seguridad</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- GLOSARIO -->
+    <section class="panel" id="tab-glosario">
+      <div class="card no-print">
+        <h2>Glosario</h2>
+        <div id="glosarioList"></div>
+      </div>
+    </section>
+
+    <!-- CERTIFICADO -->
+    <section class="panel" id="tab-certificado">
+      <div class="card no-print">
+        <h2>Certificado de logro</h2>
+        <div class="formula-box">
+          Elige tu nombre arriba y, si puedes, completa el <b>Reto</b>.<br>
+          El certificado se genera como <b>imagen</b> (igual que en los otros juegos), <b>sin código QR</b>.
+        </div>
+        <div class="readout">
+          <div class="pill"><div class="k">ESTUDIANTE</div><div class="v" id="certName">—</div></div>
+          <div class="pill"><div class="k">PUNTOS RETO</div><div class="v" id="certScore">0</div></div>
+          <div class="pill"><div class="k">NIVEL MÁX.</div><div class="v" id="certLevel">1</div></div>
+        </div>
+        <div class="btn-row">
+          <button type="button" class="btn btn-primary" id="certGen">🏆 Generar / descargar certificado</button>
+        </div>
+        <p class="muted">Se descarga una imagen del certificado. Sin QR y sin envío de correo.</p>
+        <div id="certPreview" style="margin-top:12px;text-align:center;"></div>
+      </div>
+    </section>
+
+<section class="panel" id="tab-reto">
+      <div class="card no-print">
+        <h2>Reto — 20 niveles</h2>
+        <div class="formula-box">
+          <b>20 niveles</b> · 5 preguntas cada uno · 3 vidas por nivel<br>
+          La dificultad sube: básicos → Ohm → serie/paralelo → motor → colores → planos → cálculos → diagnóstico.<br>
+          Completa un nivel (mínimo <b>4 aciertos</b>) para desbloquear el siguiente.<br>
+          <b>Sin internet:</b> el reto y el taller funcionan offline si guardas el HTML o dejas la página cargada. Solo el correo al profesor necesita red.
+        </div>
+        <div class="mode-row" id="retoLevelRow" style="max-height:130px;overflow:auto;">
+          <button type="button" class="on" data-lvl="1" id="retoLvl1">N1</button>
+        </div>
+        <div class="readout">
+          <div class="pill"><div class="k">NIVEL</div><div class="v" id="retoLvlShow">1</div></div>
+          <div class="pill"><div class="k">PREGUNTA</div><div class="v" id="retoNum">1/5</div></div>
+          <div class="pill"><div class="k">PUNTOS</div><div class="v" id="retoScore">0</div></div>
+          <div class="pill"><div class="k">VIDAS</div><div class="v" id="retoLives">❤️❤️❤️</div></div>
+        </div>
+        <div id="retoBody"><p class="muted">Elige un nivel y pulsa <b>Comenzar nivel</b>.</p></div>
+        <button class="btn btn-primary" id="retoStart">Comenzar nivel</button>
+      </div>
+    </section>
+  </main>
+  <footer class="note no-print">GILAST · GILAST</footer>
+</div>
+
+<script>
+const STUDENT_ROSTER = null; /* SaaS sin nómina */
+
+let workSize = 1; // 1, 2 o 3 personas
+let currentStudent = { name: '', section: 'B' };
+let currentGroup = [];
+
+function rosterList(){
+  try {
+    return (STUDENT_ROSTER.B || []).slice().sort((a,b)=>a.name.localeCompare(b.name,'es'));
+  } catch (e) {
+    return [];
+  }
+}
+
+function findByName(name){
+  if (!name) return null;
+  return rosterList().find(s => s.name === name) || null;
+}
+
+function fillSelectOptions(sel, emptyLabel){
+  if (!sel) return;
+  const prev = sel.value;
+  const list = rosterList();
+  sel.innerHTML = '';
+  const o0 = document.createElement('option');
+  o0.value = '';
+  o0.textContent = emptyLabel || '— Elige nombre —';
+  sel.appendChild(o0);
+  list.forEach(s => {
+    const o = document.createElement('option');
+    o.value = s.name;
+    o.textContent = s.name;
+    sel.appendChild(o);
+  });
+  if (prev && list.some(s => s.name === prev)) sel.value = prev;
+}
+
+function groupLabel(){
+  if (currentGroup.length > 1) return currentGroup.map(g => g.name).join(' / ');
+  return currentStudent.name || '';
+}
+function groupCodes(){
+  return '';
+}
+
+function updateStudentHint(){
+  const hint = document.getElementById('studentCodeHint');
+  if (!hint) return;
+  if (!currentGroup.length) {
+    hint.textContent = workSize === 1
+      ? 'Elige tu nombre. El reto es solo individual.'
+      : ('Elige los ' + workSize + ' nombres del grupo. El reto es solo individual.');
+    return;
+  }
+  const lines = currentGroup.map((g, i) => (i + 1) + ') ' + g.name);
+  hint.textContent = lines.join('  |  ') + (workSize > 1 ? '  ·  Reto: solo 1 persona' : '');
+}
+
+function autofillDrawFields(){
+  const dn = document.getElementById('drawStudent');
+  const dc = document.getElementById('drawCourse');
+  if (dn) dn.value = groupLabel();
+  if (dc) {
+    if (currentGroup.length > 1) dc.value = '3° año Electricidad (grupo de ' + currentGroup.length + ')';
+    else if (currentGroup.length === 1) dc.value = '3° año Electricidad';
+  }
+}
+
+function syncMembers(){
+  const ids = ['groupSel1', 'groupSel2', 'groupSel3'].slice(0, workSize);
+  const names = ids.map(id => {
+    const el = document.getElementById(id);
+    return el ? el.value : '';
+  });
+  // detect duplicates
+  const used = new Set();
+  const uniqueNames = [];
+  names.forEach(n => {
+    if (n && !used.has(n)) {
+      used.add(n);
+      uniqueNames.push(n);
+    }
+  });
+  currentGroup = uniqueNames.map(n => {
+    const s = findByName(n);
+    return s ? { name: s.name, section: 'B' } : null;
+  }).filter(Boolean);
+  currentStudent = currentGroup[0] || { name: '', section: 'B' };
+  updateStudentHint();
+  autofillDrawFields();
+}
+
+function setWorkSize(n){
+  workSize = n;
+  [1,2,3].forEach(i => {
+    const btn = document.getElementById('mode' + i);
+    if (btn) btn.classList.toggle('on', i === n);
+    const wrap = document.getElementById('memberWrap' + i);
+    if (wrap) wrap.style.display = i <= n ? 'block' : 'none';
+  });
+  const lab = document.getElementById('label1');
+  if (lab) lab.textContent = n === 1 ? 'Tu nombre' : 'Estudiante 1';
+  // clear hidden selects
+  if (n < 2) {
+    const s2 = document.getElementById('groupSel2');
+    if (s2) s2.value = '';
+  }
+  if (n < 3) {
+    const s3 = document.getElementById('groupSel3');
+    if (s3) s3.value = '';
+  }
+  syncMembers();
+}
+
+function fillStudentSelect(){
+  try {
+    const list = rosterList();
+    console.log('[Taller] Estudiantes cargados:', list.length);
+    if (!list.length) {
+      const hint = document.getElementById('studentCodeHint');
+      if (hint) hint.textContent = '⚠️ No se cargó la lista. Recarga la página.';
+    }
+    fillSelectOptions(document.getElementById('groupSel1'), '— Elige nombre —');
+    fillSelectOptions(document.getElementById('groupSel2'), '— Elige nombre —');
+    fillSelectOptions(document.getElementById('groupSel3'), '— Elige nombre —');
+    [1,2,3].forEach(function(i){
+      const btn = document.getElementById('mode' + i);
+      if (btn) btn.onclick = function(e){ if(e) e.preventDefault(); setWorkSize(i); };
+      const sel = document.getElementById('groupSel' + i);
+      if (sel) sel.onchange = function(){ syncMembers(); };
+    });
+    setWorkSize(workSize || 1);
+  } catch (err) {
+    console.error('[Taller] fillStudentSelect', err);
+  }
+}
+
+document.querySelectorAll('.tabs button').forEach(btn=>{
+  btn.onclick=function(){
+    document.querySelectorAll('.tabs button').forEach(function(b){ b.classList.remove('active'); });
+    btn.classList.add('active');
+    document.querySelectorAll('.panel').forEach(function(p){ p.classList.remove('active'); });
+    const tab = document.getElementById('tab-' + btn.dataset.tab);
+    if (tab) tab.classList.add('active');
+    const name = btn.dataset.tab;
+    try {
+      if (name === 'motor') { renderParts(); renderSlots(); wireMotorControls(); updateMotorRun(); drawMotor(); }
+      if (name === 'multimetro' || name === 'practicas') {
+        // Dar tiempo a que el panel se muestre antes de dibujar
+        setTimeout(activateCircTab, 30);
+      }
+      if (name === 'planos') { wirePlanButtons(); drawSchematic(); }
+      if (name === 'dibujo') initDrawingBoard();
+      if (name === 'certificado') refreshCertUI();
+      if (name === 'colores') fillResBands();
+      if (name === 'practicas') {
+        if (!document.getElementById('practList') || !document.getElementById('practList').children.length) {
+          renderPractices();
+        }
+        const pm = document.getElementById('practMail');
+        if (pm && !pm._bound) {
+          pm._bound = true;
+          pm.onclick = function(){ sendTeacherEmail('Prácticas guiadas'); };
+        }
+      }
+    } catch (err) {
+      console.error('tab ' + name, err);
+    }
+  };
+});
+
+/* MOTOR — colocación por sitios */
+const PARTS = [
+  {id:'frame', label:'📦 Carcasa', short:'Carcasa'},
+  {id:'stator', label:'🧲 Imán / estator', short:'Imán'},
+  {id:'rotor', label:'🔄 Rotor', short:'Rotor'},
+  {id:'commutator', label:'⚙️ Conmutador', short:'Conmutador'},
+  {id:'brushes', label:'🔌 Escobillas', short:'Escobillas'},
+  {id:'shaft', label:'📏 Eje', short:'Eje'}
+];
+const MOTOR_SLOTS = [
+  {id:'frame', title:'Sitio: Carcasa', hint:'Soporte exterior'},
+  {id:'stator', title:'Sitio: Imán N/S', hint:'Campo magnético fijo'},
+  {id:'rotor', title:'Sitio: Rotor', hint:'Bobina que gira'},
+  {id:'commutator', title:'Sitio: Conmutador', hint:'Centro del rotor'},
+  {id:'brushes', title:'Sitio: Escobillas', hint:'Contacto con el rotor'},
+  {id:'shaft', title:'Sitio: Eje', hint:'Salida del giro'}
+];
+const motor = {
+  parts: Object.fromEntries(PARTS.map(p => [p.id, false])),
+  battery: false,
+  switchOn: false,
+  angle: 0,
+  raf: null,
+  selected: null
+};
+
+function motorComplete(){ return PARTS.every(p => motor.parts[p.id]); }
+function motorCanRun(){ return motorComplete() && motor.battery && motor.switchOn; }
+
+function renderParts(){
+  const g = document.getElementById('partsGrid');
+  if (!g) return;
+  g.innerHTML = '';
+  PARTS.forEach(p => {
+    const placed = motor.parts[p.id];
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'part-btn' + (placed ? ' used' : '') + (motor.selected === p.id ? ' selected' : '');
+    b.textContent = p.label + (placed ? ' ✓' : '');
+    b.disabled = placed;
+    b.onclick = function(){
+      if (motor.parts[p.id]) return;
+      motor.selected = (motor.selected === p.id) ? null : p.id;
+      renderParts();
+      renderSlots();
+      const h = document.getElementById('motorHint');
+      if (h) h.textContent = motor.selected
+        ? ('Pieza elegida: ' + p.short + '. Ahora toca el sitio correcto.')
+        : 'Selecciona una pieza primero.';
+      drawMotor();
+    };
+    g.appendChild(b);
+  });
+}
+
+function renderSlots(){
+  const g = document.getElementById('slotsGrid');
+  if (!g) return;
+  g.innerHTML = '';
+  MOTOR_SLOTS.forEach(slot => {
+    const filled = motor.parts[slot.id];
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'slot-btn' + (filled ? ' filled' : '') + (motor.selected && !filled ? ' target' : '');
+    if (filled) {
+      const part = PARTS.find(x => x.id === slot.id);
+      b.textContent = '✓ ' + (part ? part.short : slot.title) + ' (bien)';
+    } else {
+      b.innerHTML = slot.title + '<br><span style="font-weight:500;font-size:.72rem;opacity:.85">' + slot.hint + '</span>';
+    }
+    b.onclick = function(){ tryPlacePart(slot.id, b); };
+    g.appendChild(b);
+  });
+}
+
+function tryPlacePart(slotId, btnEl){
+  if (motor.parts[slotId]) {
+    const h = document.getElementById('motorHint');
+    if (h) h.textContent = 'Ese sitio ya tiene su pieza correcta.';
+    return;
+  }
+  if (!motor.selected) {
+    const h = document.getElementById('motorHint');
+    if (h) h.textContent = 'Primero elige una pieza de la bandeja.';
+    return;
+  }
+  if (motor.selected === slotId) {
+    motor.parts[slotId] = true;
+    motor.selected = null;
+    const h = document.getElementById('motorHint');
+    if (h) h.textContent = '✓ Pieza colocada correctamente.';
+    renderParts();
+    renderSlots();
+    updateMotorRun();
+    drawMotor();
+  } else {
+    if (btnEl) {
+      btnEl.classList.add('wrong');
+      setTimeout(function(){ btnEl.classList.remove('wrong'); }, 400);
+    }
+    const wrong = PARTS.find(x => x.id === motor.selected);
+    const h = document.getElementById('motorHint');
+    if (h) h.textContent = '✗ ' + (wrong ? wrong.short : 'Esa pieza') + ' no va en ese sitio. Prueba otro.';
+    const st = document.getElementById('motorStatus');
+    if (st) { st.className = 'status-bad'; st.textContent = 'Ubicación incorrecta — intenta de nuevo'; }
+  }
+}
+
+function updateMotorRun(){
+  const st = document.getElementById('motorStatus');
+  if (!st) return;
+  const n = PARTS.filter(p => motor.parts[p.id]).length;
+  if (!motorComplete()) {
+    st.className = 'status-bad';
+    st.textContent = 'Piezas bien colocadas: ' + n + ' / 6 — sigue ubicándolas';
+  } else if (!motor.battery) {
+    st.className = 'status-bad';
+    st.textContent = '✓ Armado completo. Enciende la Batería (ON)';
+  } else if (!motor.switchOn) {
+    st.className = 'status-bad';
+    st.textContent = '✓ Batería ON. Cierra el Suiche';
+  } else {
+    st.className = 'status-ok';
+    st.textContent = '✓ Motor en marcha — todas las piezas en su sitio';
+  }
+  if (motorCanRun()) startSpin(); else stopSpin();
+}
+
+function startSpin(){
+  if (motor.raf) return;
+  const loop = function(){
+    motor.angle += 0.12;
+    drawMotor();
+    motor.raf = requestAnimationFrame(loop);
+  };
+  motor.raf = requestAnimationFrame(loop);
+}
+function stopSpin(){
+  if (motor.raf) cancelAnimationFrame(motor.raf);
+  motor.raf = null;
+  drawMotor();
+}
+function roundRect(ctx,x,y,w,h,r){
+  ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r);
+  ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); ctx.fill();
+}
+
+function drawMotor(){
+  const c = document.getElementById('motorCanvas'); if (!c) return;
+  const ctx = c.getContext('2d'), W = c.width, H = c.height;
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle = '#0a0f1a'; ctx.fillRect(0,0,W,H);
+  const cx = W * 0.40, cy = H * 0.52;
+
+  // Sin marcas de guía: el estudiante debe saber dónde va cada pieza
+  // Placed parts
+  if (motor.parts.frame) {
+    ctx.strokeStyle = '#94a3b8'; ctx.lineWidth = 4; ctx.strokeRect(cx - 110, cy - 90, 220, 180);
+  }
+  if (motor.parts.stator) {
+    ctx.fillStyle = '#ef4444'; roundRect(ctx, cx - 100, cy - 70, 36, 100, 6);
+    ctx.fillStyle = '#3b82f6'; roundRect(ctx, cx + 64, cy - 70, 36, 100, 6);
+    ctx.fillStyle = '#fff'; ctx.font = 'bold 18px sans-serif';
+    ctx.fillText('N', cx - 88, cy + 8); ctx.fillText('S', cx + 76, cy + 8);
+  }
+  ctx.save();
+  ctx.translate(cx, cy);
+  if (motor.parts.rotor) ctx.rotate(motor.angle);
+  if (motor.parts.rotor) {
+    ctx.fillStyle = '#fbbf24'; ctx.fillRect(-16, -55, 32, 110);
+    ctx.fillStyle = '#f59e0b'; ctx.beginPath(); ctx.arc(0, 0, 22, 0, Math.PI * 2); ctx.fill();
+  }
+  if (motor.parts.commutator) {
+    ctx.fillStyle = '#94a3b8'; ctx.beginPath(); ctx.arc(0, 0, 12, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = '#0f172a'; ctx.beginPath(); ctx.moveTo(-12, 0); ctx.lineTo(12, 0); ctx.stroke();
+  }
+  ctx.restore();
+  if (motor.parts.brushes) {
+    ctx.fillStyle = '#a78bfa';
+    ctx.fillRect(cx - 8, cy + 48, 16, 22);
+    ctx.fillRect(cx - 8, cy - 70, 16, 22);
+  }
+  if (motor.parts.shaft) {
+    ctx.strokeStyle = '#e2e8f0'; ctx.lineWidth = 5;
+    ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(cx + 130, cy); ctx.stroke();
+    ctx.save();
+    ctx.translate(cx + 130, cy);
+    if (motorCanRun()) ctx.rotate(motor.angle * 1.2);
+    ctx.fillStyle = '#38bdf8';
+    for (let i = 0; i < 3; i++) { ctx.rotate(Math.PI * 2 / 3); ctx.fillRect(-4, -28, 8, 28); }
+    ctx.restore();
+  }
+
+  // Battery / switch indicators
+  ctx.fillStyle = motor.battery ? '#34d399' : '#475569';
+  ctx.fillRect(W - 70, 30, 18, 40); ctx.fillRect(W - 48, 38, 10, 24);
+  ctx.fillStyle = '#94a3b8'; ctx.font = '11px sans-serif';
+  ctx.fillText(motor.battery ? 'Bat ON' : 'Bat OFF', W - 72, 85);
+  ctx.strokeStyle = motor.switchOn ? '#34d399' : '#f87171';
+  ctx.lineWidth = 3;
+  ctx.beginPath(); ctx.moveTo(W - 90, 140); ctx.lineTo(W - 60, motor.switchOn ? 140 : 120); ctx.stroke();
+  ctx.fillStyle = '#94a3b8';
+  ctx.fillText(motor.switchOn ? 'Suiche cerrado' : 'Suiche abierto', W - 100, 165);
+
+  if (motor.selected) {
+    ctx.fillStyle = '#38bdf8';
+    ctx.font = 'bold 12px sans-serif';
+    const sel = PARTS.find(x => x.id === motor.selected);
+    ctx.fillText('Colocando: ' + (sel ? sel.short : ''), 12, 20);
+  }
+}
+
+function wireMotorControls(){
+  const bat = document.getElementById('btnBattery');
+  if (bat) bat.onclick = function(){
+    motor.battery = !motor.battery;
+    this.textContent = motor.battery ? '🔋 Batería: ON' : '🔋 Batería: OFF';
+    this.className = 'btn ' + (motor.battery ? 'btn-ok' : 'btn-outline');
+    updateMotorRun();
+  };
+  const sw = document.getElementById('btnSwitch');
+  if (sw) sw.onclick = function(){
+    motor.switchOn = !motor.switchOn;
+    this.textContent = motor.switchOn ? '⏻ Suiche: cerrado' : '⏻ Suiche: abierto';
+    this.className = 'btn ' + (motor.switchOn ? 'btn-ok' : 'btn-outline');
+    updateMotorRun();
+  };
+  const rs = document.getElementById('btnResetMotor');
+  if (rs) rs.onclick = function(){
+    PARTS.forEach(p => { motor.parts[p.id] = false; });
+    motor.battery = false;
+    motor.switchOn = false;
+    motor.selected = null;
+    const b = document.getElementById('btnBattery');
+    if (b) { b.textContent = '🔋 Batería: OFF'; b.className = 'btn btn-outline'; }
+    const s = document.getElementById('btnSwitch');
+    if (s) { s.textContent = '⏻ Suiche: abierto'; s.className = 'btn btn-outline'; }
+    renderParts();
+    renderSlots();
+    updateMotorRun();
+    drawMotor();
+  };
+  // Click on canvas regions to place
+  const canvas = document.getElementById('motorCanvas');
+  if (canvas && !canvas._motorClick) {
+    canvas._motorClick = true;
+    canvas.style.cursor = 'pointer';
+    canvas.addEventListener('click', function(ev){
+      if (!motor.selected) return;
+      const rect = canvas.getBoundingClientRect();
+      const x = (ev.clientX - rect.left) * (canvas.width / rect.width);
+      const y = (ev.clientY - rect.top) * (canvas.height / rect.height);
+      const cx = canvas.width * 0.40, cy = canvas.height * 0.52;
+      let slot = null;
+      if (x > cx + 50 && x < cx + 150 && y > cy - 40 && y < cy + 40) slot = 'shaft';
+      else if (x > cx - 30 && x < cx + 30 && y > cy - 30 && y < cy + 30) slot = motor.parts.rotor ? 'commutator' : 'rotor';
+      else if ((x > cx - 110 && x < cx - 60) || (x > cx + 55 && x < cx + 110)) {
+        if (y > cy - 80 && y < cy + 40) slot = 'stator';
+      }
+      else if (x > cx - 20 && x < cx + 20 && ((y > cy - 85 && y < cy - 50) || (y > cy + 40 && y < cy + 75))) slot = 'brushes';
+      else if (x > cx - 115 && x < cx + 115 && y > cy - 95 && y < cy + 95) slot = 'frame';
+      if (slot) tryPlacePart(slot, null);
+    });
+  }
+}
+
+
+
+/* ========== CIRCUITOS SERIE / PARALELO / MIXTO ========== */
+const COMP_TYPES=[
+  {id:'bombillo',label:'💡 Bombillo',R:24},
+  {id:'tomacorriente',label:'🔌 Tomacorriente',R:60},
+  {id:'resistencia',label:'▤ Resistencia',R:12},
+  {id:'motorc',label:'🌀 Motor',R:18},
+  {id:'led',label:'🔆 LED',R:120},
+  {id:'capacitor',label:'▦ Capacitor',R:8},
+  {id:'rele',label:'🔔 Relé',R:40},
+  {id:'transformador',label:'⬜ Transformador',R:5},
+  {id:'fusible',label:'▧ Fusible',R:0.5},
+  {id:'suiche',label:'⏻ Suiche',R:0},
+  {id:'cable',label:'➖ Cable',R:0.2}
+];
+const circ={
+  mode:'serie',
+  V:12,
+  power:false,
+  suiche:false,
+  // items: {type, branch} branch 0 = serie principal / rama A; 1 = rama B (paralelo/mixto)
+  items:[]
+};
+
+
+function circPanels(){ return Array.prototype.slice.call(document.querySelectorAll('#tab-multimetro, #tab-practicas')); }
+function forEachCircPanel(fn){ circPanels().forEach(fn); }
+function setCircTheory(){
+  const map={serie:'<b>Serie:</b> misma corriente; voltajes se suman. R_eq = R₁+R₂+…',paralelo:'<b>Paralelo:</b> mismo voltaje; corrientes se suman. 1/R_eq=1/R₁+1/R₂+…',mixto:'<b>Mixto:</b> combina serie y paralelo.'};
+  forEachCircPanel(function(p){
+    const el=p.querySelector('.circ-theory'); if(el) el.innerHTML=map[circ.mode]||'';
+    p.querySelectorAll('.circ-mode-row button').forEach(function(b){ b.classList.toggle('on', b.getAttribute('data-mode')===circ.mode); });
+    const hint=p.querySelector('.branch-hint');
+    if(hint) hint.textContent=circ.mode==='paralelo'?'Cada carga es una rama.':(circ.mode==='mixto'?'Combina serie y paralelo.':'Todos en la misma línea.');
+  });
+}
+function renderPalette(){
+  forEachCircPanel(function(p){
+    const row=p.querySelector('.comp-palette'); if(!row) return;
+    row.innerHTML='';
+    COMP_TYPES.forEach(function(tp){
+      const b=document.createElement('button');
+      b.type='button';
+      b.className='comp-chip';
+      b.setAttribute('data-comp', tp.id);
+      b.textContent=tp.label;
+      row.appendChild(b);
+    });
+  });
+}
+function renderBranchList(){
+  forEachCircPanel(function(p){
+    const box=p.querySelector('.branch-list-el'); if(!box) return;
+    box.innerHTML='';
+    if(!circ.items.length){ box.innerHTML='<p class="muted">Sin componentes.</p>'; return; }
+    circ.items.forEach(function(it,idx){
+      const tp=COMP_TYPES.find(function(x){return x.id===it.type;});
+      const row=document.createElement('div');
+      row.style.cssText='display:flex;justify-content:space-between;align-items:center;padding:6px 8px;border:1px solid var(--line);border-radius:8px;margin:4px 0;font-size:.82rem;';
+      row.innerHTML='<span>'+(tp?tp.label:it.type)+(circ.mode!=='serie'?' · rama '+(it.branch+1):'')+'</span>';
+      const del=document.createElement('button'); del.type='button'; del.className='btn btn-outline'; del.style.padding='4px 8px'; del.textContent='Quitar';
+      del.onclick=function(){ circ.items.splice(idx,1); refreshAllCirc(); };
+      row.appendChild(del); box.appendChild(row);
+    });
+  });
+}
+function updateCircPowerButtons(){
+  forEachCircPanel(function(p){
+    const s=p.querySelector('.cSuiche'), pw=p.querySelector('.cPower'), lab=p.querySelector('.cVlab'), range=p.querySelector('.cV');
+    if(lab) lab.textContent=circ.V+' V';
+    if(range) range.value=circ.V;
+    if(s) s.textContent=circ.suiche?'⏻ Suiche: cerrado':'⏻ Suiche: abierto';
+    if(pw) pw.textContent=circ.power?'🔋 Fuente: ON':'🔋 Fuente: OFF';
+  });
+}
+
+let _circBusy = false;
+
+function refreshAllCirc(){
+  if (_circBusy) return;
+  _circBusy = true;
+  try {
+    try { setCircTheory(); } catch (e) { console.error(e); }
+    try { renderPalette(); } catch (e) { console.error(e); }
+    try { renderBranchList(); } catch (e) { console.error(e); }
+    try { updateCircPowerButtons(); } catch (e) { console.error(e); }
+    const an = analyzeCircuit();
+    drawCircuit(an);
+  } catch (e) {
+    console.error('refreshAllCirc', e);
+  } finally {
+    _circBusy = false;
+  }
+}
+
+function wireAllCircPanels(){
+  // Un solo listener por panel (delegación) — no se acumulan handlers
+  forEachCircPanel(function(p){
+    if (p._circDelegated) return;
+    p._circDelegated = true;
+    p.addEventListener('click', function(e){
+      const t = e.target;
+      if (!t || !t.closest) return;
+      const modeBtn = t.closest('.circ-mode-row button');
+      if (modeBtn) {
+        e.preventDefault();
+        circ.mode = modeBtn.getAttribute('data-mode') || 'serie';
+        refreshAllCirc();
+        return;
+      }
+      if (t.closest('.cSuiche')) {
+        e.preventDefault();
+        circ.suiche = !circ.suiche;
+        refreshAllCirc();
+        return;
+      }
+      if (t.closest('.cPower')) {
+        e.preventDefault();
+        circ.power = !circ.power;
+        refreshAllCirc();
+        return;
+      }
+      if (t.closest('.cClear')) {
+        e.preventDefault();
+        circ.items = [];
+        refreshAllCirc();
+        return;
+      }
+      if (t.closest('.cAnalyze')) {
+        e.preventDefault();
+        const an = analyzeCircuit();
+        drawCircuit(an);
+        return;
+      }
+      const chip = t.closest('.comp-chip');
+      if (chip && chip.getAttribute('data-comp')) {
+        e.preventDefault();
+        addComponent(chip.getAttribute('data-comp'));
+        return;
+      }
+      const mm = t.closest('[data-mm]');
+      if (mm && p.id === 'tab-practicas') {
+        e.preventDefault();
+        try {
+          const r = measureFromCircuit(mm.getAttribute('data-mm'));
+          const a = document.getElementById('practMmRead');
+          const u = document.getElementById('practMmUnit');
+          const n = document.getElementById('practMmNote');
+          if (a) a.textContent = r.reading;
+          if (u) u.textContent = r.unit;
+          if (n) n.textContent = r.note;
+        } catch (err) {
+          console.error(err);
+        }
+        return;
+      }
+    });
+    const range = p.querySelector('.cV');
+    if (range && !range._circBound) {
+      range._circBound = true;
+      range.addEventListener('input', function(){
+        circ.V = +range.value;
+        updateCircPowerButtons();
+        const an = analyzeCircuit();
+        drawCircuit(an);
+      });
+    }
+  });
+  const mmBtn = document.getElementById('mmMeasure');
+  if (mmBtn && !mmBtn._circBound) {
+    mmBtn._circBound = true;
+    mmBtn.addEventListener('click', function(e){
+      e.preventDefault();
+      measureMultimeter();
+    });
+  }
+}
+
+function activateCircTab(){
+  if (_circBusy) return;
+  try {
+    wireAllCircPanels();
+    // Actualización ligera: no reconstruir todo si ya hay paleta
+    forEachCircPanel(function(p){
+      const pal = p.querySelector('.comp-palette');
+      if (!pal || !pal.children.length) renderPalette();
+    });
+    setCircTheory();
+    renderBranchList();
+    updateCircPowerButtons();
+    const an = analyzeCircuit();
+    drawCircuit(an);
+  } catch (err) {
+    console.error('activateCircTab', err);
+  }
+}
+
+function measureFromCircuit(fn){
+  const V=circ.V||12; let R=24; const powered=!!circ.power&&!!circ.suiche;
+  try{
+    if(typeof loads==='function'){
+      const L=loads();
+      if(L&&L.length){
+        if(circ.mode==='paralelo'){ const inv=L.reduce(function(s,x){return s+(x.R?1/x.R:0);},0); R=inv>0?1/inv:R; }
+        else { R=L.reduce(function(s,x){return s+(x.R||0);},0)||R; }
+      }
+    }
+  }catch(e){}
+  let reading=0, unit='', note='';
+  if(fn==='V'){ reading=powered?V:0; unit='V'; note=powered?'Voltaje de la fuente.':'Fuente OFF o suiche abierto → 0 V.'; }
+  else if(fn==='R'){ reading=Math.round(R*1000)/1000; unit='Ω'; note='R_eq de las cargas.'; }
+  else if(fn==='I'){ reading=(powered&&R>0)?Math.round((V/R)*1000)/1000:0; unit='A'; note=powered?'I ≈ V/R_eq.':'Sin energía no hay corriente.'; }
+  else { const I=(powered&&R>0)?(V/R):0; reading=Math.round(V*I*1000)/1000; unit='W'; note=powered?'P = V·I.':'Sin energía, potencia 0.'; }
+  return {reading:String(reading), unit:unit, note:note};
+}
+
+function addComponent(typeId){
+  if(circ.mode==='serie'){
+    circ.items.push({type:typeId, branch:0});
+  } else if(circ.mode==='paralelo'){
+    // each new load gets its own branch index
+    const branch = circ.items.filter(i=>i.type!=='cable').length;
+    circ.items.push({type:typeId, branch: Math.min(branch, 5)});
+  } else {
+    // mixto: alternate prompt - default branch 0, user can move via buttons in list
+    circ.items.push({type:typeId, branch:0});
+  }
+  refreshAllCirc();
+}
+
+/* old renderBranchList (branchList id) removed */
+
+function loads(){
+  return circ.items.filter(i=>i.type!=='cable' && i.type!=='suiche');
+}
+
+function analyzeCircuit(){
+  const V=circ.V;
+  const powered=circ.power && circ.suiche;
+  // Check series switches - if any suiche in series path is "open" we treat main suiche only for simplicity
+  // Compute Req
+  let Req=0, I_total=0, detail='';
+  const L=loads();
+
+  if(!L.length){
+    forEachCircPanel(function(p){
+      const ro=p.querySelector('.circ-readout'); if(ro) ro.innerHTML='<div class="pill"><div class="k">ESTADO</div><div class="v">Sin cargas</div></div>';
+      const ex=p.querySelector('.circ-explain'); if(ex) ex.textContent='Agrega bombillos u otras cargas para analizar.';
+    });
+    return {Req:Infinity,I:0,powered};
+  }
+
+  if(circ.mode==='serie'){
+    Req=L.reduce((s,i)=>{const ct=COMP_TYPES.find(c=>c.id===i.type);return s+((ct&&ct.R)||0);},0);
+    // add small cable R
+    const cables=circ.items.filter(i=>i.type==='cable').length;
+    Req+=cables*0.2;
+    I_total=powered? V/Req : 0;
+    detail=`Serie: R<sub>eq</sub>=ΣR=${Req.toFixed(1)} Ω. Misma I en todos. Cada bombillo recibe parte del voltaje.`;
+  } else if(circ.mode==='paralelo'){
+    // group by branch
+    const branches={};
+    L.forEach(i=>{
+      const _ct=COMP_TYPES.find(c=>c.id===i.type);const r=(_ct&&_ct.R)||0;
+      branches[i.branch]=(branches[i.branch]||0)+r; // if multiple on same branch, series within branch
+    });
+    let inv=0;
+    Object.values(branches).forEach(r=>{ if(r>0) inv+=1/r; });
+    Req=inv>0? 1/inv : Infinity;
+    I_total=powered && isFinite(Req)? V/Req : 0;
+    detail=`Paralelo: 1/R<sub>eq</sub>=Σ(1/R). R<sub>eq</sub>=${Req.toFixed(2)} Ω. Mismo V en cada rama.`;
+  } else {
+    // mixto: branch 0 series string, branch 1 parallel group of parallel loads then series with branch0
+    const a=L.filter(i=>i.branch===0);
+    const b=L.filter(i=>i.branch===1);
+    const Ra=a.reduce((s,i)=>s+((COMP_TYPES.find(c=>c.id===i.type)||{}).R||0),0);
+    let Rb=0;
+    if(b.length){
+      let inv=0;
+      b.forEach(i=>{const r=((COMP_TYPES.find(c=>c.id===i.type)||{}).R||0); if(r>0) inv+=1/r;});
+      // if multiple in branch B treated as parallel to each other
+      Rb=inv>0?1/inv:0;
+    }
+    Req=Ra+(b.length?Rb:0);
+    I_total=powered && Req>0? V/Req : 0;
+    detail=`Mixto: R<sub>A</sub>(serie)=${Ra.toFixed(1)} Ω + R<sub>B</sub>(paralelo)=${Rb.toFixed(1)} Ω → R<sub>eq</sub>=${Req.toFixed(1)} Ω.`;
+  }
+
+  const P=V*I_total;
+  var __roHtml=`
+    <div class="pill"><div class="k">R eq.</div><div class="v">${isFinite(Req)?Req.toFixed(2)+' Ω':'—'}</div></div>
+    <div class="pill"><div class="k">I total</div><div class="v">${I_total.toFixed(2)} A</div></div>
+    <div class="pill"><div class="k">P total</div><div class="v">${P.toFixed(1)} W</div></div>
+    <div class="pill"><div class="k">Estado</div><div class="v">${powered?'ON':'OFF'}</div></div>`;
+  forEachCircPanel(function(p){
+    const ro=p.querySelector('.circ-readout'); if(ro&&typeof __roHtml!=='undefined') ro.innerHTML=__roHtml;
+    const ex=p.querySelector('.circ-explain'); if(ex) ex.innerHTML=detail+(powered?'':' <b>Cierra fuente y suiche para energizar.</b>');
+  });
+  return {Req,I:I_total,powered};
+}
+
+function drawCircuit(anCached){
+  const an = anCached || analyzeCircuit();
+  document.querySelectorAll('canvas.circuitCanvas').forEach(function(c){
+    try { drawCircuitOn(c, an); } catch (e) { console.error('drawCircuitOn', e); }
+  });
+}
+function drawCircuitOn(c, an){
+  if (!c) return;
+  const ctx=c.getContext('2d'); if(!ctx) return;
+  const W=c.width,H=c.height;
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle='#0a0f1a';ctx.fillRect(0,0,W,H);
+  if (!an) an = analyzeCircuit();
+  const on=an.powered;
+
+  // Title
+  ctx.fillStyle='#94a3b8';ctx.font='13px sans-serif';
+  ctx.fillText('Circuito '+circ.mode.toUpperCase()+(on?' · ENERGIZADO':' · SIN ENERGÍA'),12,22);
+
+  // Battery symbol left
+  const y=H/2;
+  ctx.strokeStyle='#e2e8f0';ctx.lineWidth=2;
+  ctx.beginPath();ctx.moveTo(40,y-20);ctx.lineTo(40,y+20);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(52,y-12);ctx.lineTo(52,y+12);ctx.stroke();
+  ctx.fillStyle=circ.power?'#34d399':'#64748b';
+  ctx.font='11px sans-serif';ctx.fillText(circ.V+' V',30,y+40);
+
+  // Main switch
+  ctx.strokeStyle=circ.suiche?'#34d399':'#f87171';
+  ctx.beginPath();ctx.moveTo(70,y);ctx.lineTo(95,y);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(95,y);ctx.lineTo(115, circ.suiche?y:y-16);ctx.stroke();
+  ctx.fillStyle='#94a3b8';ctx.fillText('Suiche',88,y+36);
+
+  // Draw components based on mode
+  const startX=130;
+  const items=circ.items.length?circ.items:[{type:'cable',branch:0}];
+
+  if(circ.mode==='serie'){
+    let x=startX;
+    ctx.strokeStyle='#38bdf8';ctx.lineWidth=2;
+    ctx.beginPath();ctx.moveTo(115,y);ctx.lineTo(x,y);ctx.stroke();
+    circ.items.forEach((it,i)=>{
+      x=drawComp(ctx,it.type,x,y,on,i);
+      if(i<circ.items.length-1){
+        ctx.strokeStyle='#38bdf8';ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+16,y);ctx.stroke();
+        x+=16;
+      }
+    });
+    ctx.strokeStyle='#38bdf8';ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(W-30,y);ctx.lineTo(W-30,y+70);ctx.lineTo(40,y+70);ctx.lineTo(40,y+20);ctx.stroke();
+  } else if(circ.mode==='paralelo'){
+    // bus bars
+    const x1=startX, x2=W-50;
+    ctx.strokeStyle='#38bdf8';ctx.lineWidth=2;
+    ctx.beginPath();ctx.moveTo(115,y);ctx.lineTo(x1,y);ctx.stroke();
+    // group by branch
+    const branches={};
+    circ.items.forEach(it=>{
+      if(!branches[it.branch]) branches[it.branch]=[];
+      branches[it.branch].push(it);
+    });
+    const keys=Object.keys(branches).map(Number).sort((a,b)=>a-b);
+    const n=Math.max(keys.length,1);
+    keys.forEach((k,bi)=>{
+      const yy=50+bi*((H-80)/Math.max(n,1));
+      ctx.strokeStyle='#38bdf8';
+      ctx.beginPath();ctx.moveTo(x1,y);ctx.lineTo(x1,yy);ctx.lineTo(x1+20,yy);ctx.stroke();
+      let x=x1+20;
+      branches[k].forEach((it,i)=>{
+        x=drawComp(ctx,it.type,x,yy,on,i);
+        ctx.strokeStyle='#38bdf8';ctx.beginPath();ctx.moveTo(x,yy);ctx.lineTo(x+12,yy);ctx.stroke();
+        x+=12;
+      });
+      ctx.beginPath();ctx.moveTo(x,yy);ctx.lineTo(x2,yy);ctx.lineTo(x2,y);ctx.stroke();
+    });
+    if(!keys.length){
+      ctx.beginPath();ctx.moveTo(x1,y);ctx.lineTo(x2,y);ctx.stroke();
+    }
+    ctx.beginPath();ctx.moveTo(x2,y);ctx.lineTo(W-30,y);ctx.lineTo(W-30,y+70);ctx.lineTo(40,y+70);ctx.lineTo(40,y+20);ctx.stroke();
+  } else {
+    // mixto: series top then parallel section
+    let x=startX;
+    ctx.strokeStyle='#38bdf8';ctx.lineWidth=2;
+    ctx.beginPath();ctx.moveTo(115,y);ctx.lineTo(x,y);ctx.stroke();
+    const a=circ.items.filter(i=>i.branch===0);
+    const b=circ.items.filter(i=>i.branch===1);
+    a.forEach((it,i)=>{
+      x=drawComp(ctx,it.type,x,y,on,i);
+      ctx.strokeStyle='#38bdf8';ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+14,y);ctx.stroke();x+=14;
+    });
+    const jx=x;
+    if(b.length){
+      const y1=y-40,y2=y+40;
+      ctx.beginPath();ctx.moveTo(jx,y);ctx.lineTo(jx,y1);ctx.lineTo(jx+16,y1);ctx.stroke();
+      ctx.beginPath();ctx.moveTo(jx,y);ctx.lineTo(jx,y2);ctx.lineTo(jx+16,y2);ctx.stroke();
+      let x1=jx+16,x2=jx+16;
+      b.forEach((it,i)=>{
+        if(i%2===0) x1=drawComp(ctx,it.type,x1,y1,on,i);
+        else x2=drawComp(ctx,it.type,x2,y2,on,i);
+      });
+      const xe=Math.max(x1,x2)+20;
+      ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(xe,y1);ctx.lineTo(xe,y);ctx.stroke();
+      ctx.beginPath();ctx.moveTo(x2,y2);ctx.lineTo(xe,y2);ctx.lineTo(xe,y);ctx.stroke();
+      x=xe;
+    }
+    ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(W-30,y);ctx.lineTo(W-30,y+70);ctx.lineTo(40,y+70);ctx.lineTo(40,y+20);ctx.stroke();
+  }
+}
+
+function drawComp(ctx,type,x,y,on,idx){
+  ctx.save();
+  if(type==='bombillo'){
+    ctx.beginPath();ctx.arc(x+18,y,14,0,Math.PI*2);
+    ctx.fillStyle=on?'#fbbf24':'#334155';
+    if(on){ctx.shadowColor='#fbbf24';ctx.shadowBlur=16;}
+    ctx.fill();ctx.shadowBlur=0;
+    ctx.strokeStyle='#e2e8f0';ctx.stroke();
+    ctx.fillStyle='#0f172a';ctx.font='10px sans-serif';ctx.fillText('💡',x+11,y+4);
+    x+=36;
+  } else if(type==='tomacorriente'){
+    ctx.strokeStyle='#e2e8f0';ctx.strokeRect(x+4,y-14,28,28);
+    ctx.beginPath();ctx.arc(x+12,y,3,0,Math.PI*2);ctx.arc(x+24,y,3,0,Math.PI*2);ctx.fillStyle='#e2e8f0';ctx.fill();
+    ctx.fillStyle='#94a3b8';ctx.font='9px sans-serif';ctx.fillText('Toma',x+6,y+28);
+    x+=40;
+  } else if(type==='resistencia'){
+    ctx.strokeStyle='#fb923c';ctx.lineWidth=2;
+    ctx.beginPath();
+    let px=x;ctx.moveTo(px,y);
+    for(let i=0;i<5;i++){px+=6;ctx.lineTo(px,y+(i%2===0?-10:10));}
+    ctx.lineTo(px+4,y);ctx.stroke();
+    x+=40;
+  } else if(type==='motorc'){
+    ctx.beginPath();ctx.arc(x+16,y,14,0,Math.PI*2);ctx.strokeStyle='#a78bfa';ctx.stroke();
+    ctx.fillStyle='#a78bfa';ctx.font='bold 12px sans-serif';ctx.fillText('M',x+10,y+4);
+    if(on){ctx.strokeStyle='#34d399';ctx.beginPath();ctx.arc(x+16,y,18,0,Math.PI*1.5);ctx.stroke();}
+    x+=40;
+  } else if(type==='fusible'){
+    ctx.strokeStyle='#fbbf24';ctx.strokeRect(x+4,y-8,30,16);
+    ctx.fillStyle='#fbbf24';ctx.font='9px sans-serif';ctx.fillText('FUS',x+8,y+4);
+    x+=40;
+  } else if(type==='suiche'){
+    ctx.strokeStyle=on?'#34d399':'#f87171';ctx.lineWidth=2;
+    ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+12,y);ctx.lineTo(x+28,on?y:y-12);ctx.stroke();
+    x+=34;
+  } else {
+    // cable
+    ctx.strokeStyle='#38bdf8';ctx.lineWidth=2;
+    ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+28,y);ctx.stroke();
+    x+=28;
+  }
+  ctx.restore();
+  return x;
+}
+
+/* old circ id bindings removed — use wireAllCircPanels */
+
+/* OHM */
+function updateOhm(){
+  const V=+document.getElementById('ohmV').value,R=+document.getElementById('ohmR').value,I=V/R;
+  document.getElementById('ohmVlab').textContent=V+' V';
+  document.getElementById('ohmRlab').textContent=R+' Ω';
+  document.getElementById('ohmIout').textContent=I.toFixed(2)+' A';
+  document.getElementById('ohmCheck').textContent=V+' = '+I.toFixed(2)+'·'+R;
+}
+document.getElementById('ohmV').oninput=updateOhm;
+document.getElementById('ohmR').oninput=updateOhm;
+function renderOhmFields(){
+  const mode=document.getElementById('ohmMode').value,box=document.getElementById('ohmCalcFields');
+  if(mode==='I') box.innerHTML='<label class="field">V</label><input type="number" id="oc1" value="12"><label class="field">R</label><input type="number" id="oc2" value="4">';
+  else if(mode==='V') box.innerHTML='<label class="field">I</label><input type="number" id="oc1" value="2"><label class="field">R</label><input type="number" id="oc2" value="6">';
+  else box.innerHTML='<label class="field">V</label><input type="number" id="oc1" value="12"><label class="field">I</label><input type="number" id="oc2" value="3">';
+}
+document.getElementById('ohmMode').onchange=renderOhmFields;
+document.getElementById('ohmCalcBtn').onclick=function(){
+  const mode=document.getElementById('ohmMode').value;
+  const a=parseFloat(document.getElementById('oc1').value),b=parseFloat(document.getElementById('oc2').value);
+  const out=document.getElementById('ohmCalcResult');
+  if(!isFinite(a)||!isFinite(b)||b===0){out.innerHTML='<div class="pill"><div class="k">ERROR</div><div class="v">Datos inválidos</div></div>';return;}
+  if(mode==='I') out.innerHTML=`<div class="pill"><div class="k">I=V/R</div><div class="v">${(a/b).toFixed(3)} A</div></div>`;
+  if(mode==='V') out.innerHTML=`<div class="pill"><div class="k">V=I·R</div><div class="v">${(a*b).toFixed(3)} V</div></div>`;
+  if(mode==='R') out.innerHTML=`<div class="pill"><div class="k">R=V/I</div><div class="v">${(a/b).toFixed(3)} Ω</div></div>`;
+};
+
+/* WATTS */
+function updateWatts(){
+  const V=+document.getElementById('wV').value,I=+document.getElementById('wI').value,P=V*I,R=V/I;
+  document.getElementById('wVlab').textContent=V+' V';
+  document.getElementById('wIlab').textContent=I.toFixed(1)+' A';
+  document.getElementById('wPout').textContent=P.toFixed(1)+' W';
+  document.getElementById('wRout').textContent=R.toFixed(1)+' Ω';
+  document.getElementById('wEout').textContent=(P/1000).toFixed(2)+' kWh';
+}
+document.getElementById('wV').oninput=updateWatts;
+document.getElementById('wI').oninput=updateWatts;
+document.getElementById('wCostBtn').onclick=function(){
+  const P=(+document.getElementById('wV').value)*(+document.getElementById('wI').value);
+  const h=parseFloat(document.getElementById('wHours').value)||0;
+  const cost=parseFloat(document.getElementById('wCost').value)||0;
+  const kWh=(P/1000)*h;
+  document.getElementById('wCostOut').innerHTML=`
+    <div class="pill"><div class="k">ENERGÍA</div><div class="v">${kWh.toFixed(3)} kWh</div></div>
+    <div class="pill"><div class="k">COSTO</div><div class="v">${cost>0? (kWh*cost).toFixed(2):'—'}</div></div>`;
+};
+
+/* PLANOS */
+const PLAN_ITEMS=[
+  {id:'source',label:'Fuente',def:true},
+  {id:'switch',label:'Suiche',def:true},
+  {id:'fuse',label:'Fusible',def:false},
+  {id:'lamp',label:'Bombillo',def:true},
+  {id:'outlet',label:'Tomacorriente',def:true},
+  {id:'motor',label:'Motor',def:false},
+  {id:'resistor',label:'Resistencia',def:false},
+  {id:'led',label:'LED',def:false},
+  {id:'capacitor',label:'Capacitor',def:false},
+  {id:'relay',label:'Relé',def:false},
+  {id:'transformer',label:'Transformador',def:false},
+  {id:'cable',label:'Cable',def:true},
+  {id:'ground',label:'Tierra',def:false}
+];
+const planState=Object.fromEntries(PLAN_ITEMS.map(i=>[i.id,i.def]));
+let planTopology = 'serie';
+function renderPlanChips(){
+  const row=document.getElementById('planChips');row.innerHTML='';
+  PLAN_ITEMS.forEach(it=>{
+    const c=document.createElement('button');c.type='button';
+    c.className='chip'+(planState[it.id]?' sel':'');c.textContent=it.label;
+    c.onclick=()=>{
+      if(it.id==='source')return;
+      planState[it.id]=!planState[it.id];
+      const ti=document.getElementById('planTitle');
+      if(ti) ti.dataset.auto='1';
+      renderPlanChips();
+      drawSchematic();
+    };
+    row.appendChild(c);
+  });
+}
+function escapeXml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function describePlanCircuit(){
+  const labels = {
+    switch: 'suiche', fuse: 'fusible', cable: 'cable', lamp: 'bombillo',
+    outlet: 'tomacorriente', resistor: 'resistencia', motor: 'motor', led: 'LED', capacitor: 'capacitor', relay: 'relé', transformer: 'transformador', ground: 'tierra'
+  };
+  const parts = [];
+  ['switch','fuse','lamp','outlet','resistor','motor','cable','ground'].forEach(id => {
+    if (planState[id]) parts.push(labels[id]);
+  });
+  const topo = (planTopology === 'paralelo' || planTopology === 'mixto') ? planTopology : 'serie';
+  const hasLamp = !!planState.lamp;
+  const hasMotor = !!planState.motor;
+  const hasOutlet = !!planState.outlet;
+  const hasRes = !!planState.resistor;
+  let tipo;
+  if (hasLamp && !hasMotor && !hasOutlet && !hasRes) tipo = 'Circuito de alumbrado (' + topo + ')';
+  else if (hasMotor && !hasLamp && !hasOutlet) tipo = 'Circuito de motor (' + topo + ')';
+  else if (hasOutlet && !hasLamp && !hasMotor) tipo = 'Circuito de tomacorriente (' + topo + ')';
+  else if (hasLamp && hasMotor) tipo = 'Circuito de cargas (' + topo + '): alumbrado y motor';
+  else if (hasLamp && hasOutlet) tipo = 'Circuito de alumbrado y tomacorriente (' + topo + ')';
+  else if (hasRes && !hasLamp && !hasMotor) tipo = 'Circuito resistivo (' + topo + ')';
+  else if (parts.length) tipo = 'Circuito en ' + topo;
+  else tipo = 'Circuito en ' + topo + ' (solo fuente)';
+  const detalle = parts.length ? (' con ' + parts.join(', ')) : '';
+  return tipo + detalle;
+}
+
+function drawSchematic(){
+  try {
+    const svgPrint = document.getElementById('schematicSvg');
+    const svgScreen = document.getElementById('schematicSvgScreen');
+    const titleInput = document.getElementById('planTitle');
+    let title = (titleInput && titleInput.value.trim()) ? titleInput.value.trim() : '';
+    if (!title || (titleInput && titleInput.dataset.auto === '1')) {
+      title = describePlanCircuit();
+      if (titleInput) { titleInput.value = title; titleInput.dataset.auto = '1'; }
+    }
+    const titleOut = document.getElementById('planTitleOut');
+    if (titleOut) titleOut.textContent = title;
+    const dateEl = document.getElementById('planDate');
+    if (dateEl) dateEl.textContent = new Date().toLocaleDateString('es-VE');
+    const names = (typeof groupLabel === 'function' && groupLabel()) || '—';
+    const planStu = document.getElementById('planStudentOut');
+    const planCod = document.getElementById('planCodeOut');
+    if (planStu) {
+      planStu.textContent = (currentGroup && currentGroup.length)
+        ? currentGroup.map((g, i) => (i + 1) + '. ' + g.name).join('  |  ')
+        : ('Elaboró: ' + names);
+    }
+    if (planCod) planCod.textContent = 'Prof.: GILAST · 3° año Electricidad · GILAST';
+
+    const src = (document.getElementById('planSource') || {}).value || 'dc';
+    const topo = (planTopology === 'paralelo' || planTopology === 'mixto') ? planTopology : 'serie';
+
+    // ---- Catálogo: ancho total del símbolo (terminal izq → terminal der) ----
+    const CW = {
+      source: 36, switch: 44, fuse: 48, cable: 40,
+      lamp: 40, outlet: 40, resistor: 56, motor: 44,
+      led: 40, capacitor: 40, relay: 44, transformer: 48
+    };
+    const orderAll = ['source','switch','fuse','cable','lamp','outlet','resistor','motor','led','capacitor','relay','transformer'];
+    const active = [];
+    orderAll.forEach(id => {
+      if (planState[id]) {
+        const it = PLAN_ITEMS.find(x => x.id === id);
+        if (it) active.push(it);
+      }
+    });
+    if (!active.find(a => a.id === 'source')) {
+      active.unshift(PLAN_ITEMS.find(x => x.id === 'source'));
+    }
+    const isControl = id => id === 'source' || id === 'switch' || id === 'fuse' || id === 'cable';
+    const controls = active.filter(a => isControl(a.id));
+    const loads = active.filter(a => !isControl(a.id));
+
+    const parts = [];
+    const VB_W = 760, VB_H = 320;
+    const S = '#111';
+    const sw = 2.4;
+
+    function line(x1,y1,x2,y2){
+      parts.push(`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${S}" stroke-width="${sw}" stroke-linecap="square"/>`);
+    }
+    function txt(x,y,s,size){
+      parts.push(`<text x="${x}" y="${y}" text-anchor="middle" font-size="${size||11}" font-family="Arial,sans-serif" fill="#111">${s}</text>`);
+    }
+
+    // Dibuja símbolo centrado en (cx,cy). Terminales exactos en cx±w/2
+    function drawSym(id, cx, cy){
+      const w = CW[id] || 40;
+      const L = cx - w/2, R = cx + w/2;
+      if (id === 'source') {
+        if (src === 'dc') {
+          line(L, cy, cx-6, cy);
+          line(cx-5, cy-18, cx-5, cy+18);
+          line(cx+5, cy-12, cx+5, cy+12);
+          line(cx+6, cy, R, cy);
+          txt(cx-5, cy-22, '+', 11);
+          txt(cx+5, cy-22, '−', 11);
+          txt(cx, cy+34, 'Fuente DC', 10);
+        } else {
+          line(L, cy, cx-16, cy);
+          parts.push(`<circle cx="${cx}" cy="${cy}" r="14" fill="#fff" stroke="${S}" stroke-width="${sw}"/>`);
+          txt(cx, cy+4, '~', 13);
+          line(cx+16, cy, R, cy);
+          txt(cx, cy+34, 'Fuente AC', 10);
+        }
+      } else if (id === 'switch') {
+        line(L, cy, cx-12, cy);
+        parts.push(`<circle cx="${cx-10}" cy="${cy}" r="3" fill="${S}"/>`);
+        parts.push(`<circle cx="${cx+10}" cy="${cy}" r="3" fill="${S}"/>`);
+        line(cx-10, cy, cx+8, cy-12); // pala
+        line(cx+10, cy, R, cy);
+        txt(cx, cy+34, 'Suiche', 10);
+      } else if (id === 'fuse') {
+        line(L, cy, cx-18, cy);
+        parts.push(`<rect x="${cx-18}" y="${cy-9}" width="36" height="18" fill="#fff" stroke="${S}" stroke-width="${sw}"/>`);
+        line(cx+18, cy, R, cy);
+        txt(cx, cy+34, 'Fusible', 10);
+      } else if (id === 'cable') {
+        line(L, cy, R, cy);
+        txt(cx, cy+34, 'Cable', 10);
+      } else if (id === 'lamp') {
+        line(L, cy, cx-14, cy);
+        parts.push(`<circle cx="${cx}" cy="${cy}" r="13" fill="#fff" stroke="${S}" stroke-width="${sw}"/>`);
+        line(cx-9, cy-9, cx+9, cy+9);
+        line(cx+9, cy-9, cx-9, cy+9);
+        line(cx+14, cy, R, cy);
+        txt(cx, cy+34, 'Bombillo', 10);
+      } else if (id === 'motor') {
+        line(L, cy, cx-15, cy);
+        parts.push(`<circle cx="${cx}" cy="${cy}" r="14" fill="#fff" stroke="${S}" stroke-width="${sw}"/>`);
+        txt(cx, cy+5, 'M', 13);
+        line(cx+15, cy, R, cy);
+        txt(cx, cy+34, 'Motor', 10);
+      } else if (id === 'resistor') {
+        line(L, cy, cx-22, cy);
+        parts.push(`<polyline points="${cx-22},${cy} ${cx-15},${cy-10} ${cx-7},${cy+10} ${cx},${cy-10} ${cx+7},${cy+10} ${cx+15},${cy-10} ${cx+22},${cy}" fill="none" stroke="${S}" stroke-width="${sw}"/>`);
+        line(cx+22, cy, R, cy);
+        txt(cx, cy+34, 'Resistencia', 10);
+      } else if (id === 'outlet') {
+        line(L, cy, cx-14, cy);
+        parts.push(`<rect x="${cx-14}" y="${cy-14}" width="28" height="28" fill="#fff" stroke="${S}" stroke-width="${sw}"/>`);
+        parts.push(`<circle cx="${cx-5}" cy="${cy}" r="2.5" fill="${S}"/>`);
+        parts.push(`<circle cx="${cx+5}" cy="${cy}" r="2.5" fill="${S}"/>`);
+        line(cx+14, cy, R, cy);
+        txt(cx, cy+34, 'Toma', 10);
+      } else if (id === 'led') {
+        line(L, cy, cx-12, cy);
+        parts.push(`<polygon points="${cx-8},${cy-12} ${cx-8},${cy+12} ${cx+10},${cy}" fill="#fff" stroke="${S}" stroke-width="${sw}"/>`);
+        line(cx+12, cy-10, cx+12, cy+10);
+        line(cx+12, cy, R, cy);
+        txt(cx, cy+34, 'LED', 10);
+      } else if (id === 'capacitor') {
+        line(L, cy, cx-6, cy);
+        line(cx-5, cy-14, cx-5, cy+14);
+        line(cx+5, cy-14, cx+5, cy+14);
+        line(cx+6, cy, R, cy);
+        txt(cx, cy+34, 'Capacitor', 10);
+      } else if (id === 'relay') {
+        line(L, cy, cx-16, cy);
+        parts.push(`<rect x="${cx-16}" y="${cy-12}" width="32" height="24" fill="#fff" stroke="${S}" stroke-width="${sw}"/>`);
+        txt(cx, cy+4, 'K', 11);
+        line(cx+16, cy, R, cy);
+        txt(cx, cy+34, 'Relé', 10);
+      } else if (id === 'transformer') {
+        line(L, cy, cx-18, cy);
+        parts.push(`<circle cx="${cx-8}" cy="${cy}" r="10" fill="#fff" stroke="${S}" stroke-width="${sw}"/>`);
+        parts.push(`<circle cx="${cx+8}" cy="${cy}" r="10" fill="#fff" stroke="${S}" stroke-width="${sw}"/>`);
+        line(cx+18, cy, R, cy);
+        txt(cx, cy+34, 'Transform.', 10);
+      } else {
+        line(L, cy, R, cy);
+      }
+      return { L, R, w };
+    }
+
+        function seriesBetween(items, x0, x1, y){
+      if (!items.length) { line(x0, y, x1, y); return; }
+      const widths = items.map(it => CW[it.id] || 40);
+      const sumW = widths.reduce((a,b)=>a+b, 0);
+      const innerGaps = items.length - 1;
+      let gap = innerGaps > 0 ? (x1 - x0 - sumW) / (innerGaps + 2) : (x1 - x0 - sumW) / 2;
+      if (gap < 8) gap = 8;
+      // start offset
+      let x = x0 + gap;
+      const segs = []; // {L,R,cx}
+      items.forEach((it, i) => {
+        const w = widths[i];
+        const cx = x + w/2;
+        const L = cx - w/2, R = cx + w/2;
+        segs.push({ L, R, cx, id: it.id });
+        x = R + gap;
+      });
+      // wires + symbols
+      line(x0, y, segs[0].L, y);
+      segs.forEach((s, i) => {
+        drawSym(s.id, s.cx, y);
+        if (i < segs.length - 1) line(s.R, y, segs[i+1].L, y);
+      });
+      line(segs[segs.length-1].R, y, x1, y);
+    }
+
+    const leftX = 50, rightX = 710;
+    const yMain = 130;
+    const yRet = 280;
+
+    // Retorno y verticales (circuito cerrado)
+    line(leftX, yMain, leftX, yRet);
+    line(rightX, yMain, rightX, yRet);
+    line(leftX, yRet, rightX, yRet);
+
+    if (topo === 'serie') {
+      seriesBetween(active, leftX, rightX, yMain);
+      txt(380, 24, 'Conexión: SERIE', 12);
+    } else if (topo === 'paralelo') {
+      // Controles en serie a la izquierda; cargas en ramas
+      const nodeL = 220, nodeR = 540;
+      seriesBetween(controls.length ? controls : [{id:'cable'}], leftX, nodeL, yMain);
+      const branchItems = loads.length ? loads : [{id:'lamp'}];
+      const n = branchItems.length;
+      const yTop = 70, yBot = 200;
+      branchItems.forEach((it, i) => {
+        const yy = n === 1 ? yMain : (yTop + (yBot - yTop) * i / Math.max(n - 1, 1));
+        // verticales de nodo
+        line(nodeL, yMain, nodeL, yy);
+        line(nodeR, yy, nodeR, yMain);
+        // rama horizontal con símbolo centrado
+        seriesBetween([it], nodeL, nodeR, yy);
+      });
+      line(nodeR, yMain, rightX, yMain);
+      txt(380, 24, 'Conexión: PARALELO', 12);
+    } else {
+      // MIXTO:
+      // [controles en serie] — [carga A en serie] — [cargas B,C,… en paralelo] — cierre
+      // Si solo hay 1 carga: se comporta como serie (aviso)
+      // Si hay 2+: primera en serie, resto en paralelo
+      const n1 = 200, n2 = 380, n3 = 560;
+      seriesBetween(controls.length ? controls : [{id:'cable'}], leftX, n1, yMain);
+
+      if (loads.length === 0) {
+        line(n1, yMain, rightX, yMain);
+        txt(380, 24, 'Conexión: MIXTO (agrega cargas)', 12);
+      } else if (loads.length === 1) {
+        seriesBetween(loads, n1, rightX, yMain);
+        txt(380, 24, 'Conexión: MIXTO (1 carga ≈ serie)', 12);
+      } else {
+        // primera carga en serie entre n1 y n2
+        seriesBetween([loads[0]], n1, n2, yMain);
+        // resto en paralelo entre n2 y n3
+        const branchItems = loads.slice(1);
+        const n = branchItems.length;
+        const yTop = 70, yBot = 200;
+        branchItems.forEach((it, i) => {
+          const yy = n === 1 ? yMain : (yTop + (yBot - yTop) * i / Math.max(n - 1, 1));
+          line(n2, yMain, n2, yy);
+          line(n3, yy, n3, yMain);
+          seriesBetween([it], n2, n3, yy);
+        });
+        line(n3, yMain, rightX, yMain);
+        txt(380, 24, 'Conexión: MIXTO (serie + paralelo)', 12);
+      }
+    }
+
+    if (planState.ground) {
+      const gx = 380;
+      line(gx, yRet, gx, yRet+14);
+      line(gx-14, yRet+14, gx+14, yRet+14);
+      line(gx-9, yRet+20, gx+9, yRet+20);
+      line(gx-4, yRet+26, gx+4, yRet+26);
+      txt(gx, yRet+40, 'Tierra', 10);
+    }
+
+    const html = parts.join('');
+    [svgPrint, svgScreen].forEach(svg => {
+      if (!svg) return;
+      svg.setAttribute('viewBox', '0 0 ' + VB_W + ' ' + VB_H);
+      svg.innerHTML = html;
+    });
+    return true;
+  } catch (err) {
+    console.error('drawSchematic', err);
+    alert('No se pudo generar el plano: ' + err.message);
+    return false;
+  }
+}
+
+function getSelectedNames(){
+  if (currentGroup && currentGroup.length) {
+    return currentGroup.map(g => g.name);
+  }
+  return [];
+}
+
+function namesLine(){
+  const names = getSelectedNames();
+  if (!names.length) return '';
+  return names.map((n, i) => (i + 1) + '. ' + n).join('   |   ');
+}
+
+function requireNames(){
+  const names = getSelectedNames();
+  if (!names.length) {
+    alert('Primero elige el nombre (1, 2 o 3 personas) en la parte de arriba.');
+    return false;
+  }
+  return true;
+}
+
+function buildCajetinHtml(title, extraLeft, extraRight){
+  const date = new Date().toLocaleDateString('es-VE');
+  const names = namesLine() || '—';
+  return `<div class="title-block">
+    <div class="big">${escapeXml(title)}</div>
+    <div>${extraLeft || 'Escala: s/e'}</div>
+    <div>Fecha: ${date}</div>
+    <div style="grid-column:1/-1;font-size:9pt;"><b>Integrantes:</b> ${escapeXml(names)}</div>
+    <div style="grid-column:1/-1;font-size:9pt;">Prof.: GILAST · 3° año Electricidad · GILAST · ${extraRight || ''}</div>
+  </div>`;
+}
+
+function doPrint(html){
+  // Ventana nueva (evita el problema de CSS print en la misma página)
+  const w = window.open('', '_blank');
+  if (!w) {
+    alert('El navegador bloqueó la ventana de impresión.\nPermite ventanas emergentes para esta página e intenta otra vez.');
+    return;
+  }
+  const parts = [];
+  parts.push('<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8">');
+  parts.push('<title>Lamina - Taller de electricidad</title>');
+  parts.push('<style>');
+  parts.push('@page{size:letter landscape;margin:10mm;}');
+  parts.push('*{box-sizing:border-box;}');
+  parts.push('html,body{margin:0;padding:0;font-family:Arial,Helvetica,sans-serif;color:#111;background:#fff;}');
+  parts.push('.sheet{padding:4mm;}');
+  parts.push('.title-block{border:2px solid #111;display:grid;grid-template-columns:1.6fr 1fr 1fr;font-size:10pt;margin-bottom:3mm;}');
+  parts.push('.title-block div{border:1px solid #111;padding:4px 8px;}');
+  parts.push('.title-block .big{grid-row:span 2;font-weight:600;font-size:10pt;display:flex;align-items:center;line-height:1.3;}');
+  parts.push('.schematic-wrap{border:2px solid #111;padding:2mm;background:#fff;}');
+  parts.push('svg,img{width:100%;height:auto;max-height:140mm;display:block;}');
+  parts.push('.foot{font-size:8pt;margin-top:2mm;color:#333;}');
+  parts.push('@media print{body{margin:0;}}');
+  parts.push('</style></head><body>');
+  parts.push('<div class="sheet">');
+  parts.push(html);
+  parts.push('<p class="foot">GILAST · GILAST · 3° año</p>');
+  parts.push('</div>');
+  parts.push('</body></html>');
+  w.document.open();
+  w.document.write(parts.join(''));
+  w.document.close();
+  // Esperar a que carguen imágenes/SVG y luego imprimir
+  setTimeout(function(){
+    try {
+      w.focus();
+      w.print();
+    } catch (err) {
+      alert('No se pudo abrir el diálogo de impresión. Usa Ctrl+P en la ventana nueva.');
+    }
+  }, 400);
+}
+
+function wirePlanButtons(){
+  const bSerie = document.getElementById('planTopoSerie');
+  const bPara = document.getElementById('planTopoParalelo');
+  const hint = document.getElementById('planTopoHint');
+  function setTopo(topo){
+    planTopology = topo;
+    const bMix = document.getElementById('planTopoMixto');
+    if (bSerie) bSerie.classList.toggle('on', topo === 'serie');
+    if (bPara) bPara.classList.toggle('on', topo === 'paralelo');
+    if (bMix) bMix.classList.toggle('on', topo === 'mixto');
+    if (hint) {
+      if (topo === 'serie') hint.textContent = 'Serie: todos los elementos en una sola línea de corriente.';
+      else if (topo === 'paralelo') hint.textContent = 'Paralelo: fuente/suiche en común y cada carga en su propia rama.';
+      else hint.textContent = 'Mixto: control (fuente, suiche…) en serie, una carga en serie y el resto de cargas en paralelo. Activa al menos 2 cargas (ej. bombillo + motor).';
+    }
+    const ti = document.getElementById('planTitle');
+    if (ti) ti.dataset.auto = '1';
+    drawSchematic();
+  }
+  if (bSerie) bSerie.onclick = function(){ setTopo('serie'); };
+  if (bPara) bPara.onclick = function(){ setTopo('paralelo'); };
+  const bMix = document.getElementById('planTopoMixto');
+  if (bMix) bMix.onclick = function(){ setTopo('mixto'); };
+
+  const btnG = document.getElementById('planDraw');
+  const btnP = document.getElementById('planPrint');
+  if (btnG) {
+    btnG.onclick = function(e){
+      if (e) e.preventDefault();
+      try {
+        drawSchematic();
+        const prev = document.getElementById('planPreviewCard');
+        if (prev) prev.scrollIntoView({behavior:'smooth', block:'nearest'});
+      } catch (err) {
+        console.error(err);
+        alert('Error al generar: ' + err.message);
+      }
+    };
+  }
+  if (btnP) {
+    btnP.onclick = function(e){
+      if (e) e.preventDefault();
+      if (!requireNames()) return;
+      try {
+        drawSchematic();
+        const svg = document.getElementById('schematicSvgScreen') || document.getElementById('schematicSvg');
+        const svgHtml = svg ? svg.outerHTML : '';
+        const titleInput = document.getElementById('planTitle');
+    let title = (titleInput && titleInput.value.trim()) ? titleInput.value.trim() : '';
+    // Si el usuario no escribió título, o dejó el automático, se nombra según componentes
+    if (!title || titleInput.dataset.auto === '1') {
+      title = describePlanCircuit();
+      if (titleInput) {
+        titleInput.value = title;
+        titleInput.dataset.auto = '1';
+      }
+    }
+
+        const html = buildCajetinHtml(title, 'Escala: s/e', 'Plano') +
+          '<div class="schematic-wrap" style="background:#fff;">' + svgHtml + '</div>';
+        doPrint(html);
+      } catch (err) {
+        console.error(err);
+        alert('Error al imprimir plano: ' + err.message);
+      }
+    };
+  }
+  const pt = document.getElementById('planTitle');
+  const ps = document.getElementById('planSource');
+  if (pt) {
+    pt.onchange = function(){ pt.dataset.auto = '0'; drawSchematic(); };
+    pt.oninput = function(){ pt.dataset.auto = '0'; };
+  }
+  if (ps) ps.onchange = function(){ drawSchematic(); };
+}
+
+/* DIBUJO CON LIENZO */
+const drawState = {
+  tool: 'pencil',
+  drawing: false,
+  lastX: 0,
+  lastY: 0,
+  history: []
+};
+
+function getDrawCanvas(){
+  return document.getElementById('drawCanvas');
+}
+function getDrawCtx(){
+  const c = getDrawCanvas();
+  return c ? c.getContext('2d') : null;
+}
+
+function drawCajetinBanner(ctx, w){
+  // small header strip on canvas top for reference (light)
+  ctx.save();
+  ctx.fillStyle = '#f8fafc';
+  ctx.fillRect(0, 0, w, 36);
+  ctx.strokeStyle = '#94a3b8';
+  ctx.strokeRect(0.5, 0.5, w - 1, 35);
+  ctx.fillStyle = '#334155';
+  ctx.font = '12px Arial,sans-serif';
+  const title = (document.getElementById('drawTitle') || {}).value || 'Proyecto';
+  ctx.fillText(title.slice(0, 60), 10, 22);
+  ctx.restore();
+}
+
+function clearCanvasWhite(){
+  const c = getDrawCanvas();
+  const ctx = getDrawCtx();
+  if (!c || !ctx) return;
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, c.width, c.height);
+  drawCajetinBanner(ctx, c.width);
+}
+
+function applyDrawGuide(){
+  const c = getDrawCanvas();
+  const ctx = getDrawCtx();
+  if (!c || !ctx) return;
+  // save current? no - guide resets background then user draws
+  pushHistory();
+  clearCanvasWhite();
+  const type = document.getElementById('drawType').value;
+  ctx.save();
+  ctx.strokeStyle = '#cbd5e1';
+  ctx.fillStyle = '#64748b';
+  ctx.lineWidth = 1;
+  ctx.font = '13px Arial,sans-serif';
+
+  if (type === 'grid') {
+    for (let x = 0; x < c.width; x += 30) {
+      ctx.beginPath(); ctx.moveTo(x, 36); ctx.lineTo(x, c.height); ctx.stroke();
+    }
+    for (let y = 36; y < c.height; y += 30) {
+      ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(c.width, y); ctx.stroke();
+    }
+  } else if (type === 'ortho') {
+    const m = 24, gap = 12;
+    const bw = (c.width - m * 2 - gap) / 2;
+    const bh = (c.height - 36 - m * 2 - gap) / 2;
+    const boxes = [
+      {x: m, y: 36 + m, lab: 'Vista frontal'},
+      {x: m + bw + gap, y: 36 + m, lab: 'Vista superior'},
+      {x: m, y: 36 + m + bh + gap, lab: 'Vista lateral'},
+      {x: m + bw + gap, y: 36 + m + bh + gap, lab: 'Isométrico (opcional)'}
+    ];
+    ctx.strokeStyle = '#334155';
+    ctx.lineWidth = 2;
+    boxes.forEach(b => {
+      ctx.strokeRect(b.x, b.y, bw, bh);
+      ctx.fillStyle = '#475569';
+      ctx.fillText(b.lab, b.x + 8, b.y + 18);
+    });
+  } else if (type === 'motor') {
+    ctx.strokeStyle = '#94a3b8';
+    ctx.setLineDash([6, 6]);
+    ctx.strokeRect(c.width * 0.25, 80, c.width * 0.5, 280);
+    ctx.setLineDash([]);
+    ctx.fillStyle = '#64748b';
+    const labels = ['Imán / estator', 'Rotor', 'Conmutador', 'Escobillas', 'Eje', 'Carcasa'];
+    labels.forEach((lab, i) => ctx.fillText((i + 1) + '. ' + lab, 30, 100 + i * 28));
+    ctx.fillText('Dibuja el motor en el recuadro y une con flechas a cada nombre', 30, 520);
+  } else if (type === 'circuito') {
+    ctx.strokeStyle = '#334155';
+    ctx.lineWidth = 2;
+    const h = 140;
+    [{lab: 'A) Serie — una sola línea de corriente', y: 60}, {lab: 'B) Paralelo — ramas independientes', y: 60 + h + 20}, {lab: 'C) Mixto — serie + paralelo', y: 60 + 2 * (h + 20)}].forEach(b => {
+      ctx.strokeRect(24, b.y, c.width - 48, h);
+      ctx.fillStyle = '#475569';
+      ctx.fillText(b.lab, 36, b.y + 22);
+    });
+  } else if (type === 'margins') {
+    // Technical sheet margins ~10mm look-alike
+    const m = 40;
+    ctx.strokeStyle = '#0f172a';
+    ctx.lineWidth = 3;
+    ctx.strokeRect(m, 36 + m, c.width - 2 * m, c.height - 36 - 2 * m);
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = '#94a3b8';
+    ctx.strokeRect(m + 8, 36 + m + 8, c.width - 2 * m - 16, c.height - 36 - 2 * m - 16);
+    // cajetin bottom right
+    const cw = 220, ch = 70;
+    const cx0 = c.width - m - cw - 8, cy0 = c.height - m - ch - 8;
+    ctx.strokeStyle = '#0f172a';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(cx0, cy0, cw, ch);
+    ctx.fillStyle = '#64748b';
+    ctx.font = '12px Arial,sans-serif';
+    ctx.fillText('CAJETÍN (completar datos arriba)', cx0 + 8, cy0 + 20);
+    ctx.fillText('Escala · Fecha · Nombre', cx0 + 8, cy0 + 42);
+    ctx.fillStyle = '#94a3b8';
+    ctx.fillText('Zona de dibujo — respeta el margen grueso', m + 16, 36 + m + 28);
+  } else if (type === 'project') {
+    const m = 30;
+    ctx.strokeStyle = '#334155';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(m, 50, c.width - 2 * m, 320);
+    ctx.fillStyle = '#475569';
+    ctx.font = '14px Arial,sans-serif';
+    ctx.fillText('VISTA GENERAL DEL PROYECTO (boceto)', m + 12, 72);
+    ctx.strokeRect(m, 390, c.width * 0.55, 180);
+    ctx.fillText('NOTAS / MATERIALES', m + 12, 412);
+    ctx.strokeRect(m + c.width * 0.55 + 12, 390, c.width * 0.35, 180);
+    ctx.fillText('SÍMBOLOS / LEYENDA', m + c.width * 0.55 + 24, 412);
+    // line types legend
+    ctx.strokeStyle = '#0f172a';
+    ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.moveTo(m + 12, 100); ctx.lineTo(m + 100, 100); ctx.stroke();
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(m + 120, 100); ctx.lineTo(m + 208, 100); ctx.stroke();
+    ctx.setLineDash([8, 6]);
+    ctx.beginPath(); ctx.moveTo(m + 228, 100); ctx.lineTo(m + 316, 100); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.font = '11px Arial,sans-serif';
+    ctx.fillStyle = '#64748b';
+    ctx.fillText('gruesa', m + 12, 116);
+    ctx.fillText('fina', m + 120, 116);
+    ctx.fillText('eje / oculta', m + 228, 116);
+  }
+  // blank / grid handled above
+  ctx.restore();
+  pushHistory();
+}
+
+function pushHistory(){
+  const c = getDrawCanvas();
+  if (!c) return;
+  try {
+    drawState.history.push(c.toDataURL('image/png'));
+    if (drawState.history.length > 25) drawState.history.shift();
+  } catch (e) {}
+}
+
+function undoDraw(){
+  const c = getDrawCanvas();
+  const ctx = getDrawCtx();
+  if (!c || !ctx || drawState.history.length < 2) return;
+  drawState.history.pop();
+  const prev = drawState.history[drawState.history.length - 1];
+  const img = new Image();
+  img.onload = () => { ctx.clearRect(0, 0, c.width, c.height); ctx.drawImage(img, 0, 0); };
+  img.src = prev;
+}
+
+function canvasPos(e){
+  const c = getDrawCanvas();
+  const rect = c.getBoundingClientRect();
+  const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+  const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+  const x = (clientX - rect.left) * (c.width / rect.width);
+  const y = (clientY - rect.top) * (c.height / rect.height);
+  return {x, y};
+}
+
+function startDraw(e){
+  e.preventDefault();
+  const ctx = getDrawCtx();
+  if (!ctx) return;
+  drawState.drawing = true;
+  const p = canvasPos(e);
+  drawState.lastX = p.x;
+  drawState.lastY = p.y;
+  pushHistory();
+}
+
+function moveDraw(e){
+  if (!drawState.drawing) return;
+  e.preventDefault();
+  const ctx = getDrawCtx();
+  if (!ctx) return;
+  const p = canvasPos(e);
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+  if (drawState.tool === 'eraser') {
+    ctx.globalCompositeOperation = 'destination-out';
+    ctx.strokeStyle = 'rgba(0,0,0,1)';
+    ctx.lineWidth = Math.max(8, +document.getElementById('drawSize').value * 3);
+  } else {
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.strokeStyle = document.getElementById('drawColor').value;
+    ctx.lineWidth = +document.getElementById('drawSize').value;
+  }
+  ctx.beginPath();
+  ctx.moveTo(drawState.lastX, drawState.lastY);
+  ctx.lineTo(p.x, p.y);
+  ctx.stroke();
+  drawState.lastX = p.x;
+  drawState.lastY = p.y;
+}
+
+function endDraw(e){
+  if (!drawState.drawing) return;
+  drawState.drawing = false;
+  const ctx = getDrawCtx();
+  if (ctx) ctx.globalCompositeOperation = 'source-over';
+}
+
+function wireDrawCanvas(){
+  const c = getDrawCanvas();
+  if (!c || c._wired) return;
+  c._wired = true;
+  c.addEventListener('mousedown', startDraw);
+  c.addEventListener('mousemove', moveDraw);
+  window.addEventListener('mouseup', endDraw);
+  c.addEventListener('mouseleave', endDraw);
+  c.addEventListener('touchstart', startDraw, {passive: false});
+  c.addEventListener('touchmove', moveDraw, {passive: false});
+  c.addEventListener('touchend', endDraw);
+  c.addEventListener('touchcancel', endDraw);
+}
+
+function initDrawingBoard(){
+  wireDrawCanvas();
+  clearCanvasWhite();
+  pushHistory();
+  const pencil = document.getElementById('toolPencil');
+  const eraser = document.getElementById('toolEraser');
+  if (pencil) pencil.onclick = () => {
+    drawState.tool = 'pencil';
+    pencil.classList.add('on');
+    if (eraser) eraser.classList.remove('on');
+  };
+  if (eraser) eraser.onclick = () => {
+    drawState.tool = 'eraser';
+    eraser.classList.add('on');
+    if (pencil) pencil.classList.remove('on');
+  };
+  const clearBtn = document.getElementById('toolClear');
+  if (clearBtn) clearBtn.onclick = () => { pushHistory(); clearCanvasWhite(); applyDrawGuide(); };
+  const undoBtn = document.getElementById('toolUndo');
+  if (undoBtn) undoBtn.onclick = undoDraw;
+  const guideBtn = document.getElementById('drawGuideBtn');
+  if (guideBtn) guideBtn.onclick = applyDrawGuide;
+  const printBtn = document.getElementById('drawPrint');
+  if (printBtn) printBtn.onclick = printDrawing;
+}
+
+function printDrawing(){
+  try {
+    if (!requireNames()) return;
+    const c = document.getElementById('drawCanvas');
+    if (!c) { alert('No hay lienzo de dibujo.'); return; }
+    const title = (document.getElementById('drawTitle') || {}).value || 'Proyecto';
+    const scale = (document.getElementById('drawScale') || {}).value || 's/e';
+    const dataUrl = c.toDataURL('image/png');
+    const html = buildCajetinHtml(title, 'Escala: ' + scale, 'Dibujo') +
+      '<img src="' + dataUrl + '" style="width:100%;border:2px solid #111;display:block;"/>';
+    doPrint(html);
+  } catch (err) {
+    console.error(err);
+    alert('Error al imprimir dibujo: ' + err.message);
+  }
+}
+
+/* RETO — 3 NIVELES */
+const RETO_LEVELS = {
+  1: [
+    {q:"La Ley de Ohm indica que:", opts:["V = I · R", "P = V + I", "R = V · I", "I = V · R"], a:0},
+    {q:"La unidad de voltaje es:", opts:["Voltio (V)", "Amperio (A)", "Ohmio (Ω)", "Vatio (W)"], a:0},
+    {q:"La unidad de corriente es:", opts:["Amperio (A)", "Voltio (V)", "Ohmio (Ω)", "Hercio (Hz)"], a:0},
+    {q:"La unidad de resistencia es:", opts:["Ohmio (Ω)", "Vatio (W)", "Culombio (C)", "Faradio (F)"], a:0},
+    {q:"Un suiche (interruptor) sirve para:", opts:["Abrir o cerrar el paso de corriente", "Aumentar el voltaje", "Medir ohmios", "Generar energía"], a:0},
+  ],
+  2: [
+    {q:"Si V = 12 V y R = 4 Ω, la corriente I es:", opts:["3 A", "48 A", "0.33 A", "16 A"], a:0},
+    {q:"Si aumenta R y V se mantiene, la corriente I:", opts:["Disminuye", "Aumenta", "No cambia", "Se hace infinita"], a:0},
+    {q:"Si V = 6 V e I = 2 A, la resistencia R es:", opts:["3 Ω", "12 Ω", "0.33 Ω", "8 Ω"], a:0},
+    {q:"La corriente es el flujo de:", opts:["Cargas eléctricas", "Solo calor", "Solo luz", "Aire comprimido"], a:0},
+    {q:"Un circuito cerrado permite:", opts:["Que la corriente circule", "Que no haya voltaje", "Eliminar la resistencia", "Apagar la fuente siempre"], a:0},
+  ],
+  3: [
+    {q:"La potencia eléctrica se calcula como:", opts:["P = V · I", "P = V / I", "P = R · t", "P = I / V"], a:0},
+    {q:"La unidad de potencia es:", opts:["Vatio (W)", "Voltio (V)", "Ohmio (Ω)", "Amperio (A)"], a:0},
+    {q:"P = 100 W y V = 50 V. La corriente I es:", opts:["2 A", "5000 A", "0.5 A", "150 A"], a:0},
+    {q:"Si I = 0, en un circuito con fuente y carga:", opts:["No hay circulación de corriente", "El voltaje es infinito", "R = 0 siempre", "P es máxima"], a:0},
+    {q:"Un bombillo convierte energía eléctrica principalmente en:", opts:["Luz y calor", "Solo sonido", "Solo viento", "Magnetismo puro"], a:0},
+  ],
+  4: [
+    {q:"En un circuito en serie, la corriente:", opts:["Es la misma en todos los componentes", "Se reparte entre las ramas", "Solo pasa por el primero", "Es siempre cero"], a:0},
+    {q:"En un circuito en paralelo, el voltaje:", opts:["Es el mismo en cada rama", "Se suma en cada resistencia", "Solo existe en un cable", "No se puede medir"], a:0},
+    {q:"La resistencia equivalente en serie de 3 Ω y 5 Ω es:", opts:["8 Ω", "15 Ω", "1.9 Ω", "2 Ω"], a:0},
+    {q:"Si se abre un suiche en serie, el circuito:", opts:["Se interrumpe (no hay corriente)", "Duplica el voltaje", "Reduce R a cero", "Sigue igual"], a:0},
+    {q:"Dos bombillos iguales en serie a 12 V: cada uno recibe aprox.:", opts:["6 V", "12 V", "24 V", "0 V"], a:0},
+  ],
+  5: [
+    {q:"Dos resistencias de 10 Ω en paralelo: Req aprox.:", opts:["5 Ω", "20 Ω", "100 Ω", "0 Ω"], a:0},
+    {q:"En paralelo, si una rama se abre:", opts:["Las otras ramas pueden seguir funcionando", "Todo el circuito se apaga siempre", "Aumenta el voltaje al doble", "R total se hace cero"], a:0},
+    {q:"Un fusible se coloca para:", opts:["Proteger el circuito ante exceso de corriente", "Aumentar el brillo", "Medir la potencia", "Reemplazar al suiche"], a:0},
+    {q:"El cable en un diagrama representa:", opts:["Conexión conductora", "Una resistencia alta", "Una fuente", "Un motor"], a:0},
+    {q:"Si R1 = 2 Ω y R2 = 2 Ω en serie a 8 V, I total es:", opts:["2 A", "4 A", "8 A", "0.5 A"], a:0},
+  ],
+  6: [
+    {q:"Un circuito mixto combina:", opts:["Serie y paralelo", "Solo baterías", "Solo bombillos fundidos", "Transformadores sin cables"], a:0},
+    {q:"V = 24 V, R = 8 Ω. I y P son:", opts:["I = 3 A y P = 72 W", "I = 192 A y P = 3 W", "I = 0.3 A y P = 8 W", "I = 32 A y P = 24 W"], a:0},
+    {q:"Si tres resistencias iguales de 6 Ω están en serie, Req:", opts:["18 Ω", "2 Ω", "6 Ω", "36 Ω"], a:0},
+    {q:"La fuente de un circuito aporta:", opts:["Energía eléctrica (voltaje)", "Solo resistencia", "Solo color al cable", "Frecuencia de radio"], a:0},
+    {q:"Medir voltaje se hace preferiblemente:", opts:["En paralelo a la carga", "En serie forzada siempre", "Sin tocar el circuito", "Solo con el suiche abierto y sin referencia"], a:0},
+  ],
+  7: [
+    {q:"En un motor DC, el rotor es:", opts:["La parte que gira", "El imán fijo exterior", "Solo el cable de tierra", "El fusible"], a:0},
+    {q:"El conmutador en un motor DC sirve para:", opts:["Invertir la corriente en el rotor a tiempo", "Aumentar el voltaje de la red", "Medir la resistencia", "Enfriar el imán"], a:0},
+    {q:"Las escobillas de un motor DC:", opts:["Conducen corriente al conmutador/rotor", "Generan el campo del estator solas", "Son el eje mecánico", "Miden la potencia"], a:0},
+    {q:"Para que el motor del taller gire hace falta:", opts:["Piezas armadas + alimentación eléctrica", "Solo el imán sin cables", "Solo el eje suelto", "Quitar el conmutador"], a:0},
+    {q:"El estator en el motor simple del taller actúa como:", opts:["Campo magnético fijo", "Única fuente de voltaje", "Fusible principal", "Interruptor"], a:0},
+  ],
+  8: [
+    {q:"P = I² · R es válida cuando:", opts:["Conocemos I y R", "Solo hay voltaje desconocido e I = 0", "No hay resistencia", "El circuito está abierto y P es máxima"], a:0},
+    {q:"Si V = 120 V e I = 0.5 A, la potencia es:", opts:["60 W", "240 W", "120.5 W", "0.004 W"], a:0},
+    {q:"Una resistencia de 100 Ω a 12 V disipa:", opts:["1.44 W", "1200 W", "8.3 W", "0.12 W"], a:0},
+    {q:"Si duplicas V y R se mantiene, la potencia:", opts:["Se cuadruplica", "Se duplica", "Se reduce a la mitad", "No cambia"], a:0},
+    {q:"Un LED suele requerir:", opts:["Polaridad correcta y limitación de corriente", "Solo corriente infinita", "Voltaje sin límite", "Conexión a tierra obligatoria sin R"], a:0},
+  ],
+  9: [
+    {q:"Código de colores: 1ª banda marrón, 2ª negra, 3ª roja (×100). Valor:", opts:["1000 Ω", "10 Ω", "100 Ω", "1 Ω"], a:0},
+    {q:"Banda dorada en resistencia indica tolerancia típica de:", opts:["±5 %", "±20 %", "±0.1 %", "±50 %"], a:0},
+    {q:"La 3ª banda (multiplicador) roja significa:", opts:["×100", "×10", "×1", "×1000"], a:0},
+    {q:"Negro en 1ª o 2ª cifra significativa vale:", opts:["0", "1", "9", "10"], a:0},
+    {q:"Una resistencia “marrón-verde-marrón” es:", opts:["150 Ω", "15 Ω", "151 Ω", "105 Ω"], a:0},
+  ],
+  10: [
+    {q:"Un plano eléctrico debe mostrar:", opts:["Símbolos y circuito cerrado", "Solo el color de la pared", "La nota musical del taller", "El menú del comedor"], a:0},
+    {q:"El cajetín de una lámina suele incluir:", opts:["Título, nombre, escala y fecha", "Solo el número de vidas", "La receta del motor", "Ningún dato del estudiante"], a:0},
+    {q:"En boceto técnico, la línea gruesa se usa para:", opts:["Contornos visibles", "Solo decoración", "Borrar el cajetín", "Escribir el título en rojo"], a:0},
+    {q:"Símbolo de resistencia en planos suele ser:", opts:["Rectángulo o zigzag", "Círculo con cruz", "Triángulo relleno", "Estrella"], a:0},
+    {q:"Un circuito en el plano debe poder:", opts:["Cerrarse desde la fuente hasta regresar", "Quedar abierto siempre", "Omitir el neutro/retorno siempre", "Tener cables que no conecten nada"], a:0},
+  ],
+  11: [
+    {q:"R eq serie de 2 Ω, 3 Ω y 5 Ω:", opts:["10 Ω", "30 Ω", "0.97 Ω", "3.33 Ω"], a:0},
+    {q:"Dos de 12 Ω en paralelo: Req:", opts:["6 Ω", "24 Ω", "144 Ω", "0 Ω"], a:0},
+    {q:"V = 18 V, tres R de 3 Ω en serie. I:", opts:["2 A", "6 A", "54 A", "0.5 A"], a:0},
+    {q:"En paralelo de 4 Ω y 4 Ω a 8 V, corriente en cada rama:", opts:["2 A", "4 A", "1 A", "8 A"], a:0},
+    {q:"Req de 10 Ω en serie con (10 Ω // 10 Ω):", opts:["15 Ω", "20 Ω", "30 Ω", "5 Ω"], a:0},
+  ],
+  12: [
+    {q:"Si un bombillo en serie se funde:", opts:["Se interrumpe la corriente del circuito serie", "Los demás brillan más siempre", "El voltaje se hace cero en la fuente", "R total baja a cero"], a:0},
+    {q:"Corto circuito significa en la práctica:", opts:["Camino de muy baja R que puede elevar I en exceso", "R infinita siempre", "Fuente desconectada", "Solo un LED al revés"], a:0},
+    {q:"Medir corriente con multímetro se hace en:", opts:["Serie con el circuito", "Paralelo a la carga siempre", "Aire, sin contacto", "Solo con la punta roja"], a:0},
+    {q:"Si el suiche está abierto y mides V en bornes de la fuente:", opts:["Puedes leer el voltaje de la fuente", "La lectura es siempre 0", "R es 0", "P es máxima"], a:0},
+    {q:"Un tomacorriente en el taller se representa como:", opts:["Punto de conexión de carga", "Fuente ideal de 0 V", "Solo un fusible", "El rotor del motor"], a:0},
+  ],
+  13: [
+    {q:"I = 0.25 A en R = 40 Ω. V en la resistencia:", opts:["10 V", "160 V", "0.006 V", "40.25 V"], a:0},
+    {q:"P = 40 W, R = 10 Ω. Corriente I (usa P = I²R):", opts:["2 A", "4 A", "400 A", "0.25 A"], a:0},
+    {q:"Tres de 6 Ω en paralelo: Req:", opts:["2 Ω", "18 Ω", "0.5 Ω", "6 Ω"], a:0},
+    {q:"Fuente 9 V, Req = 18 Ω. Potencia total:", opts:["4.5 W", "162 W", "2 W", "0.5 W"], a:0},
+    {q:"Si R se reduce a la mitad y V fijo, I:", opts:["Se duplica", "Se reduce a la mitad", "Se cuadruplica", "No cambia"], a:0},
+  ],
+  14: [
+    {q:"En un mixto: 4 Ω en serie con (6 Ω // 3 Ω). Req:", opts:["6 Ω", "13 Ω", "2 Ω", "7 Ω"], a:0},
+    {q:"6 Ω // 3 Ω vale:", opts:["2 Ω", "9 Ω", "0.5 Ω", "18 Ω"], a:0},
+    {q:"Con V = 12 V y Req = 6 Ω, I total:", opts:["2 A", "72 A", "0.5 A", "18 A"], a:0},
+    {q:"La caída de voltaje en una R serie es:", opts:["V = I · R de esa resistencia", "Siempre igual a la fuente", "Independiente de I", "Siempre 0"], a:0},
+    {q:"Si dos cargas en paralelo disipan 5 W y 5 W a mismo V, potencia total:", opts:["10 W", "5 W", "25 W", "0 W"], a:0},
+  ],
+  15: [
+    {q:"Primera seguridad al intervenir un circuito:", opts:["Desenergizar / abrir suiche y verificar", "Tocar cables para sentir calor", "Aumentar V al máximo", "Quitar todas las R"], a:0},
+    {q:"No se debe:", opts:["Trabajar con manos húmedas en circuitos energizados", "Usar fusibles del valor correcto", "Leer el plano antes", "Usar herramientas aisladas"], a:0},
+    {q:"Un relé sirve principalmente para:", opts:["Controlar un circuito con otro (conmutar cargas)", "Medir ohmios exactos", "Ser solo decorativo", "Reemplazar la tierra"], a:0},
+    {q:"El transformador ideal en el taller se asocia a:", opts:["Cambio de niveles de tensión (acoplamiento magnético)", "Generar corriente continua pura sin núcleo", "Eliminar toda la potencia", "Ser un suiche manual"], a:0},
+    {q:"Capacitor en DC ideal (estado estable) se comporta como:", opts:["Circuito abierto (no pasa DC continua)", "Cortocircuito perfecto", "Fuente de 0 Ω", "Fusible"], a:0},
+  ],
+  16: [
+    {q:"R1=2Ω, R2=6Ω en serie a 16 V. V en R2:", opts:["12 V", "4 V", "16 V", "8 V"], a:0},
+    {q:"R1=2Ω, R2=6Ω en serie a 16 V. V en R1:", opts:["4 V", "12 V", "16 V", "2 V"], a:0},
+    {q:"Divisor de tensión: dos R iguales parten V en:", opts:["Mitades iguales", "Tercio y dos tercios", "Todo en una sola R", "Cero en ambas"], a:0},
+    {q:"I total = 3 A en dos ramas iguales en paralelo: I por rama:", opts:["1.5 A", "3 A", "6 A", "0 A"], a:0},
+    {q:"Potencia en R=8Ω con I=2A:", opts:["32 W", "16 W", "4 W", "10 W"], a:0},
+  ],
+  17: [
+    {q:"(12Ω // 6Ω) en serie con 4Ω. Req:", opts:["8 Ω", "22 Ω", "3 Ω", "10 Ω"], a:0},
+    {q:"12Ω // 6Ω vale:", opts:["4 Ω", "18 Ω", "2 Ω", "72 Ω"], a:0},
+    {q:"V=24 V, Req=8 Ω. P total:", opts:["72 W", "3 W", "192 W", "32 W"], a:0},
+    {q:"Si una rama en paralelo tiene R→∞ (abierta), Req del paralelo de dos:", opts:["Queda la otra R", "Queda 0", "Queda la suma", "Se hace infinito el voltaje"], a:0},
+    {q:"Instrumento para medir R con circuito desenergizado:", opts:["Multímetro en función óhmetro", "Solo amperímetro en paralelo", "Voltímetro en serie forzado", "Fusible"], a:0},
+  ],
+  18: [
+    {q:"Motor: más voltaje (dentro de límite) suele implicar:", opts:["Mayor velocidad/torque según diseño", "Menor corriente siempre", "R del cobre = 0", "Apagado automático del campo"], a:0},
+    {q:"Si las escobillas no contactan el conmutador:", opts:["El rotor no recibe corriente y no gira", "El motor acelera sin control", "R del estator baja a 0", "P es máxima"], a:0},
+    {q:"Un plano con cruce de cables sin conexión se dibuja:", opts:["Cruzando sin punto de unión", "Con punto grueso obligatorio", "Con fusible en cada cruce", "Con doble batería"], a:0},
+    {q:"Conexión real de cables se marca en el plano con:", opts:["Punto de unión", "Líneas que solo se cruzan", "Texto “tal vez”", "Color aleatorio"], a:0},
+    {q:"Escala en el cajetín indica:", opts:["Relación de tamaño dibujo/realidad", "El número de vidas", "La potencia del motor", "El color del cable"], a:0},
+  ],
+  19: [
+    {q:"R serie 5Ω + (10Ω // 10Ω) + 5Ω. Req:", opts:["15 Ω", "30 Ω", "20 Ω", "7.5 Ω"], a:0},
+    {q:"V=30 V en ese Req=15Ω. I total:", opts:["2 A", "0.5 A", "45 A", "15 A"], a:0},
+    {q:"Caída en cada 5Ω serie (I=2A):", opts:["10 V", "5 V", "2 V", "30 V"], a:0},
+    {q:"Potencia total con V=30 e I=2:", opts:["60 W", "15 W", "32 W", "90 W"], a:0},
+    {q:"Si se cortocircuita solo el paralelo 10//10:", opts:["Esas R dejan de limitar (tramo ≈0Ω) y cambia I", "Req aumenta siempre", "I se hace 0", "V de la fuente se anula"], a:0},
+  ],
+  20: [
+    {q:"Diagnóstico: fuente OK, suiche cerrado, R carga OK, I=0. Revisa primero:", opts:["Continuidad (cable abierto o mal contacto)", "Subir V al doble sin medir", "Quitar el fusible bueno", "Mojar las manos"], a:0},
+    {q:"Dos bombillos en paralelo: uno se funde. El otro:", opts:["Puede seguir encendido", "Se funde al instante siempre", "Apaga la fuente", "Reduce V a 0"], a:0},
+    {q:"Req de 2Ω // 2Ω // 2Ω:", opts:["2/3 Ω ≈ 0.67 Ω", "6 Ω", "2 Ω", "8 Ω"], a:0},
+    {q:"P=V²/R con V=12 y R=6:", opts:["24 W", "2 W", "72 W", "0.5 W"], a:0},
+    {q:"Objetivo del taller eléctrico aplicado:", opts:["Armar, medir, interpretar planos y trabajar seguro", "Memorizar solo colores sin práctica", "Evitar el multímetro", "Omitir la seguridad"], a:0},
+  ],
+};
+
+let reto = { level: 1, i: 0, score: 0, lives: 3, maxUnlocked: 1 };
+try {
+  const u = parseInt(localStorage.getItem('tallerElec_retoLvl') || '1', 10);
+  if (u >= 1 && u <= 20) reto.maxUnlocked = u;
+} catch (e) {}
+
+function updateRetoLevelButtons(){
+  const row = document.getElementById('retoLevelRow');
+  if (row && !row._built) {
+    row._built = true;
+    row.innerHTML = '';
+    for (let n = 1; n <= 20; n++) {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.id = 'retoLvl' + n;
+      b.setAttribute('data-lvl', String(n));
+      b.textContent = 'N' + n;
+      b.onclick = function(){ selectRetoLevel(n); };
+      row.appendChild(b);
+    }
+  }
+  for (let n = 1; n <= 20; n++) {
+    const b = document.getElementById('retoLvl' + n);
+    if (!b) continue;
+    if (n <= reto.maxUnlocked) {
+      b.textContent = 'N' + n;
+      b.disabled = false;
+      b.style.opacity = '1';
+    } else {
+      b.textContent = 'N' + n + '🔒';
+      b.disabled = true;
+      b.style.opacity = '0.5';
+    }
+    b.classList.toggle('on', n === reto.level);
+  }
+}
+
+function selectRetoLevel(n){
+  if (n > reto.maxUnlocked) return;
+  reto.level = n;
+  updateRetoLevelButtons();
+  const show = document.getElementById('retoLvlShow');
+  if (show) show.textContent = String(n);
+  const body = document.getElementById('retoBody');
+  if (body) body.innerHTML = '<p class="muted">Nivel ' + n + ' listo. Pulsa <b>Comenzar nivel</b>.</p>';
+  const st = document.getElementById('retoStart');
+  if (st) st.style.display = 'block';
+}
+
+
+function spawnSparks(n){
+  n = n || 12;
+  const emojis = ['✨','⭐','🎉','⚡','💫','🌟'];
+  for (let i = 0; i < n; i++) {
+    const el = document.createElement('div');
+    el.className = 'sparkle';
+    el.textContent = emojis[i % emojis.length];
+    const x = 20 + Math.random() * 60;
+    const y = 30 + Math.random() * 40;
+    el.style.left = x + 'vw';
+    el.style.top = y + 'vh';
+    el.style.setProperty('--dx', ((Math.random() - 0.5) * 120) + 'px');
+    el.style.setProperty('--dy', (-40 - Math.random() * 100) + 'px');
+    document.body.appendChild(el);
+    setTimeout(function(){ el.remove(); }, 1100);
+  }
+}
+
+function showRetoQ(){
+  const box = document.getElementById('retoBody');
+  if (!box) return;
+  const Qs = (reto.queue && reto.queue.length) ? reto.queue : (RETO_LEVELS[reto.level] || []);
+  const show = document.getElementById('retoLvlShow');
+  if (show) show.textContent = String(reto.level);
+
+  if (reto.lives <= 0 || reto.i >= Qs.length) {
+    setRetoLevelScore(reto.level, reto.score);
+    const passed = reto.lives > 0 && reto.score >= 4;
+    let extra = '';
+    if (passed) {
+      if (reto.level < 20 && reto.maxUnlocked < reto.level + 1) {
+        reto.maxUnlocked = reto.level + 1;
+        try { localStorage.setItem('tallerElec_retoLvl', String(reto.maxUnlocked)); } catch (e) {}
+        extra = '<p class="status-ok">✓ Nivel desbloqueado: ' + reto.maxUnlocked + '</p>';
+      } else if (reto.level === 20) {
+        extra = '<p class="status-ok">✓ Completaste los 20 niveles del taller.</p>';
+      }
+    } else if (reto.lives <= 0) {
+      extra = '<p class="status-bad">Se acabaron las vidas. Vuelve a intentar este nivel.</p>';
+    } else {
+      extra = '<p class="muted">Necesitas al menos 4 aciertos para desbloquear el siguiente nivel.</p>';
+    }
+    updateRetoLevelButtons();
+    box.innerHTML = '<div class="q-card"><p class="q-ask">Fin del nivel ' + reto.level + '</p><p>Puntos de este nivel: <b>' + reto.score + '</b> / ' + Qs.length + '</p><p>Total acumulado: <b>' + getRetoBestScore() + '</b> / 100</p>' + extra +
+      '<button class="btn btn-primary" id="retoAgain">Reintentar nivel</button>' +
+      (reto.maxUnlocked > reto.level ? '<button class="btn btn-gold" id="retoNext">Ir al siguiente nivel</button>' : '') + '</div>';
+    const again = document.getElementById('retoAgain');
+    if (again) again.onclick = function(){ startRetoLevel(reto.level); };
+    const nx = document.getElementById('retoNext');
+    if (nx) nx.onclick = function(){ selectRetoLevel(reto.level + 1); startRetoLevel(reto.level); };
+    const st = document.getElementById('retoStart');
+    if (st) st.style.display = 'none';
+    return;
+  }
+
+  const Q = Qs[reto.i];
+  document.getElementById('retoNum').textContent = (reto.i + 1) + '/' + Qs.length;
+  document.getElementById('retoScore').textContent = reto.score;
+  document.getElementById('retoLives').textContent = '❤️'.repeat(reto.lives) || '💀';
+  // Mezclar opciones: la correcta NO siempre es la primera
+  const order = Q.opts.map(function(_, i){ return i; });
+  for (let i = order.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    const tmp = order[i]; order[i] = order[j]; order[j] = tmp;
+  }
+  const shuffledOpts = order.map(function(i){ return Q.opts[i]; });
+  const correctIdx = order.indexOf(Q.a);
+  const correctText = Q.opts[Q.a];
+
+  box.innerHTML = '<div class="q-card"><div class="q-ask">' + Q.q + '</div><div class="mc" id="retoMc"></div>' +
+    '<button class="btn btn-gold" id="retoCheck">Verificar</button><div id="retoFb"></div></div>';
+  const mc = document.getElementById('retoMc');
+  let sel = null;
+  shuffledOpts.forEach(function(o, idx){
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.textContent = o;
+    b.onclick = function(){
+      Array.prototype.forEach.call(mc.children, function(x){ x.classList.remove('sel'); });
+      b.classList.add('sel');
+      sel = idx;
+    };
+    mc.appendChild(b);
+  });
+  document.getElementById('retoCheck').onclick = function(){
+    if (sel === null) { alert('Elige una opción'); return; }
+    const ok = sel === correctIdx;
+    const fb = document.getElementById('retoFb');
+    if (ok) {
+      reto.score++;
+      fb.innerHTML = '<div class="fb-celeb"><div class="big">🎉✨⚡✨🎉</div><div class="msg">¡Correcto! ¡Muy bien!</div></div>';
+      spawnSparks(14);
+    } else {
+      reto.lives--;
+      fb.innerHTML = '<div class="fb-sad"><div class="big">😢</div><div class="msg">Incorrecto… sigue intentando</div><div style="color:#fecaca;font-size:.9rem;margin-top:6px;">Respuesta: ' + correctText + '</div></div>';
+    }
+    document.getElementById('retoScore').textContent = reto.score;
+    document.getElementById('retoLives').textContent = '❤️'.repeat(Math.max(reto.lives, 0)) || '💀';
+    document.getElementById('retoCheck').style.display = 'none';
+    Array.prototype.forEach.call(mc.children, function(x){ x.disabled = true; });
+    const next = document.createElement('button');
+    next.type = 'button';
+    next.className = 'btn btn-primary';
+    next.textContent = (reto.i + 1 >= Qs.length || reto.lives <= 0) ? 'Ver resultado del nivel' : 'Siguiente';
+    next.onclick = function(){ reto.i++; showRetoQ(); };
+    box.appendChild(next);
+  };
+}
+
+function shuffleArray(arr){const a=arr.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));const t=a[i];a[i]=a[j];a[j]=t;}return a;}
+
+function shuffleArray(arr){
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    const t = a[i]; a[i] = a[j]; a[j] = t;
+  }
+  return a;
+}
+function questionKey(item){
+  try { return String(item.q || item.question || JSON.stringify(item)); } catch(e){ return String(Math.random()); }
+}
+function buildQuestionPool(level){
+  const pool = [];
+  const seen = {};
+  const ids = [level - 1, level, level + 1, level + 2, level + 3];
+  ids.forEach(function(L){
+    if (L < 1 || typeof RETO_LEVELS === 'undefined' || !RETO_LEVELS[L]) return;
+    (RETO_LEVELS[L] || []).forEach(function(item){
+      const k = questionKey(item);
+      if (seen[k]) return;
+      seen[k] = true;
+      pool.push(item);
+    });
+  });
+  if (pool.length < 8 && typeof RETO_LEVELS !== 'undefined') {
+    Object.keys(RETO_LEVELS).forEach(function(Lk){
+      (RETO_LEVELS[Lk] || []).forEach(function(item){
+        const k = questionKey(item);
+        if (seen[k]) return;
+        seen[k] = true;
+        pool.push(item);
+      });
+    });
+  }
+  return pool;
+}
+function pickFreshQuestions(level, n){
+  n = n || 5;
+  if (!reto.usedByLevel) reto.usedByLevel = {};
+  if (!reto.usedByLevel[level]) reto.usedByLevel[level] = {};
+  const used = reto.usedByLevel[level];
+  let pool = buildQuestionPool(level).filter(function(item){
+    return !used[questionKey(item)];
+  });
+  if (pool.length < n) {
+    reto.usedByLevel[level] = {};
+    pool = buildQuestionPool(level);
+  }
+  const picked = shuffleArray(pool).slice(0, Math.min(n, pool.length));
+  picked.forEach(function(item){
+    reto.usedByLevel[level][questionKey(item)] = true;
+  });
+  return picked;
+}
+
+function startRetoLevel(lvl){
+  reto.level = lvl || reto.level;
+  reto.i = 0;
+  reto.score = 0;
+  reto.lives = 3;
+  reto.queue = pickFreshQuestions(reto.level, 5);
+  const st = document.getElementById('retoStart');
+  if (st) st.style.display = 'none';
+  updateRetoLevelButtons();
+  showRetoQ();
+}
+
+function startReto(){
+  if (workSize > 1) {
+    alert('El reto es solo individual.\\nElige "1 persona" y tu nombre.');
+    return;
+  }
+  if (!currentStudent.name) {
+    alert('Elige tu nombre antes de comenzar el reto.');
+    return;
+  }
+  startRetoLevel(reto.level);
+}
+
+const _rs=document.getElementById('retoStart'); if(_rs) _rs.onclick = startReto;
+const _r1=document.getElementById('retoLvl1'); if(_r1) _r1.onclick = function(){ selectRetoLevel(1); };
+const _r2=document.getElementById('retoLvl2'); if(_r2) _r2.onclick = function(){ selectRetoLevel(2); };
+const _r3=document.getElementById('retoLvl3'); if(_r3) _r3.onclick = function(){ selectRetoLevel(3); };
+updateRetoLevelButtons();
+
+
+/* ===== MÓDULOS NUEVOS ===== */
+const TEACHER_EMAIL = 'gilben854@gmail.com';
+
+const RES_DIGITS = [
+  {name:'Negro',hex:'#111',v:0},{name:'Marrón',hex:'#7c2d12',v:1},{name:'Rojo',hex:'#dc2626',v:2},
+  {name:'Naranja',hex:'#ea580c',v:3},{name:'Amarillo',hex:'#eab308',v:4},{name:'Verde',hex:'#16a34a',v:5},
+  {name:'Azul',hex:'#2563eb',v:6},{name:'Violeta',hex:'#7c3aed',v:7},{name:'Gris',hex:'#6b7280',v:8},
+  {name:'Blanco',hex:'#f8fafc',v:9}
+];
+const RES_MULT = [
+  {name:'Negro ×1',hex:'#111',m:1},{name:'Marrón ×10',hex:'#7c2d12',m:10},{name:'Rojo ×100',hex:'#dc2626',m:100},
+  {name:'Naranja ×1k',hex:'#ea580c',m:1e3},{name:'Amarillo ×10k',hex:'#eab308',m:1e4},
+  {name:'Verde ×100k',hex:'#16a34a',m:1e5},{name:'Azul ×1M',hex:'#2563eb',m:1e6},
+  {name:'Dorado ×0.1',hex:'#ca8a04',m:0.1},{name:'Plateado ×0.01',hex:'#94a3b8',m:0.01}
+];
+const RES_TOL = [
+  {name:'Marrón ±1%',hex:'#7c2d12',t:'±1%'},{name:'Rojo ±2%',hex:'#dc2626',t:'±2%'},
+  {name:'Dorado ±5%',hex:'#ca8a04',t:'±5%'},{name:'Plateado ±10%',hex:'#94a3b8',t:'±10%'}
+];
+
+function fillResBands(){
+  const b1 = document.getElementById('band1');
+  const b2 = document.getElementById('band2');
+  const b3 = document.getElementById('band3');
+  const b4 = document.getElementById('band4');
+  if (!b1) return;
+  function fill(sel, arr, labelKey){
+    sel.innerHTML = '';
+    arr.forEach((o,i)=>{
+      const op = document.createElement('option');
+      op.value = String(i);
+      op.textContent = o.name;
+      sel.appendChild(op);
+    });
+  }
+  fill(b1, RES_DIGITS); fill(b2, RES_DIGITS); fill(b3, RES_MULT); fill(b4, RES_TOL);
+  b1.value = '1'; b2.value = '0'; b3.value = '2'; b4.value = '2';
+  [b1,b2,b3,b4].forEach(s => s.onchange = updateResistorCode);
+  updateResistorCode();
+}
+
+function formatOhms(v){
+  if (v >= 1e6) return (v/1e6).toFixed(2).replace(/\.00$/,'') + ' MΩ';
+  if (v >= 1e3) return (v/1e3).toFixed(2).replace(/\.00$/,'') + ' kΩ';
+  return v.toFixed(2).replace(/\.00$/,'') + ' Ω';
+}
+
+function updateResistorCode(){
+  const d1 = RES_DIGITS[+document.getElementById('band1').value];
+  const d2 = RES_DIGITS[+document.getElementById('band2').value];
+  const mu = RES_MULT[+document.getElementById('band3').value];
+  const to = RES_TOL[+document.getElementById('band4').value];
+  const val = (d1.v * 10 + d2.v) * mu.m;
+  document.getElementById('resValue').textContent = formatOhms(val);
+  document.getElementById('resTol').textContent = to.t;
+  document.getElementById('resExplain').textContent =
+    'Cálculo: (' + d1.v + d2.v + ') × ' + mu.m + ' = ' + formatOhms(val) + '  ' + to.t;
+  const prev = document.getElementById('resPreview');
+  if (prev) {
+    prev.innerHTML = '';
+    [{h:d1.hex,x:18},{h:d2.hex,x:34},{h:mu.hex,x:50},{h:to.hex,x:70}].forEach(b=>{
+      const d = document.createElement('div');
+      d.className = 'band-bar';
+      d.style.left = b.x + '%';
+      d.style.background = b.h;
+      d.style.border = '1px solid #000';
+      prev.appendChild(d);
+    });
+  }
+}
+
+function measureMultimeter(){
+  const fn = (document.getElementById('mmFunc')||{}).value || 'V';
+  const r = measureFromCircuit(fn);
+  const a = document.getElementById('mmRead');
+  const u = document.getElementById('mmUnit');
+  const n = document.getElementById('mmNote');
+  if (a) a.textContent = r.reading;
+  if (u) u.textContent = r.unit;
+  if (n) n.textContent = r.note;
+}
+
+const PRACTICES = [
+  {title:'Práctica 1 — Alumbrado en serie',steps:[
+    'Elige tu nombre arriba.',
+    'Tipo Serie: agrega bombillo y suiche.',
+    'Cierra suiche, enciende fuente y observa el dibujo.',
+    'Medir V y Medir I; anota los valores.',
+    'En Planos: Serie, generar e imprimir.'
+  ]},
+  {title:'Práctica 2 — Cargas en paralelo',steps:[
+    'Vacía el circuito y elige Paralelo.',
+    'Agrega dos cargas (bombillo y motor).',
+    'Energiza y mide V e I aquí mismo.',
+    'En Planos: Paralelo, generar e imprimir.',
+    'Anota: mismo V, corrientes por rama.'
+  ]},
+  {title:'Práctica 3 — Circuito mixto',steps:[
+    'Tipo Mixto: al menos dos cargas + suiche.',
+    'Energiza y mide V, I y P.',
+    'En Planos: Mixto y Generar.',
+    'Imprime la lámina con los nombres.'
+  ]},
+  {title:'Práctica 4 — Ohm, Watts y colores',steps:[
+    'Ohm: V=12 V, R=24 Ω; anota la corriente.',
+    'Watts: calcula la potencia.',
+    'Colores R: arma 1 kΩ (marrón, negro, rojo, dorado).',
+    'Si agregaste resistencias, mide R aquí y compara.'
+  ]}
+];
+
+function renderPractices(){
+  const box = document.getElementById('practList');
+  if (!box) return;
+  box.innerHTML = '';
+  PRACTICES.forEach((pr, pi) => {
+    const card = document.createElement('div');
+    card.className = 'pract-card';
+    card.innerHTML = '<h3>' + pr.title + '</h3>';
+    pr.steps.forEach((st, si) => {
+      const id = 'pr_' + pi + '_' + si;
+      const lab = document.createElement('label');
+      lab.innerHTML = '<input type="checkbox" id="' + id + '"> ' + st;
+      card.appendChild(lab);
+      const inp = lab.querySelector('input');
+      try {
+        inp.checked = localStorage.getItem(id) === '1';
+      } catch(e){}
+      inp.onchange = function(){
+        try { localStorage.setItem(id, inp.checked ? '1' : '0'); } catch(e){}
+      };
+    });
+    box.appendChild(card);
+  });
+}
+
+function practicesSummary(){
+  let done = 0, total = 0;
+  PRACTICES.forEach((pr, pi) => {
+    pr.steps.forEach((_, si) => {
+      total++;
+      const id = 'pr_' + pi + '_' + si;
+      try { if (localStorage.getItem(id) === '1') done++; } catch(e){}
+    });
+  });
+  return { done, total };
+}
+
+const GLOSARIO = [
+  ['Voltaje (V)', 'Diferencia de potencial eléctrico. Se mide en voltios.'],
+  ['Corriente (I)', 'Flujo de carga eléctrica. Se mide en amperios (A).'],
+  ['Resistencia (R)', 'Oposición al paso de la corriente. Se mide en ohmios (Ω).'],
+  ['Potencia (P)', 'Energía por unidad de tiempo. P = V · I. Se mide en vatios (W).'],
+  ['Serie', 'Componentes uno tras otro: misma corriente, voltajes que se reparten.'],
+  ['Paralelo', 'Componentes en ramas: mismo voltaje, corrientes que se reparten.'],
+  ['Mixto', 'Combinación de conexiones en serie y en paralelo.'],
+  ['Suiche', 'Interruptor que abre o cierra el circuito.'],
+  ['Fusible', 'Protección que se abre si la corriente es excesiva.'],
+  ['LED', 'Diodo emisor de luz; polarizado y de baja corriente.'],
+  ['Relé', 'Interruptor electromagnético controlado por una bobina.'],
+  ['Transformador', 'Dispositivo que cambia niveles de tensión en CA.'],
+  ['Capacitor', 'Almacena carga eléctrica entre dos placas.'],
+  ['Ohm (ley de)', 'V = I · R'],
+  ['Tierra', 'Conexión de seguridad al potencial de tierra.']
+];
+
+function renderGlosario(){
+  const box = document.getElementById('glosarioList');
+  if (!box) return;
+  box.innerHTML = GLOSARIO.map(g =>
+    '<div class="glos-item"><b>' + g[0] + '</b><br><span class="muted">' + g[1] + '</span></div>'
+  ).join('');
+}
+
+function getRetoLevelScores(){
+  try {
+    const raw = localStorage.getItem('tallerElec_retoLevelScores');
+    if (!raw) return {};
+    const o = JSON.parse(raw);
+    return (o && typeof o === 'object') ? o : {};
+  } catch(e){ return {}; }
+}
+function getRetoBestScore(){
+  // Total acumulado = suma de mejores puntajes por nivel (máx. 100 = 20×5)
+  try {
+    const scores = getRetoLevelScores();
+    let sum = 0;
+    Object.keys(scores).forEach(function(k){
+      const v = parseInt(scores[k], 10) || 0;
+      if (v > 0) sum += Math.min(5, v);
+    });
+    if (sum > 0) return sum;
+    return parseInt(localStorage.getItem('tallerElec_retoBest') || '0', 10) || 0;
+  } catch(e){ return 0; }
+}
+function getRetoMaxPossible(){ return 100; }
+function setRetoLevelScore(level, s){
+  try {
+    const scores = getRetoLevelScores();
+    const key = String(level);
+    const prev = parseInt(scores[key] || '0', 10) || 0;
+    const val = Math.min(5, Math.max(0, s|0));
+    if (val > prev) {
+      scores[key] = val;
+      localStorage.setItem('tallerElec_retoLevelScores', JSON.stringify(scores));
+    }
+    localStorage.setItem('tallerElec_retoBest', String(getRetoBestScore()));
+  } catch(e){}
+}
+function setRetoBestScore(s){
+  const lvl = (typeof reto !== 'undefined' && reto.level) ? reto.level : 1;
+  setRetoLevelScore(lvl, s);
+}
+
+function refreshCertUI(){
+  const n = document.getElementById('certName');
+  const s = document.getElementById('certScore');
+  const lv = document.getElementById('certLevel');
+  if (n) n.textContent = groupLabel() || '— elige nombre —';
+  if (s) s.textContent = String(Math.max(getRetoBestScore(), (typeof reto !== 'undefined' ? reto.score : 0) || 0));
+  if (lv) lv.textContent = String((typeof reto !== 'undefined' && reto.maxUnlocked) ? reto.maxUnlocked : 1);
+}
+
+function certBadgeFor(score, maxLvl){
+  if (maxLvl >= 20 && score >= 80) return '🏆 Maestro del taller eléctrico';
+  if (maxLvl >= 15) return '⭐ Experto en circuitos';
+  if (maxLvl >= 10) return '🔧 Técnico en formación';
+  if (maxLvl >= 5) return '💡 Aprendiz avanzado';
+  if (score >= 4) return '🥉 Participación destacada';
+  return '📋 Participante del taller';
+}
+
+function printCertificado(){
+  if (!requireNames()) return;
+  const names = namesLine();
+  const score = Math.max(getRetoBestScore(), (typeof reto !== 'undefined' ? reto.score : 0) || 0);
+  const maxLvl = (typeof reto !== 'undefined' && reto.maxUnlocked) ? reto.maxUnlocked : 1;
+  const badge = certBadgeFor(score, maxLvl);
+  const fecha = new Date().toLocaleDateString('es-VE', { year: 'numeric', month: 'long', day: 'numeric' });
+
+  const canvas = document.createElement('canvas');
+  canvas.width = 900;
+  canvas.height = 640;
+  const ctx = canvas.getContext('2d');
+
+  const grad = ctx.createLinearGradient(0, 0, 900, 640);
+  grad.addColorStop(0, '#0f172a');
+  grad.addColorStop(0.45, '#1e3a5f');
+  grad.addColorStop(1, '#0c4a6e');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, 900, 640);
+
+  ctx.strokeStyle = '#38bdf8';
+  ctx.lineWidth = 8;
+  ctx.strokeRect(20, 20, 860, 600);
+  ctx.strokeStyle = 'rgba(255,255,255,0.35)';
+  ctx.lineWidth = 2;
+  ctx.strokeRect(32, 32, 836, 576);
+
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#fff';
+  ctx.font = 'bold 28px Arial';
+  ctx.fillText('CERTIFICADO DE LOGRO', 450, 95);
+
+  ctx.font = '18px Arial';
+  ctx.fillText('Taller de Electricidad Aplicada', 450, 130);
+
+  ctx.fillStyle = 'rgba(255,255,255,0.85)';
+  ctx.font = '14px Arial';
+  ctx.fillText('GILAST · Monseñor Juan José Bernal', 450, 158);
+  ctx.fillText('3° año Electricidad · Producido por GILAST', 450, 180);
+
+  ctx.fillStyle = 'rgba(255,255,255,0.95)';
+  ctx.font = '18px Arial';
+  ctx.fillText('Se otorga el presente reconocimiento a:', 450, 230);
+
+  ctx.fillStyle = '#38bdf8';
+  ctx.font = 'bold 32px Arial';
+  // wrap long group names
+  const nameStr = names || 'Estudiante';
+  if (nameStr.length > 42) {
+    ctx.font = 'bold 24px Arial';
+  }
+  ctx.fillText(nameStr, 450, 280);
+
+  ctx.fillStyle = 'rgba(255,255,255,0.9)';
+  ctx.font = '18px Arial';
+  ctx.fillText('3° año — Electricidad', 450, 320);
+
+  ctx.fillStyle = '#fff';
+  ctx.font = '22px Arial';
+  ctx.fillText('Puntos totales: ' + score + ' / 100', 450, 365);
+
+  ctx.fillStyle = '#7dd3fc';
+  ctx.font = '18px Arial';
+  ctx.fillText('Nivel máximo desbloqueado: ' + maxLvl + ' / 20', 450, 400);
+
+  ctx.fillStyle = '#86efac';
+  ctx.font = 'bold 22px Arial';
+  ctx.fillText(badge, 450, 445);
+
+  ctx.fillStyle = 'rgba(255,255,255,0.8)';
+  ctx.font = '15px Arial';
+  ctx.fillText('Motor · Circuitos · Ohm · Watts · Planos · Prácticas · Reto', 450, 490);
+
+  ctx.fillStyle = 'rgba(255,255,255,0.75)';
+  ctx.font = '14px Arial';
+  ctx.fillText(fecha, 450, 530);
+
+  ctx.fillStyle = 'rgba(255,255,255,0.55)';
+  ctx.font = '12px Arial';
+  ctx.fillText('Documento de logro del taller — sin código QR', 450, 575);
+
+  // Preview
+  const prev = document.getElementById('certPreview');
+  if (prev) {
+    prev.innerHTML = '';
+    const img = document.createElement('img');
+    img.src = canvas.toDataURL('image/png');
+    img.alt = 'Certificado';
+    img.style.maxWidth = '100%';
+    img.style.borderRadius = '12px';
+    img.style.border = '1px solid #334155';
+    prev.appendChild(img);
+  }
+
+  // Download
+  try {
+    const a = document.createElement('a');
+    a.href = canvas.toDataURL('image/png');
+    a.download = 'Certificado_Electricidad_' + (nameStr.replace(/[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑ]+/g, '_').slice(0, 40) || 'estudiante') + '.png';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  } catch (e) {
+    console.error(e);
+  }
+
+  // Optional print window with image
+  try {
+    const w = window.open('', '_blank');
+    if (w) {
+      w.document.write('<html><head><title>Certificado</title></head><body style="margin:0;text-align:center;background:#111;">');
+      w.document.write('<img src="' + canvas.toDataURL('image/png') + '" style="max-width:100%;height:auto;"/>');
+      w.document.write('</body></html>');
+      w.document.close();
+      setTimeout(function(){ try { w.print(); } catch (e2) {} }, 400);
+    }
+  } catch (e) {}
+}
+
+function printSeguridad(){
+  const html = `
+    <div class="title-block">
+      <div class="big">Ficha de seguridad — Taller de electricidad</div>
+      <div>3° año Electricidad</div>
+      <div>Fecha: ${new Date().toLocaleDateString('es-VE')}</div>
+      <div style="grid-column:1/-1"><b>Integrantes:</b> ${escapeXml(namesLine()||'—')}</div>
+      <div style="grid-column:1/-1">Prof.: GILAST · GILAST</div>
+    </div>
+    <ol style="font-size:11pt;line-height:1.5;">
+      <li>No trabajar con manos mojadas.</li>
+      <li>Desconectar la fuente antes de modificar el circuito.</li>
+      <li>Usar herramientas con mango aislado.</li>
+      <li>No sobrecargar tomacorrientes ni cables.</li>
+      <li>Ante chispa, olor a quemado o calor: apagar y avisar.</li>
+      <li>Mantener el área ordenada.</li>
+      <li>Evitar joyas metálicas en circuitos energizados.</li>
+      <li>Respetar fusibles y protecciones.</li>
+    </ol>`;
+  doPrint(html);
+}
+
+function sendTeacherEmail(kind){
+  if (!requireNames()) return;
+  const names = namesLine();
+  const score = Math.max(getRetoBestScore(), (typeof reto !== 'undefined' ? reto.score : 0) || 0);
+  const pr = practicesSummary();
+  const subject = encodeURIComponent('Taller Electricidad — ' + kind + ' — ' + names);
+  const body = encodeURIComponent(
+    'Profesor GILAST\n\n' +
+    'Tipo: ' + kind + '\n' +
+    'Estudiantes: ' + names + '\n' +
+    'Curso: 3° año Electricidad — GILAST\n' +
+    'Puntaje reto: ' + score + '\n' +
+    'Prácticas marcadas: ' + pr.done + '/' + pr.total + '\n' +
+    'Fecha: ' + new Date().toLocaleString('es-VE') + '\n'
+  );
+  // FormSubmit AJAX
+  const statusId = kind.indexOf('ráctica') >= 0 ? 'practStatus' : 'certStatus';
+  const st = document.getElementById(statusId);
+  if (st) st.textContent = 'Enviando…';
+  const fd = new FormData();
+  fd.append('nombre', names);
+  fd.append('tipo', kind);
+  fd.append('puntaje_reto', String(score));
+  fd.append('practicas', pr.done + '/' + pr.total);
+  fd.append('curso', '3° año Electricidad');
+  fd.append('_subject', 'Taller Electricidad — ' + kind + ' — ' + names);
+  fd.append('_template', 'table');
+  fd.append('_captcha', 'false');
+  fetch('https://formsubmit.co/ajax/' + TEACHER_EMAIL, { method:'POST', body: fd })
+    .then(r => r.json())
+    .then(data => {
+      if (st) st.textContent = '✅ Aviso enviado al profesor.';
+    })
+    .catch(() => {
+      // fallback mailto
+      window.location.href = 'mailto:' + TEACHER_EMAIL + '?subject=' + subject + '&body=' + body;
+      if (st) st.textContent = 'Se abrió el correo del dispositivo (fallback).';
+    });
+}
+
+function initExtraModules(){
+  fillResBands();
+  renderPractices();
+  renderGlosario();
+  const mm = document.getElementById('mmMeasure');
+  if (mm) mm.onclick = measureMultimeter;
+  const sg = document.getElementById('segPrint');
+  if (sg) sg.onclick = printSeguridad;
+  const cg = document.getElementById('certGen');
+  if (cg) cg.onclick = printCertificado;
+  const pm = document.getElementById('practMail');
+  if (pm) pm.onclick = function(){ sendTeacherEmail('Prácticas guiadas'); };
+  refreshCertUI();
+}
+
+
+/* INIT */
+(function boot(){
+  function safe(label, fn){
+    try { fn(); } catch (e) { console.error('[Taller] ' + label, e); }
+  }
+  // 1) Nombres primero (lo más importante)
+  safe('estudiantes', fillStudentSelect);
+  safe('motor', function(){ renderParts(); renderSlots(); wireMotorControls(); updateMotorRun(); drawMotor(); });
+  safe('circuitos', function(){ wireAllCircPanels(); refreshAllCirc(); });
+  safe('ohm', function(){ updateOhm(); renderOhmFields(); });
+  safe('watts', updateWatts);
+  safe('planos', function(){ renderPlanChips(); wirePlanButtons(); drawSchematic(); });
+  safe('dibujo', initDrawingBoard);
+  safe('extras', initExtraModules);
+  safe('reto-btns', updateRetoLevelButtons);
+  // Reintento por si el DOM aún no estaba listo
+  setTimeout(function(){ safe('estudiantes-retry', fillStudentSelect); }, 100);
+  setTimeout(function(){ safe('planos-retry', wirePlanButtons); }, 150);
+})();
+</script>
+<div id="printRoot" class="print-only" style="display:none;"></div>
+<script>
+(function(){
+  var SAAS_API = localStorage.getItem('saas_api_base') || '';
+  async function saasCheckAccess(){
+    var gate = document.getElementById('licenseGate');
+    var st = document.getElementById('licenseStatus');
+    var code = localStorage.getItem('saas_classCode') || '';
+    if(!code){ if(st) st.innerHTML='<b style="color:#fca5a5">Sin código de clase.</b> Vuelve al catálogo.'; if(gate) gate.className='license-gate blocked'; return false; }
+    try{
+      var r = await fetch(SAAS_API + '/api/access/check?classCode=' + encodeURIComponent(code));
+      var data = await r.json();
+      if(!data.allowed){ if(st) st.innerHTML='<b style="color:#fca5a5">Acceso bloqueado.</b>'; if(gate) gate.className='license-gate blocked'; return false; }
+      if(st) st.innerHTML='<b style="color:#86efac">Licencia activa.</b> '+(data.teacherName||'');
+      if(gate) gate.className='license-gate ok';
+      try{ localStorage.setItem('saas_access_ok','1'); }catch(e){}
+      var ni=document.getElementById('studentNameInput');
+      if(ni && !ni.value && localStorage.getItem('saas_studentName')){ ni.value=localStorage.getItem('saas_studentName'); }
+      return true;
+    }catch(e){ if(st) st.innerHTML='<b style="color:#fca5a5">Sin servidor.</b> '+e.message; if(gate) gate.className='license-gate blocked'; return false; }
+  }
+  window.saasCheckAccess = saasCheckAccess;
+  function wrapFn(name){
+    var orig = window[name];
+    if(typeof orig !== 'function' || orig._saasWrapped) return;
+    var wrapped = async function(){
+      if(!(await saasCheckAccess())){ alert('Sin acceso. Usa el catálogo con el código de clase.'); return; }
+      return orig.apply(this, arguments);
+    };
+    wrapped._saasWrapped = true;
+    window[name] = wrapped;
+  }
+  function install(){
+    ['startRetoLevel','startLevel','startChallenge','beginLevel','startGame','startReto'].forEach(wrapFn);
+    saasCheckAccess();
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', install);
+  else setTimeout(install, 0);
+})();
+</script>
+</body>
+</html>
