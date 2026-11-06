@@ -185,7 +185,7 @@ async function unlockCatalog(){
   if(!code){ show(err,'Escribe el código de clase'); return; }
   if(!name){ show(err,'Escribe tu nombre'); return; }
   try{
-    const r = await fetch(API_BASE + '/api/access/check?classCode=' + encodeURIComponent(code));
+    const r = await fetch(API_BASE + '/api/access/check?classCode=' + encodeURIComponent(code) + '&studentName=' + encodeURIComponent(name));
     const data = await r.json();
     if(!data.allowed){
       const map={
@@ -202,6 +202,7 @@ async function unlockCatalog(){
     localStorage.setItem('saas_certEmail', data.certificateEmail||'');
     localStorage.setItem('saas_teacherName', data.teacherName||'');
     localStorage.setItem('saas_access_ok', '1');
+    localStorage.setItem('saas_student_token', data.accessToken||'');
     localStorage.setItem('saas_subjects', JSON.stringify(Array.isArray(data.subjects) ? data.subjects : []));
     show(ok, 'Acceso concedido · Profesor: ' + (data.teacherName||'') + ' · Puedes entrar a los módulos');
     lockGrid(false);
@@ -213,7 +214,7 @@ async function unlockCatalog(){
 }
 
 function clearAccess(){
-  ['saas_classCode','saas_studentName','saas_certEmail','saas_teacherName','saas_access_ok','saas_subjects'].forEach(k=>localStorage.removeItem(k));
+  ['saas_classCode','saas_studentName','saas_certEmail','saas_teacherName','saas_access_ok','saas_subjects','saas_student_token'].forEach(k=>localStorage.removeItem(k));
   document.getElementById('classCode').value='';
   document.getElementById('studentName').value='';
   lockGrid(true);
@@ -265,10 +266,11 @@ async function revalidateSavedAccess(){
   const name=(localStorage.getItem('saas_studentName')||'').trim();
   if(!code || !name || localStorage.getItem('saas_access_ok')!=='1') return;
   try{
-    const r=await fetch(API_BASE+'/api/access/check?classCode='+encodeURIComponent(code),{cache:'no-store'});
+    const r=await fetch(API_BASE+'/api/access/check?classCode='+encodeURIComponent(code)+'&studentName='+encodeURIComponent(name),{cache:'no-store'});
     const d=await r.json();
     if(!d.allowed){ clearAccess(); show(document.getElementById('err'),'La licencia del profesor venció o fue suspendida. Ingresa con un código vigente.'); return; }
     localStorage.setItem('saas_subjects',JSON.stringify(d.subjects||[]));
+    localStorage.setItem('saas_student_token',d.accessToken||localStorage.getItem('saas_student_token')||'');
   }catch(e){ clearAccess(); show(document.getElementById('err'),'No se pudo validar la vigencia del código.'); }
 }
 

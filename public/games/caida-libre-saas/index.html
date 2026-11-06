@@ -5,16 +5,18 @@
 (async function(){
   const code=(localStorage.getItem('saas_classCode')||'').trim().toUpperCase();
   const name=(localStorage.getItem('saas_studentName')||'').trim();
-  const fail=function(){ ['saas_access_ok','saas_classCode','saas_studentName','saas_subjects'].forEach(k=>localStorage.removeItem(k)); location.replace('/catalogo.html?access=expired'); };
+  const fail=function(){ ['saas_access_ok','saas_classCode','saas_studentName','saas_subjects','saas_student_token'].forEach(k=>localStorage.removeItem(k)); location.replace('/catalogo.html?access=expired'); };
   if(!code||!name) return fail();
   try{
-    const r=await fetch('/api/access/check?classCode='+encodeURIComponent(code),{cache:'no-store'});
+    const r=await fetch('/api/access/check?classCode='+encodeURIComponent(code),{cache:'no-store',headers:{Authorization:'Bearer '+(localStorage.getItem('saas_student_token')||'')}});
     const d=await r.json();
     if(!d.allowed || (Array.isArray(d.subjects)&&d.subjects.length&&!d.subjects.includes('fisica'))) return fail();
     localStorage.setItem('saas_access_ok','1');
+    localStorage.setItem('saas_student_token',d.accessToken||localStorage.getItem('saas_student_token')||'');
     localStorage.setItem('saas_subjects',JSON.stringify(d.subjects||[]));
   }catch(e){ return fail(); }
 })();
+window.saasSubmitResult=async function(result){ const t=localStorage.getItem('saas_student_token')||''; if(!t) return {ok:false}; const r=await fetch('/api/results',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+t},body:JSON.stringify(result||{})}); return r.json(); };
 </script>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
 <title>Caída libre y lanzamiento vertical — SaaS</title><style>

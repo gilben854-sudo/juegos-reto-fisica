@@ -35,7 +35,7 @@ async function checkAccess(){
   const name=(studentName.value||'').trim();
   if(!code||!name){ show(err,'Escribe código de clase y tu nombre'); return; }
   try{
-    const data=await API.req('/api/access/check?classCode='+encodeURIComponent(code));
+    const data=await API.req('/api/access/check?classCode='+encodeURIComponent(code)+'&studentName='+encodeURIComponent(name));
     if(!data.allowed){
       const map={license_inactive:'La licencia del profesor está vencida o suspendida. No se puede jugar.',invalid_class_code:'Código de clase inválido.',no_credentials:'Falta el código de clase.'};
       show(err, map[data.reason]||'Acceso denegado');
@@ -47,6 +47,7 @@ async function checkAccess(){
     localStorage.setItem('saas_certEmail', data.certificateEmail||'');
     localStorage.setItem('saas_teacherName', data.teacherName||'');
     localStorage.setItem('saas_access_ok','1');
+    localStorage.setItem('saas_student_token', data.accessToken||'');
     localStorage.setItem('saas_subjects', JSON.stringify(data.subjects||[]));
     show(ok,'Acceso concedido. Profesor: '+(data.teacherName||'')+' · Colegio: '+(data.school||'—'));
     info.textContent='Correo del profesor (certificados): '+(data.certificateEmail||'—')+' · Código: '+data.classCode;

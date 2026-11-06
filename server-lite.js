@@ -38,6 +38,7 @@ function loadDb() {
   // Compatibilidad con bases persistentes creadas antes de añadir sesiones y resultados.
   if (!db.teachers || typeof db.teachers !== 'object' || Array.isArray(db.teachers)) db.teachers = {};
   if (!db.sessions || typeof db.sessions !== 'object' || Array.isArray(db.sessions)) db.sessions = {};
+  if (!db.studentSessions || typeof db.studentSessions !== 'object' || Array.isArray(db.studentSessions)) db.studentSessions = {};
   if (!Array.isArray(db.results)) db.results = [];
   if (!db.classrooms || typeof db.classrooms !== 'object' || Array.isArray(db.classrooms)) db.classrooms = {};
   if (!db.licenses || typeof db.licenses !== 'object' || Array.isArray(db.licenses)) db.licenses = {};
@@ -305,22 +306,35 @@ const server = http.createServer(async (req, res) => {
 
     if (p === '/api/access/check' && req.method === 'GET') {
       const classCode = (u.searchParams.get('classCode') || '').toUpperCase();
+      const studentName = (u.searchParams.get('studentName') || '').trim().slice(0, 80);
+      const bearer = String(req.headers.authorization || '').replace(/^Bearer\s+/i, '');
       const db = loadDb();
+      if (bearer && db.studentSessions[bearer]) {
+        const sess=db.studentSessions[bearer];
+        const t=db.teachers[sess.teacherId];
+        if (sess.expires >= Date.now() && t && licenseActive(t)) return send(res,200,{allowed:true,mode:'student',accessToken:bearer,expiresAt:sess.expires,certificateEmail:t.certificateEmail||t.email,school:t.school||'',classCode:t.classCode,teacherName:t.name,studentName:sess.studentName,subjects:teacherSubjects(t)});
+        delete db.studentSessions[bearer]; saveDb(db); return send(res,200,{allowed:false,reason:'license_inactive'});
+      }
       if (!classCode) return send(res, 200, { allowed: false, reason: 'no_credentials' });
       const t = Object.values(db.teachers).find(x => (x.classCode || '') === classCode);
       if (!t) return send(res, 200, { allowed: false, reason: 'invalid_class_code' });
       if (!licenseActive(t)) return send(res, 200, { allowed: false, reason: 'license_inactive' });
-      return send(res, 200, {
-        allowed: true, mode: 'student',
-        certificateEmail: t.certificateEmail || t.email,
-        school: t.school || '', classCode: t.classCode, teacherName: t.name, subjects: teacherSubjects(t)
-      });
+      let accessToken=null, expiresAt=null;
+      if(studentName){ accessToken=token(); expiresAt=Date.now()+12*3600000; db.studentSessions[accessToken]={role:'student',teacherId:t.id,classCode,studentName,expires:expiresAt}; saveDb(db); }
+      return send(res, 200, {allowed:true,mode:'student',accessToken,expiresAt,certificateEmail:t.certificateEmail||t.email,school:t.school||'',classCode:t.classCode,teacherName:t.name,studentName,subjects:teacherSubjects(t)});
     }
-
+    if (p === '/api/results' && req.method === 'POST') {
+      const body=await readBody(req); const bearer=String(req.headers.authorization||'').replace(/^Bearer\s+/i,''); const db=loadDb(); const sess=db.studentSessions[bearer];
+      if(!sess || sess.expires<Date.now()) return send(res,401,{error:'Sesión estudiantil inválida o vencida'});
+      const t=db.teachers[sess.teacherId]; if(!t || !licenseActive(t)) return send(res,403,{error:'Licencia inactiva'});
+      const row={id:uuid(),teacherId:t.id,studentName:sess.studentName,module:String(body.module||'').slice(0,120),score:body.score??null,level:body.level??null,meta:body.meta||{},at:new Date().toISOString()}; db.results.push(row); if(db.results.length>5000) db.results=db.results.slice(-4000); saveDb(db); return send(res,200,{ok:true,resultId:row.id});
+    }
     if (p === '/api/teacher/results' && req.method === 'GET') {
       const a = auth(req, 'teacher');
       if (!a) return send(res, 401, { error: 'No autorizado' });
-      const list = (a.db.results || []).filter(r => r.teacherId === a.sess.teacherId).slice(-100).reverse();
+      const t=a.db.teachers[a.sess.teacherId];
+      if(!licenseActive(t)) return send(res,403,{error:'Licencia inactiva'});
+      const list = (a.db.results || []).filter(r => r.teacherId === a.sess.teacherId).slice(-200).reverse();
       return send(res, 200, { results: list });
     }
 

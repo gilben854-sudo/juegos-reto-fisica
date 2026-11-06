@@ -36,6 +36,7 @@ function loadDb() {
   // Compatibilidad con bases persistentes creadas antes de añadir sesiones y resultados.
   if (!db.teachers || typeof db.teachers !== 'object' || Array.isArray(db.teachers)) db.teachers = {};
   if (!db.sessions || typeof db.sessions !== 'object' || Array.isArray(db.sessions)) db.sessions = {};
+  if (!db.studentSessions || typeof db.studentSessions !== 'object' || Array.isArray(db.studentSessions)) db.studentSessions = {};
   if (!Array.isArray(db.results)) db.results = [];
   if (!db.classrooms || typeof db.classrooms !== 'object' || Array.isArray(db.classrooms)) db.classrooms = {};
   if (!db.licenses || typeof db.licenses !== 'object' || Array.isArray(db.licenses)) db.licenses = {};
@@ -300,61 +301,20 @@ app.post('/api/teacher/settings', (req, res) => {
 
 // Comprobación de acceso para los juegos (el candado)
 app.get('/api/access/check', (req, res) => {
-  const classCode = (req.query.classCode || req.headers['x-class-code'] || '').toString().toUpperCase();
-  const teacherToken = (req.headers.authorization || '').replace(/^Bearer\s+/i, '');
-  const db = loadDb();
-
-  // Profesor logueado
-  if (teacherToken && db.sessions[teacherToken]) {
-    const sess = db.sessions[teacherToken];
-    if (sess.role === 'teacher' && sess.expires >= Date.now()) {
-      const t = db.teachers[sess.teacherId];
-      if (t && licenseActive(t)) {
-        return res.json({
-          allowed: true,
-          mode: 'teacher',
-          certificateEmail: t.certificateEmail || t.email,
-          school: t.school || '',
-          classCode: t.classCode,
-          teacherName: t.name, subjects: teacherSubjects(t)
-        });
-      }
-      return res.json({ allowed: false, reason: 'license_inactive' });
-    }
-  }
-
-  // Alumno con código de clase
-  if (classCode) {
-    const t = Object.values(db.teachers).find((x) => (x.classCode || '') === classCode);
-    if (!t) return res.json({ allowed: false, reason: 'invalid_class_code' });
-    if (!licenseActive(t)) return res.json({ allowed: false, reason: 'license_inactive' });
-    return res.json({
-      allowed: true,
-      mode: 'student',
-      certificateEmail: t.certificateEmail || t.email,
-      school: t.school || '',
-      classCode: t.classCode,
-      teacherName: t.name, subjects: teacherSubjects(t)
-    });
-  }
-
-  res.json({ allowed: false, reason: 'no_credentials' });
+  const classCode=(req.query.classCode||req.headers['x-class-code']||'').toString().toUpperCase(); const studentName=String(req.query.studentName||'').trim().slice(0,80); const bearer=String(req.headers.authorization||'').replace(/^Bearer\s+/i,''); const db=loadDb();
+  if(bearer && db.studentSessions[bearer]){ const sess=db.studentSessions[bearer], t=db.teachers[sess.teacherId]; if(sess.expires>=Date.now()&&t&&licenseActive(t)) return res.json({allowed:true,mode:'student',accessToken:bearer,expiresAt:sess.expires,certificateEmail:t.certificateEmail||t.email,school:t.school||'',classCode:t.classCode,teacherName:t.name,studentName:sess.studentName,subjects:teacherSubjects(t)}); delete db.studentSessions[bearer]; saveDb(db); return res.json({allowed:false,reason:'license_inactive'}); }
+  if(!classCode) return res.json({allowed:false,reason:'no_credentials'}); const t=Object.values(db.teachers).find(x=>(x.classCode||'')===classCode); if(!t) return res.json({allowed:false,reason:'invalid_class_code'}); if(!licenseActive(t)) return res.json({allowed:false,reason:'license_inactive'});
+  let accessToken=null,expiresAt=null; if(studentName){accessToken=token();expiresAt=Date.now()+12*3600000;db.studentSessions[accessToken]={role:'student',teacherId:t.id,classCode,studentName,expires:expiresAt};saveDb(db);} return res.json({allowed:true,mode:'student',accessToken,expiresAt,certificateEmail:t.certificateEmail||t.email,school:t.school||'',classCode:t.classCode,teacherName:t.name,studentName,subjects:teacherSubjects(t)});
 });
-
 // Registro de resultado (para historial del profesor)
 app.post('/api/results', (req, res) => {
-  const { classCode, studentName, module, score, level, meta } = req.body || {};
-  const db = loadDb();
-  const t = Object.values(db.teachers).find(
-    (x) => (x.classCode || '') === String(classCode || '').toUpperCase()
-  );
-  if (!t || !licenseActive(t)) {
-    return res.status(403).json({ error: 'No autorizado o licencia inactiva' });
-  }
+  const { module, score, level, meta } = req.body || {}; const bearer=String(req.headers.authorization||'').replace(/^Bearer\s+/i,''); const db=loadDb(); const sess=db.studentSessions[bearer];
+  if(!sess || sess.expires<Date.now()) return res.status(401).json({error:'Sesión estudiantil inválida o vencida'});
+  const t=db.teachers[sess.teacherId]; if(!t || !licenseActive(t)) return res.status(403).json({error:'Licencia inactiva'});
   const row = {
     id: uuidv4(),
     teacherId: t.id,
-    studentName: String(studentName || 'Estudiante').trim(),
+    studentName: sess.studentName,
     module: String(module || '').trim(),
     score: score ?? null,
     level: level ?? null,

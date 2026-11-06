@@ -43,6 +43,7 @@
       <button class="btn btn-primary" type="button" id="btnCopy">Copiar código</button>
     </div>
     <p><b>Profesor:</b> <span id="tName"></span></p>
+    <div class="card" style="margin-top:16px;background:#111c31"><h3>Resultados recientes</h3><p class="muted">Aquí aparecerán los resultados enviados desde los juegos.</p><div id="resultsList" class="muted">Cargando…</div></div>
     <p><b>Vence:</b> <span id="tUntil"></span></p>
     <p class="muted">Ve al catálogo, pega este código y tu nombre para jugar.</p>
     <p>
@@ -98,9 +99,18 @@
       ? '<span style="color:#86efac">Licencia activa</span>'
       : '<span style="color:#fca5a5">Licencia inactiva</span>';
     window._classCode = teacher.classCode || '';
+    loadResults();
     alert('Tu codigo de clase es:\n\n' + (teacher.classCode || '') + '\n\nCopialo para el catalogo.');
   }
 
+  async function loadResults(){
+    var box=document.getElementById('resultsList'); if(!box) return;
+    try{ var data=await api('/api/teacher/results'); var rows=data.results||[];
+      if(!rows.length){ box.textContent='Todavía no hay resultados registrados.'; return; }
+      box.innerHTML='<div style="overflow:auto"><table style="width:100%"><thead><tr><th>Estudiante</th><th>Juego</th><th>Puntos</th><th>Nivel</th><th>Fecha</th></tr></thead><tbody>'+rows.map(function(r){return '<tr><td>'+esc(r.studentName)+'</td><td>'+esc(r.module)+'</td><td>'+esc(r.score)+'</td><td>'+esc(r.level)+'</td><td>'+new Date(r.at).toLocaleString()+'</td></tr>';}).join('')+'</tbody></table></div>';
+    }catch(e){ box.textContent='No se pudieron cargar los resultados.'; }
+  }
+  function esc(v){ return String(v==null?'':v).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
   document.getElementById('btnLogin').onclick = async function(){
     hideMsg();
     var email = document.getElementById('email').value.trim();
@@ -114,6 +124,7 @@
       sessionStorage.setItem('saas_token', login.token);
       sessionStorage.setItem('saas_role', 'teacher');
       showDash(login.teacher);
+      loadResults();
     } catch (e) {
       showMsg(e.message || String(e), false);
       alert('Error: ' + (e.message || e));

@@ -4,16 +4,18 @@
 (async function(){
   const code=(localStorage.getItem('saas_classCode')||'').trim().toUpperCase();
   const name=(localStorage.getItem('saas_studentName')||'').trim();
-  const fail=function(){ ['saas_access_ok','saas_classCode','saas_studentName','saas_subjects'].forEach(k=>localStorage.removeItem(k)); location.replace('/catalogo.html?access=expired'); };
+  const fail=function(){ ['saas_access_ok','saas_classCode','saas_studentName','saas_subjects','saas_student_token'].forEach(k=>localStorage.removeItem(k)); location.replace('/catalogo.html?access=expired'); };
   if(!code||!name) return fail();
   try{
-    const r=await fetch('/api/access/check?classCode='+encodeURIComponent(code),{cache:'no-store'});
+    const r=await fetch('/api/access/check?classCode='+encodeURIComponent(code),{cache:'no-store',headers:{Authorization:'Bearer '+(localStorage.getItem('saas_student_token')||'')}});
     const d=await r.json();
     if(!d.allowed || (Array.isArray(d.subjects)&&d.subjects.length&&!d.subjects.includes('fisica'))) return fail();
     localStorage.setItem('saas_access_ok','1');
+    localStorage.setItem('saas_student_token',d.accessToken||localStorage.getItem('saas_student_token')||'');
     localStorage.setItem('saas_subjects',JSON.stringify(d.subjects||[]));
   }catch(e){ return fail(); }
 })();
+window.saasSubmitResult=async function(result){ const t=localStorage.getItem('saas_student_token')||''; if(!t) return {ok:false}; const r=await fetch('/api/results',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+t},body:JSON.stringify(result||{})}); return r.json(); };
 </script>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Mol y masa molar — Química</title><style>
 :root{--bg:#07111f;--card:#102238;--line:#24425f;--text:#e6f0fa;--muted:#a7bfd4;--accent:#34d399;--gold:#fbbf24;--bad:#f87171}*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 20% 0,#123b45,#07111f 55%);color:var(--text);font-family:system-ui,sans-serif;min-height:100vh}header{padding:24px 16px;text-align:center;border-bottom:1px solid var(--line)}header h1{margin:0;color:#6ee7b7;font-size:1.6rem}header p{color:var(--muted);margin:8px 0 0}main{max-width:760px;margin:0 auto;padding:18px 16px 48px}.card{background:rgba(16,34,56,.95);border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:16px;box-shadow:0 12px 30px #0003}label{display:block;color:#cde1ef;font-weight:700;font-size:.9rem;margin:10px 0 5px}input{width:100%;padding:12px;border:2px solid #42627c;border-radius:10px;background:#f8fafc;color:#0f172a;font-size:1rem}button{border:0;border-radius:10px;padding:12px 16px;font-weight:800;cursor:pointer;font-size:.95rem}.primary{background:#059669;color:white;width:100%;margin-top:14px}.choice{display:block;width:100%;text-align:left;background:#173452;color:var(--text);border:2px solid #315878;margin:9px 0}.choice:hover{border-color:var(--accent)}.choice.correct{background:#14532d;border-color:#4ade80}.choice.wrong{background:#5b1d28;border-color:#f87171}.hidden{display:none}.muted{color:var(--muted);line-height:1.5}.progress{height:10px;background:#183047;border-radius:99px;overflow:hidden;margin:12px 0 18px}.progress i{display:block;height:100%;background:linear-gradient(90deg,#10b981,#fbbf24);width:0;transition:.25s}.score{color:#fbbf24;font-weight:800}.feedback-good{color:#86efac;font-weight:800;font-size:1.05rem;line-height:1.6}.feedback-encourage{color:#fcd34d;font-weight:700;font-size:1.02rem;line-height:1.6}.result{text-align:center;font-size:1.2rem}.certificate{border:2px solid var(--gold);padding:18px;border-radius:14px;margin-top:14px;background:#302511}a{color:#6ee7b7}
