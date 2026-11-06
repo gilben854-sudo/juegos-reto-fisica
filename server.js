@@ -26,9 +26,17 @@ app.use(express.json({ limit: '1mb' }));
 app.use(express.static(PUBLIC));
 
 function loadDb() {
-  return JSON.parse(fs.readFileSync(DB_PATH, 'utf8'));
+  const db = JSON.parse(fs.readFileSync(DB_PATH, 'utf8'));
+  // Compatibilidad con bases persistentes creadas antes de añadir sesiones y resultados.
+  if (!db.teachers || typeof db.teachers !== 'object' || Array.isArray(db.teachers)) db.teachers = {};
+  if (!db.sessions || typeof db.sessions !== 'object' || Array.isArray(db.sessions)) db.sessions = {};
+  if (!Array.isArray(db.results)) db.results = [];
+  if (!db.classrooms || typeof db.classrooms !== 'object' || Array.isArray(db.classrooms)) db.classrooms = {};
+  if (!db.licenses || typeof db.licenses !== 'object' || Array.isArray(db.licenses)) db.licenses = {};
+  return db;
 }
 function saveDb(db) {
+  fs.mkdirSync(path.dirname(DB_PATH), { recursive: true });
   fs.writeFileSync(DB_PATH, JSON.stringify(db, null, 2), 'utf8');
 }
 function hashPw(pw, salt) {
