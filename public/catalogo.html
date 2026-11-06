@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Juegos de Reto para Física — Catálogo</title>
+<title>Juegos de Reto para Física y Química — Catálogo</title>
 <style>
 :root{--bg:#0b1220;--card:#111827;--line:#1e293b;--text:#e2e8f0;--muted:#94a3b8;--accent:#38bdf8}
 *{box-sizing:border-box}
@@ -22,7 +22,7 @@ input{width:100%;max-width:420px;padding:11px 12px;border-radius:10px;border:2px
 .btn-outline{background:transparent;border:2px solid #64748b;color:#e2e8f0}
 .err{display:none;color:#fca5a5;background:#450a0a;border:1px solid #7f1d1d;padding:10px;border-radius:10px;margin-top:10px}
 .ok{display:none;color:#86efac;background:#052e16;border:1px solid #166534;padding:10px;border-radius:10px;margin-top:10px}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}.section-title{grid-column:1/-1;color:#6ee7b7;border-bottom:1px solid #245b52;padding:12px 2px 6px;margin-top:8px;font-size:1.2rem}
 .card-mod{display:block;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;text-decoration:none;color:var(--text);transition:.15s}
 .card-mod:hover{border-color:#38bdf8;transform:translateY(-2px)}
 .card-title{font-weight:800;color:#7dd3fc;margin-bottom:6px}
@@ -40,9 +40,9 @@ footer{text-align:center;color:#64748b;font-size:.8rem;padding:24px 12px}
 </head>
 <body>
 <header>
-  <h1>Juegos de Reto para Física</h1>
-  <p class="slogan">Aprende física resolviendo retos</p>
-  <p class="sub">Producido por GILAST · 13 módulos</p>
+  <h1>Juegos de Reto para Física y Química</h1>
+  <p class="slogan">Aprende ciencias resolviendo retos</p>
+  <p class="sub">Física y Química · 21 módulos</p>
 </header>
 <div class="wrap">
   <div class="gate">
@@ -129,9 +129,18 @@ footer{text-align:center;color:#64748b;font-size:.8rem;padding:24px 12px}
       <div class="card-desc">Ohm, Watts, motor y planos</div>
       <div class="card-go">Entrar →</div>
     </a>
+    <div class="section-title">Juegos de Química</div>
+    <a class="card-mod" href="games/tabla-periodica-saas/index.html" data-module="quimica-tabla"><div class="card-title">Tabla periódica</div><div class="card-desc">Elementos, símbolos y números atómicos</div><div class="card-go">Entrar →</div></a>
+    <a class="card-mod" href="games/simbolos-elementos-saas/index.html" data-module="quimica-simbolos"><div class="card-title">Símbolos y nombres</div><div class="card-desc">Relaciona símbolos con elementos</div><div class="card-go">Entrar →</div></a>
+    <a class="card-mod" href="games/valencias-saas/index.html" data-module="quimica-valencias"><div class="card-title">Valencias</div><div class="card-desc">Identifica valencias comunes</div><div class="card-go">Entrar →</div></a>
+    <a class="card-mod" href="games/balanceo-ecuaciones-saas/index.html" data-module="quimica-balanceo"><div class="card-title">Balanceo de ecuaciones</div><div class="card-desc">Equilibra reacciones químicas</div><div class="card-go">Entrar →</div></a>
+    <a class="card-mod" href="games/nomenclatura-saas/index.html" data-module="quimica-nomenclatura"><div class="card-title">Nomenclatura química</div><div class="card-desc">Nombra compuestos inorgánicos</div><div class="card-go">Entrar →</div></a>
+    <a class="card-mod" href="games/oxidacion-saas/index.html" data-module="quimica-oxidacion"><div class="card-title">Estados de oxidación</div><div class="card-desc">Calcula estados de oxidación</div><div class="card-go">Entrar →</div></a>
+    <a class="card-mod" href="games/mol-masa-molar-saas/index.html" data-module="quimica-mol"><div class="card-title">Mol y masa molar</div><div class="card-desc">Cantidad de sustancia y masa</div><div class="card-go">Entrar →</div></a>
+    <a class="card-mod" href="games/acidos-bases-ph-saas/index.html" data-module="quimica-ph"><div class="card-title">Ácidos, bases y pH</div><div class="card-desc">Reconoce pH, ácidos y bases</div><div class="card-go">Entrar →</div></a>
   </div>
 </div>
-<footer>Juegos de Reto para Física · Aprende física resolviendo retos · Producido por GILAST</footer>
+<footer>Juegos de Reto para Física y Química · Aprende ciencias resolviendo retos · Producido por GILAST</footer>
 <script>
 // API base: same origin when served by saas-platform; override if games on another host
 const API_BASE = localStorage.getItem('saas_api_base') || '';
