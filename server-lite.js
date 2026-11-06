@@ -358,11 +358,11 @@ const server = http.createServer(async (req, res) => {
       filePath = path.join(filePath, 'index.html');
     if (!fs.existsSync(filePath) || !fs.statSync(filePath).isFile()) {
       if (p === '/' || p === '') {
-        return send(res, 200, `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Juegos de Reto para Física</title>
+        return send(res, 200, `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Juegos de Reto</title>
 <style>body{font-family:system-ui;background:#0b1220;color:#e2e8f0;padding:40px;max-width:640px;margin:auto}
 a{color:#38bdf8;display:block;margin:10px 0;font-size:1.1rem}</style></head><body>
-<h1>Juegos de Reto para Física</h1>
-<p>Aprende física resolviendo retos · GILAST</p>
+<h1>Juegos de Reto</h1>
+<p>Aprende jugando · GILAST</p>
 <a href="/catalogo.html">Catálogo de juegos</a>
 <a href="/profesor.html">Panel del profesor</a>
 <a href="/admin.html">Admin (licencias)</a>
@@ -381,6 +381,6 @@ a{color:#38bdf8;display:block;margin:10px 0;font-size:1.1rem}</style></head><bod
 });
 
 server.listen(PORT, '0.0.0.0', () => {
-  console.log('Juegos de Reto para Física — http://localhost:' + PORT);
+  console.log('Juegos de Reto — http://localhost:' + PORT);
   console.log('Catálogo: http://localhost:' + PORT + '/catalogo.html');
 });

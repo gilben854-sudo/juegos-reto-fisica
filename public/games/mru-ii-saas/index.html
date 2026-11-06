@@ -18,13 +18,21 @@
   }catch(e){ return fail(); }
 })();
 window.saasSubmitResult=async function(result){ const t=localStorage.getItem('saas_student_token')||''; if(!t) return {ok:false}; const r=await fetch('/api/results',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+t},body:JSON.stringify(result||{})}); return r.json(); };
-window.addEventListener('DOMContentLoaded',function(){var b=document.createElement('button');b.id='saas-print-certificate';b.type='button';b.textContent='Imprimir certificado';b.style.cssText='position:fixed;right:14px;bottom:14px;z-index:9999;background:#fbbf24;color:#111827;border:0;border-radius:12px;padding:11px 14px;font-weight:800;cursor:pointer;box-shadow:0 4px 14px #0006';b.onclick=function(){var n=localStorage.getItem('saas_studentName')||'Estudiante',title=document.title.split('—')[0].trim()||'Juego educativo',score=(document.getElementById('scoreDisplay')||{}).textContent||'—',phrases=['¡Cada reto que resuelves te acerca más a tus metas!','¡Tu esfuerzo y curiosidad hacen la diferencia!','¡Sigue aprendiendo: vas por muy buen camino!'],w=window.open('','_blank','width=850,height=650');if(!w)return;var clean=function(x){return String(x).replace(/[<>&]/g,'')};w.document.write('<!doctype html><html lang="es"><head><title>Certificado</title><style>body{font-family:Georgia,serif;background:#f8fafc;color:#172033;text-align:center;padding:55px}main{border:8px double #0f766e;padding:55px;max-width:720px;margin:auto;background:white}h1{color:#0f766e;font-size:38px}h2{font-size:30px;margin:28px 0}.phrase{font-size:20px;color:#b45309;margin:35px 0;font-style:italic}.meta{font-family:Arial,sans-serif;color:#475569}button{padding:10px 18px;border:0;background:#0f766e;color:#fff;border-radius:8px;font-weight:bold}@media print{button{display:none}}</style></head><body><main><h1>Certificado de logro</h1><p class="meta">Se reconoce a</p><h2>'+clean(n)+'</h2><p class="meta">por completar el reto educativo</p><h3>'+clean(title)+'</h3><p class="meta">Puntos: '+clean(score)+'</p><p class="phrase">'+phrases[Math.floor(Math.random()*phrases.length)]+'</p><p class="meta">Juegos de Reto · '+new Date().toLocaleDateString('es-ES')+'</p><button onclick="window.print()">Imprimir</button></main></body></html>');w.document.close()};document.body.appendChild(b)});
+window.addEventListener('DOMContentLoaded',function(){var b=document.createElement('button');b.id='saas-print-certificate';b.type='button';b.textContent='Imprimir certificado';b.style.cssText='position:fixed;right:14px;bottom:14px;z-index:9999;background:#fbbf24;color:#111827;border:0;border-radius:12px;padding:11px 14px;font-weight:800;cursor:pointer;box-shadow:0 4px 14px #0006';b.onclick=function(){var n=localStorage.getItem('saas_studentName')||'Estudiante',title=document.title.split('—')[0].trim()||'Juego educativo',score=(document.getElementById('scoreDisplay')||{}).textContent||'—',phrases=['¡Cada reto que resuelves te acerca más a tus metas!','¡Tu esfuerzo y curiosidad hacen la diferencia!','¡Sigue aprendiendo: vas por muy buen camino!'],w=window.open('','_blank','width=850,height=650');if(!w)return;var clean=function(x){return String(x).replace(/[<>&]/g,'')};w.document.write('<!doctype html><html lang="es"><head><title>Certificado</title><style>body{font-family:Georgia,serif;background:#f8fafc;color:#172033;text-align:center;padding:55px}main{border:8px double #0f766e;padding:55px;max-width:720px;margin:auto;background:white}h1{color:#0f766e;font-size:38px}h2{font-size:30px;margin:28px 0}.phrase{font-size:20px;color:#b45309;margin:35px 0;font-style:italic}.meta{font-family:Arial,sans-serif;color:#475569}button{padding:10px 18px;border:0;background:#0f766e;color:#fff;border-radius:8px;font-weight:bold}@media print{button{display:none}}</style><style id="juegos-reto-theme">
+body[data-subject="fisica"]{--brand:#2563eb;--page:#eff6ff;--ink:#1e3a8a;background:var(--page)!important;color:var(--ink)!important}
+body[data-subject="fisica"] header,body[data-subject="fisica"] header.top{background:var(--brand)!important;background-image:none!important;color:#fff!important}
+body[data-subject="fisica"] button.primary,body[data-subject="fisica"] .btn-primary,body[data-subject="fisica"] .btn-success,body[data-subject="fisica"] .primary{background:var(--brand)!important;color:#fff!important;border-color:var(--brand)!important}
+body[data-subject="fisica"] .card,body[data-subject="fisica"] .panel,body[data-subject="fisica"] section.card{background:#fff!important;color:var(--ink)!important;border-color:#2563eb!important}
+body[data-subject="fisica"] input,body[data-subject="fisica"] select,body[data-subject="fisica"] textarea{min-height:48px!important;font-size:1rem!important;padding:12px!important;border:2px solid #2563eb!important;border-radius:10px!important;background:#fff!important;color:#172033!important;max-width:520px!important;width:100%!important}
+body[data-subject="fisica"] [id*="Section"],body[data-subject="fisica"] [id*="section"],body[data-subject="fisica"] select[id*="Name"]{min-height:52px!important;font-size:1.05rem!important;width:100%!important;max-width:520px!important}
+body[data-subject="fisica"] .creator-mark{display:block;font-size:.72rem;color:#64748b;text-align:center;padding:8px;opacity:.8}
+</style></head><body data-subject="fisica"><main><h1>Certificado de logro</h1><p class="meta">Se reconoce a</p><h2>'+clean(n)+'</h2><p class="meta">por completar el reto educativo</p><h3>'+clean(title)+'</h3><p class="meta">Puntos: '+clean(score)+'</p><p class="phrase">'+phrases[Math.floor(Math.random()*phrases.length)]+'</p><p class="meta">Juegos de Reto · '+new Date().toLocaleDateString('es-ES')+'</p><button onclick="window.print()">Imprimir</button></main></body></html>');w.document.close()};document.body.appendChild(b)});
 </script>
 
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="color-scheme" content="light only">
-<title>MRU II — </title>
+<title>Juegos de Reto — MRU II —</title>
 <style>
   html { color-scheme: light only; }
   button, input, select, textarea {
@@ -41,7 +49,7 @@ window.addEventListener('DOMContentLoaded',function(){var b=document.createEleme
   html,body{
     margin:0;padding:0;height:100%;
     font-family:'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
-    background:linear-gradient(180deg,#0F2A44,#1F4E79 40%,#2E75B6);
+    background:#f8fafc;
     color:var(--text);
     -webkit-tap-highlight-color:transparent;
     -webkit-user-select:none;user-select:none;
@@ -119,7 +127,7 @@ window.addEventListener('DOMContentLoaded',function(){var b=document.createEleme
   .sim-controls input[type=range]{
     width:100%;display:block;touch-action:none;
     -webkit-appearance:none;appearance:none;height:10px;border-radius:6px;
-    background:linear-gradient(90deg,#dbe3ea,#94a3b8);outline:none;margin:0 0 4px;
+    background:#f8fafc;outline:none;margin:0 0 4px;
   }
   .sim-controls input[type=range]::-webkit-slider-thumb{
     -webkit-appearance:none;width:22px;height:22px;border-radius:50%;
@@ -142,7 +150,7 @@ window.addEventListener('DOMContentLoaded',function(){var b=document.createEleme
 <div id="licenseGate" class="license-gate"><div id="licenseStatus" class="muted">Comprobando acceso…</div></div>
 
 <div id="app">
-  <div class="teacher-bar">  — U.E.P. "" · MRU II</div>
+  <div class="teacher-bar">  — MRU II</div>
   <header>
     <div>
       <h1 id="headerTitle">MRU II</h1>

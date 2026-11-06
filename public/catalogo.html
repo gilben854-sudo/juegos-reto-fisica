@@ -3,11 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Juegos de Reto para Física y Química — Catálogo</title>
+<title>Juegos de Reto — Catálogo</title>
 <style>
 :root{--bg:#0b1220;--card:#111827;--line:#1e293b;--text:#e2e8f0;--muted:#94a3b8;--accent:#38bdf8}
 *{box-sizing:border-box}
-body{margin:0;font-family:system-ui,sans-serif;background:linear-gradient(160deg,#0b1220,#0f172a 40%,#082f49);color:var(--text);min-height:100vh}
+body{margin:0;font-family:system-ui,sans-serif;background:#f8fafc;color:var(--text);min-height:100vh}
 header{text-align:center;padding:28px 16px 12px}
 header h1{margin:0;color:#7dd3fc;font-size:1.55rem}
 .slogan{color:#7dd3fc;font-weight:600;margin:8px 0 0}
@@ -22,7 +22,7 @@ input{width:100%;max-width:420px;padding:11px 12px;border-radius:10px;border:2px
 .btn-outline{background:transparent;border:2px solid #64748b;color:#e2e8f0}
 .err{display:none;color:#fca5a5;background:#450a0a;border:1px solid #7f1d1d;padding:10px;border-radius:10px;margin-top:10px}
 .ok{display:none;color:#86efac;background:#052e16;border:1px solid #166534;padding:10px;border-radius:10px;margin-top:10px}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}.section-title{grid-column:1/-1;color:#6ee7b7;border-bottom:1px solid #245b52;padding:12px 2px 6px;margin-top:8px;font-size:1.2rem}.subject-nav{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0}.subject-btn{background:#172b43;color:#cbd5e1;border:2px solid #35536f}.subject-btn.active{background:#0f766e;color:#ecfdf5;border-color:#34d399}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}.section-title{grid-column:1/-1;color:#6ee7b7;border-bottom:1px solid #245b52;padding:12px 2px 6px;margin-top:8px;font-size:1.2rem}.subject-nav{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0}.subject-btn{background:#172b43;color:#cbd5e1;border:2px solid #35536f}.subject-btn.active{background:#0f766e;color:#ecfdf5;border-color:#34d399} .card-mod[data-subject="fisica"]{border-top:4px solid #2563eb}.card-mod[data-subject="quimica"]{border-top:4px solid #059669}.card-mod[data-subject="biologia"]{border-top:4px solid #16a34a}.card-mod[data-subject="matematicas"]{border-top:4px solid #d97706} .subject-btn[data-subject-button="fisica"]{background:#2563eb;color:#fff;border-color:#1d4ed8}.subject-btn[data-subject-button="quimica"]{background:#059669;color:#fff;border-color:#047857}.subject-btn[data-subject-button="biologia"]{background:#16a34a;color:#fff;border-color:#15803d}.subject-btn[data-subject-button="matematicas"]{background:#d97706;color:#fff;border-color:#b45309}
 .card-mod{display:block;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;text-decoration:none;color:var(--text);transition:.15s}
 .card-mod:hover{border-color:#38bdf8;transform:translateY(-2px)}
 .card-title{font-weight:800;color:#7dd3fc;margin-bottom:6px}
@@ -40,8 +40,8 @@ footer{text-align:center;color:#64748b;font-size:.8rem;padding:24px 12px}
 </head>
 <body>
 <header>
-  <h1>Juegos de Reto para Física y Química</h1>
-  <p class="slogan">Aprende ciencias resolviendo retos</p>
+  <h1>Juegos de Reto</h1>
+  <p class="slogan">Aprende jugando</p>
   <p class="sub">Física, Química, Biología y Matemáticas · 42 módulos</p>
 </header>
 <div class="wrap">
@@ -70,106 +70,106 @@ footer{text-align:center;color:#64748b;font-size:.8rem;padding:24px 12px}
   </div>
   <div class="grid locked-overlay" id="grid">
     <div class="section-title" data-subject="fisica">Juegos de Física</div>
-    <a class="card-mod" href="games/notacion-saas/index.html" data-module="notacion">
+    <a class="card-mod" data-subject="fisica" href="games/notacion-saas/index.html" data-module="notacion">
       <div class="card-title">Notación científica</div>
       <div class="card-desc">Potencias de 10 y conversión</div>
       <div class="card-go">Entrar →</div>
     </a>
-    <a class="card-mod" href="games/despejes-saas/index.html" data-module="despejes">
+    <a class="card-mod" data-subject="fisica" href="games/despejes-saas/index.html" data-module="despejes">
       <div class="card-title">Despejes</div>
       <div class="card-desc">Despejar fórmulas paso a paso</div>
       <div class="card-go">Entrar →</div>
     </a>
-    <a class="card-mod" href="games/mru-saas/index.html" data-module="mru">
+    <a class="card-mod" data-subject="fisica" href="games/mru-saas/index.html" data-module="mru">
       <div class="card-title">MRU</div>
       <div class="card-desc">Movimiento rectilíneo uniforme</div>
       <div class="card-go">Entrar →</div>
     </a>
-    <a class="card-mod" href="games/mru-ii-saas/index.html" data-module="mru2">
+    <a class="card-mod" data-subject="fisica" href="games/mru-ii-saas/index.html" data-module="mru2">
       <div class="card-title">MRU II</div>
       <div class="card-desc">Encuentro de móviles y relativo</div>
       <div class="card-go">Entrar →</div>
     </a>
-    <a class="card-mod" href="games/mruv-saas/index.html" data-module="mruv">
+    <a class="card-mod" data-subject="fisica" href="games/mruv-saas/index.html" data-module="mruv">
       <div class="card-title">MRUV</div>
       <div class="card-desc">Movimiento con aceleración</div>
       <div class="card-go">Entrar →</div>
     </a>
-    <a class="card-mod" href="games/caida-libre-saas/index.html" data-module="caida">
+    <a class="card-mod" data-subject="fisica" href="games/caida-libre-saas/index.html" data-module="caida">
       <div class="card-title">Caída libre y lanzamiento vertical</div>
       <div class="card-desc">g, tiro vertical y MRUV vertical</div>
       <div class="card-go">Entrar →</div>
     </a>
-    <a class="card-mod" href="games/proyectiles-saas/index.html" data-module="proyectiles">
+    <a class="card-mod" data-subject="fisica" href="games/proyectiles-saas/index.html" data-module="proyectiles">
       <div class="card-title">Movimiento de proyectiles</div>
       <div class="card-desc">Parábola, alcance y altura máxima</div>
       <div class="card-go">Entrar →</div>
     </a>
-    <a class="card-mod" href="games/newton-saas/index.html" data-module="newton">
+    <a class="card-mod" data-subject="fisica" href="games/newton-saas/index.html" data-module="newton">
       <div class="card-title">Leyes de Newton</div>
       <div class="card-desc">Inercia, F=ma y acción-reacción</div>
       <div class="card-go">Entrar →</div>
     </a>
-    <a class="card-mod" href="games/gravitacion-saas/index.html" data-module="gravitacion">
+    <a class="card-mod" data-subject="fisica" href="games/gravitacion-saas/index.html" data-module="gravitacion">
       <div class="card-title">Ley de gravitación universal</div>
       <div class="card-desc">F ∝ m₁m₂/r²</div>
       <div class="card-go">Entrar →</div>
     </a>
-    <a class="card-mod" href="games/energia-saas/index.html" data-module="energia">
+    <a class="card-mod" data-subject="fisica" href="games/energia-saas/index.html" data-module="energia">
       <div class="card-title">Energía mecánica</div>
       <div class="card-desc">Cinética, potencial y trabajo</div>
       <div class="card-go">Entrar →</div>
     </a>
-    <a class="card-mod" href="games/momento-saas/index.html" data-module="momento">
+    <a class="card-mod" data-subject="fisica" href="games/momento-saas/index.html" data-module="momento">
       <div class="card-title">Cantidad de movimiento</div>
       <div class="card-desc">Impulso y choques</div>
       <div class="card-go">Entrar →</div>
     </a>
-    <a class="card-mod" href="games/carga-saas/index.html" data-module="carga">
+    <a class="card-mod" data-subject="fisica" href="games/carga-saas/index.html" data-module="carga">
       <div class="card-title">Carga eléctrica</div>
       <div class="card-desc">Ley de Coulomb</div>
       <div class="card-go">Entrar →</div>
     </a>
-    <a class="card-mod" href="games/electricidad-saas/index.html" data-module="electricidad">
+    <a class="card-mod" data-subject="fisica" href="games/electricidad-saas/index.html" data-module="electricidad">
       <div class="card-title">Taller de electricidad</div>
       <div class="card-desc">Ohm, Watts, motor y planos</div>
       <div class="card-go">Entrar →</div>
     </a>
     <div class="section-title" data-subject="quimica">Juegos de Química</div>
-    <a class="card-mod" href="games/simulador-laboratorio-saas/index.html" data-module="quimica-simulador"><div class="card-title">Simulador de laboratorio químico</div><div class="card-desc">Instrumentos, seguridad, pH y prácticas</div><div class="card-go">Entrar →</div></a>
-    <a class="card-mod" href="games/tabla-periodica-saas/index.html" data-module="quimica-tabla"><div class="card-title">Tabla periódica</div><div class="card-desc">Elementos, símbolos y números atómicos</div><div class="card-go">Entrar →</div></a>
-    <a class="card-mod" href="games/simbolos-elementos-saas/index.html" data-module="quimica-simbolos"><div class="card-title">Símbolos y nombres</div><div class="card-desc">Relaciona símbolos con elementos</div><div class="card-go">Entrar →</div></a>
-    <a class="card-mod" href="games/valencias-saas/index.html" data-module="quimica-valencias"><div class="card-title">Valencias</div><div class="card-desc">Identifica valencias comunes</div><div class="card-go">Entrar →</div></a>
-    <a class="card-mod" href="games/balanceo-ecuaciones-saas/index.html" data-module="quimica-balanceo"><div class="card-title">Balanceo de ecuaciones</div><div class="card-desc">Equilibra reacciones químicas</div><div class="card-go">Entrar →</div></a>
-    <a class="card-mod" href="games/nomenclatura-saas/index.html" data-module="quimica-nomenclatura"><div class="card-title">Nomenclatura química</div><div class="card-desc">Nombra compuestos inorgánicos</div><div class="card-go">Entrar →</div></a>
-    <a class="card-mod" href="games/oxidacion-saas/index.html" data-module="quimica-oxidacion"><div class="card-title">Estados de oxidación</div><div class="card-desc">Calcula estados de oxidación</div><div class="card-go">Entrar →</div></a>
-    <a class="card-mod" href="games/mol-masa-molar-saas/index.html" data-module="quimica-mol"><div class="card-title">Mol y masa molar</div><div class="card-desc">Cantidad de sustancia y masa</div><div class="card-go">Entrar →</div></a>
-    <a class="card-mod" href="games/acidos-bases-ph-saas/index.html" data-module="quimica-ph"><div class="card-title">Ácidos, bases y pH</div><div class="card-desc">Reconoce pH, ácidos y bases</div><div class="card-go">Entrar →</div></a>
+    <a class="card-mod" data-subject="quimica" href="games/simulador-laboratorio-saas/index.html" data-module="quimica-simulador"><div class="card-title">Simulador de laboratorio químico</div><div class="card-desc">Instrumentos, seguridad, pH y prácticas</div><div class="card-go">Entrar →</div></a>
+    <a class="card-mod" data-subject="quimica" href="games/tabla-periodica-saas/index.html" data-module="quimica-tabla"><div class="card-title">Tabla periódica</div><div class="card-desc">Elementos, símbolos y números atómicos</div><div class="card-go">Entrar →</div></a>
+    <a class="card-mod" data-subject="quimica" href="games/simbolos-elementos-saas/index.html" data-module="quimica-simbolos"><div class="card-title">Símbolos y nombres</div><div class="card-desc">Relaciona símbolos con elementos</div><div class="card-go">Entrar →</div></a>
+    <a class="card-mod" data-subject="quimica" href="games/valencias-saas/index.html" data-module="quimica-valencias"><div class="card-title">Valencias</div><div class="card-desc">Identifica valencias comunes</div><div class="card-go">Entrar →</div></a>
+    <a class="card-mod" data-subject="quimica" href="games/balanceo-ecuaciones-saas/index.html" data-module="quimica-balanceo"><div class="card-title">Balanceo de ecuaciones</div><div class="card-desc">Equilibra reacciones químicas</div><div class="card-go">Entrar →</div></a>
+    <a class="card-mod" data-subject="quimica" href="games/nomenclatura-saas/index.html" data-module="quimica-nomenclatura"><div class="card-title">Nomenclatura química</div><div class="card-desc">Nombra compuestos inorgánicos</div><div class="card-go">Entrar →</div></a>
+    <a class="card-mod" data-subject="quimica" href="games/oxidacion-saas/index.html" data-module="quimica-oxidacion"><div class="card-title">Estados de oxidación</div><div class="card-desc">Calcula estados de oxidación</div><div class="card-go">Entrar →</div></a>
+    <a class="card-mod" data-subject="quimica" href="games/mol-masa-molar-saas/index.html" data-module="quimica-mol"><div class="card-title">Mol y masa molar</div><div class="card-desc">Cantidad de sustancia y masa</div><div class="card-go">Entrar →</div></a>
+    <a class="card-mod" data-subject="quimica" href="games/acidos-bases-ph-saas/index.html" data-module="quimica-ph"><div class="card-title">Ácidos, bases y pH</div><div class="card-desc">Reconoce pH, ácidos y bases</div><div class="card-go">Entrar →</div></a>
     <div class="section-title" data-subject="biologia">Juegos de Biología</div>
-    <a class="card-mod" href="games/celula-saas/index.html" data-module="biologia-celula"><div class="card-title">La célula</div><div class="card-desc">Estructura y funciones celulares</div><div class="card-go">Entrar →</div></a>
-    <a class="card-mod" href="games/genetica-saas/index.html" data-module="biologia-genetica"><div class="card-title">Genética</div><div class="card-desc">ADN, genes y herencia</div><div class="card-go">Entrar →</div></a>
-    <a class="card-mod" href="games/ecosistemas-saas/index.html" data-module="biologia-ecosistemas"><div class="card-title">Ecosistemas</div><div class="card-desc">Relaciones entre seres vivos y ambiente</div><div class="card-go">Entrar →</div></a>
-    <a class="card-mod" href="games/fotosintesis-saas/index.html" data-module="biologia-fotosintesis"><div class="card-title">Fotosíntesis</div><div class="card-desc">Cómo las plantas producen alimento</div><div class="card-go">Entrar →</div></a>
-    <a class="card-mod" href="games/sistemas-cuerpo-saas/index.html" data-module="biologia-sistemas"><div class="card-title">Sistemas del cuerpo humano</div><div class="card-desc">Funciones de los principales sistemas</div><div class="card-go">Entrar →</div></a>
-    <a class="card-mod" href="games/anatomia-saas/index.html" data-module="biologia-anatomia"><div class="card-title">Anatomía básica</div><div class="card-desc">Órganos, tejidos y organización corporal</div><div class="card-go">Entrar →</div></a>
-    <a class="card-mod" href="games/reproduccion-saas/index.html" data-module="biologia-reproduccion"><div class="card-title">Reproducción</div><div class="card-desc">Reproducción y desarrollo</div><div class="card-go">Entrar →</div></a>
-    <a class="card-mod" href="games/evolucion-saas/index.html" data-module="biologia-evolucion"><div class="card-title">Evolución y adaptación</div><div class="card-desc">Cambios en poblaciones a través del tiempo</div><div class="card-go">Entrar →</div></a>
-    <a class="card-mod" href="games/simulador-biologia-saas/index.html" data-module="biologia-simulador"><div class="card-title">Simulador de laboratorio biológico</div><div class="card-desc">Microscopía, observación y seguridad</div><div class="card-go">Entrar →</div></a>
+    <a class="card-mod" data-subject="biologia" href="games/celula-saas/index.html" data-module="biologia-celula"><div class="card-title">La célula</div><div class="card-desc">Estructura y funciones celulares</div><div class="card-go">Entrar →</div></a>
+    <a class="card-mod" data-subject="biologia" href="games/genetica-saas/index.html" data-module="biologia-genetica"><div class="card-title">Genética</div><div class="card-desc">ADN, genes y herencia</div><div class="card-go">Entrar →</div></a>
+    <a class="card-mod" data-subject="biologia" href="games/ecosistemas-saas/index.html" data-module="biologia-ecosistemas"><div class="card-title">Ecosistemas</div><div class="card-desc">Relaciones entre seres vivos y ambiente</div><div class="card-go">Entrar →</div></a>
+    <a class="card-mod" data-subject="biologia" href="games/fotosintesis-saas/index.html" data-module="biologia-fotosintesis"><div class="card-title">Fotosíntesis</div><div class="card-desc">Cómo las plantas producen alimento</div><div class="card-go">Entrar →</div></a>
+    <a class="card-mod" data-subject="biologia" href="games/sistemas-cuerpo-saas/index.html" data-module="biologia-sistemas"><div class="card-title">Sistemas del cuerpo humano</div><div class="card-desc">Funciones de los principales sistemas</div><div class="card-go">Entrar →</div></a>
+    <a class="card-mod" data-subject="biologia" href="games/anatomia-saas/index.html" data-module="biologia-anatomia"><div class="card-title">Anatomía básica</div><div class="card-desc">Órganos, tejidos y organización corporal</div><div class="card-go">Entrar →</div></a>
+    <a class="card-mod" data-subject="biologia" href="games/reproduccion-saas/index.html" data-module="biologia-reproduccion"><div class="card-title">Reproducción</div><div class="card-desc">Reproducción y desarrollo</div><div class="card-go">Entrar →</div></a>
+    <a class="card-mod" data-subject="biologia" href="games/evolucion-saas/index.html" data-module="biologia-evolucion"><div class="card-title">Evolución y adaptación</div><div class="card-desc">Cambios en poblaciones a través del tiempo</div><div class="card-go">Entrar →</div></a>
+    <a class="card-mod" data-subject="biologia" href="games/simulador-biologia-saas/index.html" data-module="biologia-simulador"><div class="card-title">Simulador de laboratorio biológico</div><div class="card-desc">Microscopía, observación y seguridad</div><div class="card-go">Entrar →</div></a>
     <div class="section-title" data-subject="matematicas">Juegos de Matemáticas</div>
-    <a class="card-mod" href="games/operaciones-saas/index.html" data-module="matematicas-operaciones"><div class="card-title">Operaciones básicas</div><div class="card-desc">Cálculo y jerarquía de operaciones</div><div class="card-go">Entrar →</div></a>
-    <a class="card-mod" href="games/fracciones-saas/index.html" data-module="matematicas-fracciones"><div class="card-title">Fracciones</div><div class="card-desc">Operaciones y problemas con fracciones</div><div class="card-go">Entrar →</div></a>
-    <a class="card-mod" href="games/algebra-saas/index.html" data-module="matematicas-algebra"><div class="card-title">Álgebra</div><div class="card-desc">Expresiones y simplificación algebraica</div><div class="card-go">Entrar →</div></a>
-    <a class="card-mod" href="games/ecuaciones-saas/index.html" data-module="matematicas-ecuaciones"><div class="card-title">Ecuaciones</div><div class="card-desc">Ecuaciones lineales y problemas</div><div class="card-go">Entrar →</div></a>
-    <a class="card-mod" href="games/proporciones-saas/index.html" data-module="matematicas-proporciones"><div class="card-title">Proporciones y porcentajes</div><div class="card-desc">Regla de tres, porcentajes y descuentos</div><div class="card-go">Entrar →</div></a>
-    <a class="card-mod" href="games/geometria-saas/index.html" data-module="matematicas-geometria"><div class="card-title">Geometría</div><div class="card-desc">Áreas, perímetros, volúmenes y ángulos</div><div class="card-go">Entrar →</div></a>
-    <a class="card-mod" href="games/funciones-saas/index.html" data-module="matematicas-funciones"><div class="card-title">Funciones y gráficas</div><div class="card-desc">Relaciones, tablas y pendientes</div><div class="card-go">Entrar →</div></a>
-    <a class="card-mod" href="games/estadistica-saas/index.html" data-module="matematicas-estadistica"><div class="card-title">Estadística y probabilidad</div><div class="card-desc">Datos, gráficos y probabilidad</div><div class="card-go">Entrar →</div></a>
-    <a class="card-mod" href="games/simulador-matematico-saas/index.html" data-module="matematicas-simulador"><div class="card-title">Simulador matemático</div><div class="card-desc">Retos integrados de cálculo y lógica</div><div class="card-go">Entrar →</div></a>
-    <a class="card-mod" href="games/trigonometria-saas/index.html" data-module="matematicas-trigonometria"><div class="card-title">Trigonometría</div><div class="card-desc">Razones, ángulos y triángulos</div><div class="card-go">Entrar →</div></a>
-    <a class="card-mod" href="games/vectores-saas/index.html" data-module="matematicas-vectores"><div class="card-title">Vectores</div><div class="card-desc">Módulo, dirección, componentes y operaciones</div><div class="card-go">Entrar →</div></a>
+    <a class="card-mod" data-subject="matematicas" href="games/operaciones-saas/index.html" data-module="matematicas-operaciones"><div class="card-title">Operaciones básicas</div><div class="card-desc">Cálculo y jerarquía de operaciones</div><div class="card-go">Entrar →</div></a>
+    <a class="card-mod" data-subject="matematicas" href="games/fracciones-saas/index.html" data-module="matematicas-fracciones"><div class="card-title">Fracciones</div><div class="card-desc">Operaciones y problemas con fracciones</div><div class="card-go">Entrar →</div></a>
+    <a class="card-mod" data-subject="matematicas" href="games/algebra-saas/index.html" data-module="matematicas-algebra"><div class="card-title">Álgebra</div><div class="card-desc">Expresiones y simplificación algebraica</div><div class="card-go">Entrar →</div></a>
+    <a class="card-mod" data-subject="matematicas" href="games/ecuaciones-saas/index.html" data-module="matematicas-ecuaciones"><div class="card-title">Ecuaciones</div><div class="card-desc">Ecuaciones lineales y problemas</div><div class="card-go">Entrar →</div></a>
+    <a class="card-mod" data-subject="matematicas" href="games/proporciones-saas/index.html" data-module="matematicas-proporciones"><div class="card-title">Proporciones y porcentajes</div><div class="card-desc">Regla de tres, porcentajes y descuentos</div><div class="card-go">Entrar →</div></a>
+    <a class="card-mod" data-subject="matematicas" href="games/geometria-saas/index.html" data-module="matematicas-geometria"><div class="card-title">Geometría</div><div class="card-desc">Áreas, perímetros, volúmenes y ángulos</div><div class="card-go">Entrar →</div></a>
+    <a class="card-mod" data-subject="matematicas" href="games/funciones-saas/index.html" data-module="matematicas-funciones"><div class="card-title">Funciones y gráficas</div><div class="card-desc">Relaciones, tablas y pendientes</div><div class="card-go">Entrar →</div></a>
+    <a class="card-mod" data-subject="matematicas" href="games/estadistica-saas/index.html" data-module="matematicas-estadistica"><div class="card-title">Estadística y probabilidad</div><div class="card-desc">Datos, gráficos y probabilidad</div><div class="card-go">Entrar →</div></a>
+    <a class="card-mod" data-subject="matematicas" href="games/simulador-matematico-saas/index.html" data-module="matematicas-simulador"><div class="card-title">Simulador matemático</div><div class="card-desc">Retos integrados de cálculo y lógica</div><div class="card-go">Entrar →</div></a>
+    <a class="card-mod" data-subject="matematicas" href="games/trigonometria-saas/index.html" data-module="matematicas-trigonometria"><div class="card-title">Trigonometría</div><div class="card-desc">Razones, ángulos y triángulos</div><div class="card-go">Entrar →</div></a>
+    <a class="card-mod" data-subject="matematicas" href="games/vectores-saas/index.html" data-module="matematicas-vectores"><div class="card-title">Vectores</div><div class="card-desc">Módulo, dirección, componentes y operaciones</div><div class="card-go">Entrar →</div></a>
   </div>
 </div>
-<footer>Juegos de Reto para Física, Química, Biología y Matemáticas · Aprende ciencias resolviendo retos · <a href="/terminos.html">Términos</a> · <a href="/privacidad.html">Privacidad</a></footer>
+<footer>Juegos de Reto · Física, Química, Biología y Matemáticas · Aprende jugando · <a href="/terminos.html">Términos</a> · <a href="/privacidad.html">Privacidad</a></footer>
 <script>
 // API base: same origin when served by saas-platform; override if games on another host
 const API_BASE = localStorage.getItem('saas_api_base') || '';

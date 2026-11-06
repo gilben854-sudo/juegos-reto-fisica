@@ -18,7 +18,15 @@
   }catch(e){ return fail(); }
 })();
 window.saasSubmitResult=async function(result){ const t=localStorage.getItem('saas_student_token')||''; if(!t) return {ok:false}; const r=await fetch('/api/results',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+t},body:JSON.stringify(result||{})}); return r.json(); };
-window.addEventListener('DOMContentLoaded',function(){var b=document.createElement('button');b.id='saas-print-certificate';b.type='button';b.textContent='Imprimir certificado';b.style.cssText='position:fixed;right:14px;bottom:14px;z-index:9999;background:#fbbf24;color:#111827;border:0;border-radius:12px;padding:11px 14px;font-weight:800;cursor:pointer;box-shadow:0 4px 14px #0006';b.onclick=function(){var n=localStorage.getItem('saas_studentName')||'Estudiante',title=document.title.split('—')[0].trim()||'Juego educativo',score=(document.getElementById('scoreDisplay')||{}).textContent||'—',phrases=['¡Cada reto que resuelves te acerca más a tus metas!','¡Tu esfuerzo y curiosidad hacen la diferencia!','¡Sigue aprendiendo: vas por muy buen camino!'],w=window.open('','_blank','width=850,height=650');if(!w)return;var clean=function(x){return String(x).replace(/[<>&]/g,'')};w.document.write('<!doctype html><html lang="es"><head><title>Certificado</title><style>body{font-family:Georgia,serif;background:#f8fafc;color:#172033;text-align:center;padding:55px}main{border:8px double #0f766e;padding:55px;max-width:720px;margin:auto;background:white}h1{color:#0f766e;font-size:38px}h2{font-size:30px;margin:28px 0}.phrase{font-size:20px;color:#b45309;margin:35px 0;font-style:italic}.meta{font-family:Arial,sans-serif;color:#475569}button{padding:10px 18px;border:0;background:#0f766e;color:#fff;border-radius:8px;font-weight:bold}@media print{button{display:none}}</style></head><body><main><h1>Certificado de logro</h1><p class="meta">Se reconoce a</p><h2>'+clean(n)+'</h2><p class="meta">por completar el reto educativo</p><h3>'+clean(title)+'</h3><p class="meta">Puntos: '+clean(score)+'</p><p class="phrase">'+phrases[Math.floor(Math.random()*phrases.length)]+'</p><p class="meta">Juegos de Reto · '+new Date().toLocaleDateString('es-ES')+'</p><button onclick="window.print()">Imprimir</button></main></body></html>');w.document.close()};document.body.appendChild(b)});
+window.addEventListener('DOMContentLoaded',function(){var b=document.createElement('button');b.id='saas-print-certificate';b.type='button';b.textContent='Imprimir certificado';b.style.cssText='position:fixed;right:14px;bottom:14px;z-index:9999;background:#fbbf24;color:#111827;border:0;border-radius:12px;padding:11px 14px;font-weight:800;cursor:pointer;box-shadow:0 4px 14px #0006';b.onclick=function(){var n=localStorage.getItem('saas_studentName')||'Estudiante',title=document.title.split('—')[0].trim()||'Juego educativo',score=(document.getElementById('scoreDisplay')||{}).textContent||'—',phrases=['¡Cada reto que resuelves te acerca más a tus metas!','¡Tu esfuerzo y curiosidad hacen la diferencia!','¡Sigue aprendiendo: vas por muy buen camino!'],w=window.open('','_blank','width=850,height=650');if(!w)return;var clean=function(x){return String(x).replace(/[<>&]/g,'')};w.document.write('<!doctype html><html lang="es"><head><title>Certificado</title><style>body{font-family:Georgia,serif;background:#f8fafc;color:#172033;text-align:center;padding:55px}main{border:8px double #0f766e;padding:55px;max-width:720px;margin:auto;background:white}h1{color:#0f766e;font-size:38px}h2{font-size:30px;margin:28px 0}.phrase{font-size:20px;color:#b45309;margin:35px 0;font-style:italic}.meta{font-family:Arial,sans-serif;color:#475569}button{padding:10px 18px;border:0;background:#0f766e;color:#fff;border-radius:8px;font-weight:bold}@media print{button{display:none}}</style><style id="juegos-reto-theme">
+body[data-subject="fisica"]{--brand:#2563eb;--page:#eff6ff;--ink:#1e3a8a;background:var(--page)!important;color:var(--ink)!important}
+body[data-subject="fisica"] header,body[data-subject="fisica"] header.top{background:var(--brand)!important;background-image:none!important;color:#fff!important}
+body[data-subject="fisica"] button.primary,body[data-subject="fisica"] .btn-primary,body[data-subject="fisica"] .btn-success,body[data-subject="fisica"] .primary{background:var(--brand)!important;color:#fff!important;border-color:var(--brand)!important}
+body[data-subject="fisica"] .card,body[data-subject="fisica"] .panel,body[data-subject="fisica"] section.card{background:#fff!important;color:var(--ink)!important;border-color:#2563eb!important}
+body[data-subject="fisica"] input,body[data-subject="fisica"] select,body[data-subject="fisica"] textarea{min-height:48px!important;font-size:1rem!important;padding:12px!important;border:2px solid #2563eb!important;border-radius:10px!important;background:#fff!important;color:#172033!important;max-width:520px!important;width:100%!important}
+body[data-subject="fisica"] [id*="Section"],body[data-subject="fisica"] [id*="section"],body[data-subject="fisica"] select[id*="Name"]{min-height:52px!important;font-size:1.05rem!important;width:100%!important;max-width:520px!important}
+body[data-subject="fisica"] .creator-mark{display:block;font-size:.72rem;color:#64748b;text-align:center;padding:8px;opacity:.8}
+</style></head><body data-subject="fisica"><main><h1>Certificado de logro</h1><p class="meta">Se reconoce a</p><h2>'+clean(n)+'</h2><p class="meta">por completar el reto educativo</p><h3>'+clean(title)+'</h3><p class="meta">Puntos: '+clean(score)+'</p><p class="phrase">'+phrases[Math.floor(Math.random()*phrases.length)]+'</p><p class="meta">Juegos de Reto · '+new Date().toLocaleDateString('es-ES')+'</p><button onclick="window.print()">Imprimir</button></main></body></html>');w.document.close()};document.body.appendChild(b)});
 </script>
 
 <meta charset="UTF-8">
@@ -38,7 +46,7 @@ window.addEventListener('DOMContentLoaded',function(){var b=document.createEleme
   input,select,button,textarea{color-scheme:light only;font:inherit;}
   .wrap{max-width:720px;margin:0 auto;padding:0 0 48px;}
   header.top{
-    background:linear-gradient(135deg,#0f172a 0%,#1e3a5f 60%,#0c4a6e 100%);
+    background:#f8fafc;
     padding:18px 16px 14px;border-bottom:3px solid var(--accent);text-align:center;
   }
   header.top .teacher{font-size:.85rem;color:#bae6fd;margin:0 0 4px;font-weight:600;}
@@ -97,9 +105,9 @@ window.addEventListener('DOMContentLoaded',function(){var b=document.createEleme
   .slider-box.r{border-color:#fb923c;}
   .slider-box label{display:flex;justify-content:space-between;font-weight:800;font-size:.9rem;margin-bottom:8px;}
   .slider-box input[type=range]{width:100%;-webkit-appearance:none;height:10px;border-radius:6px;outline:none;}
-  .v input[type=range]{background:linear-gradient(90deg,#0ea5e9,#38bdf8);}
-  .i input[type=range]{background:linear-gradient(90deg,#059669,#34d399);}
-  .r input[type=range]{background:linear-gradient(90deg,#ea580c,#fb923c);}
+  .v input[type=range]{background:#f8fafc;}
+  .i input[type=range]{background:#f8fafc;}
+  .r input[type=range]{background:#f8fafc;}
   .formula-box{
     background:#0f172a;border:1px dashed var(--accent);border-radius:10px;
     padding:10px 12px;font-size:.9rem;color:#bae6fd;margin:10px 0;
@@ -162,7 +170,7 @@ window.addEventListener('DOMContentLoaded',function(){var b=document.createEleme
   .title-block .big{grid-row:span 2;font-weight:600;font-size:.75rem;display:flex;align-items:center;line-height:1.3;}
   .drawing-area{
     border:2px solid #111;min-height:320px;position:relative;
-    background:linear-gradient(#e2e8f0 1px,transparent 1px),linear-gradient(90deg,#e2e8f0 1px,transparent 1px);
+    background:#f8fafc;
     background-size:20px 20px;
   }
   .ortho-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
@@ -253,10 +261,10 @@ window.addEventListener('DOMContentLoaded',function(){var b=document.createEleme
 #retoLevelRow{display:flex;flex-wrap:wrap;gap:4px;}
   #retoLevelRow button{flex:0 0 auto;min-width:48px;padding:8px 5px;font-size:.7rem;}
   
-  .fb-celeb{text-align:center;padding:14px 10px;margin:10px 0;border-radius:14px;background:linear-gradient(135deg,#052e16,#14532d);border:1px solid #22c55e;animation:celebPop .45s ease;}
+  .fb-celeb{text-align:center;padding:14px 10px;margin:10px 0;border-radius:14px;background:#f8fafc;border:1px solid #22c55e;animation:celebPop .45s ease;}
   .fb-celeb .big{font-size:2rem;line-height:1.2;}
   .fb-celeb .msg{color:#86efac;font-weight:800;font-size:1.05rem;margin-top:4px;}
-  .fb-sad{text-align:center;padding:14px 10px;margin:10px 0;border-radius:14px;background:linear-gradient(135deg,#450a0a,#7f1d1d);border:1px solid #f87171;animation:sadDrop .4s ease;}
+  .fb-sad{text-align:center;padding:14px 10px;margin:10px 0;border-radius:14px;background:#f8fafc;border:1px solid #f87171;animation:sadDrop .4s ease;}
   .fb-sad .big{font-size:2.2rem;line-height:1.2;filter:grayscale(.1);}
   .fb-sad .msg{color:#fecaca;font-weight:800;font-size:1rem;margin-top:4px;}
   @keyframes celebPop{0%{transform:scale(.6);opacity:0}60%{transform:scale(1.08)}100%{transform:scale(1);opacity:1}}
@@ -590,7 +598,7 @@ window.addEventListener('DOMContentLoaded',function(){var b=document.createEleme
         <select id="band3"></select>
         <label class="field">Banda 4 (tolerancia)</label>
         <select id="band4"></select>
-        <div id="resPreview" style="margin:12px 0;height:48px;border-radius:8px;background:linear-gradient(90deg,#c4a574 0%,#c4a574 100%);position:relative;border:2px solid #333;"></div>
+        <div id="resPreview" style="margin:12px 0;height:48px;border-radius:8px;background:#f8fafc;position:relative;border:2px solid #333;"></div>
         <p class="muted" id="resExplain"></p>
       </div>
     </section>
@@ -789,7 +797,7 @@ window.addEventListener('DOMContentLoaded',function(){var b=document.createEleme
       </div>
     </section>
   </main>
-  <footer class="note no-print"> · </footer>
+  <footer class="note no-print"> · <small class="creator-mark">Creado por GILAST</small></footer>
 </div>
 
 <script>
@@ -3192,7 +3200,7 @@ function printCertificado(){
   try {
     const w = window.open('', '_blank');
     if (w) {
-      w.document.write('<html><head><title>Certificado</title></head><body style="margin:0;text-align:center;background:#111;">');
+      w.document.write('<html><head><title>Juegos de Reto — Certificado</title></head><body style="margin:0;text-align:center;background:#111;">');
       w.document.write('<img src="' + canvas.toDataURL('image/png') + '" style="max-width:100%;height:auto;"/>');
       w.document.write('</body></html>');
       w.document.close();
