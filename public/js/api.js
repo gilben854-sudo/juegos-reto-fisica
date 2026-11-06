@@ -1,9 +1,9 @@
 const API = {
   base: '',
-  get token(){ return localStorage.getItem('saas_token') || ''; },
-  set token(v){ if(v) localStorage.setItem('saas_token', v); else localStorage.removeItem('saas_token'); },
-  get role(){ return localStorage.getItem('saas_role') || ''; },
-  set role(v){ if(v) localStorage.setItem('saas_role', v); else localStorage.removeItem('saas_role'); },
+  get token(){ return sessionStorage.getItem('saas_token') || ''; },
+  set token(v){ if(v) sessionStorage.setItem('saas_token', v); else sessionStorage.removeItem('saas_token'); },
+  get role(){ return sessionStorage.getItem('saas_role') || ''; },
+  set role(v){ if(v) sessionStorage.setItem('saas_role', v); else sessionStorage.removeItem('saas_role'); },
   async req(path, opts={}){
     const headers = Object.assign({'Content-Type':'application/json'}, opts.headers||{});
     if(this.token) headers.Authorization = 'Bearer ' + this.token;

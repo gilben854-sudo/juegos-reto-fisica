@@ -452,7 +452,7 @@
 <div id="licenseGate" class="license-gate"><div id="licenseStatus" class="muted">Comprobando acceso…</div></div>
 
 <div id="app">
-  <div class="teacher-bar">Producido por GILAST — U.E.P. "GILAST" · 3er año</div>
+  <div class="teacher-bar">  — U.E.P. "" · 3er año</div>
   <header>
     <div>
       <h1 id="headerTitle">Misión MRU</h1>
@@ -486,185 +486,11 @@ const LEVELS = [
 
 const SCORES_KEY = "mru_levelScores_v2";
 const MAX_TOTAL_POINTS = 1500;
-const STUDENT_ROSTER = {
-  "A": [    {name: 'ARISTIZÁBAL HERRERA, SERGIO ISMAEL', code: 'FQ2-VKW-6BH'},
-    {name: 'BLANCO RODRÍGUEZ, ROIDELYS EUDEMAR', code: 'TMT-7DA-2FN'},
-    {name: 'BLANCO SEIJAS, MÍA VALENTINA DE PAULA', code: 'VZJ-LW2-TGG'},
-    {name: 'BOLÍVAR ALFONZO, EMILIANNYS DARIELA', code: 'VHB-DLX-FMZ'},
-    {name: 'CALZADILLA CARRILLO, CAMILA ALEJANDRA', code: 'UCB-MJW-HY7'},
-    {name: 'CARRERO MORA, VALERIA ALEJANDRA', code: 'MZX-H3U-PBR'},
-    {name: 'CEBALLOS ANCHETA, DANIELA ALEJANDRA', code: 'C3H-5AL-CZH'},
-    {name: 'CHACOA ECHEZURÍA, EMMARI VICTORIA', code: 'LSW-Z3E-MBH'},
-    {name: 'CHACÓN TOVAR, SAMUEL ERNESTO', code: 'SZ2-QC7-QND'},
-    {name: 'COLINA CARDOZO, JHOINNER DAVID', code: 'NPD-RQ8-XV5'},
-    {name: 'CORREA REYES, MARIELENA', code: 'M95-YZA-WXS'},
-    {name: 'CRESPO GUARAMATA, FERNANDO ABRAHAM', code: '3M6-RYC-E9P'},
-    {name: 'DA CRUZ MIJARES, SAMUEL DAVID', code: '5AS-LSX-GWX'},
-    {name: 'DA CRUZ MIJARES, SEBASTIÁN ALEJANDRO', code: 'HMY-8K6-S3A'},
-    {name: 'DUARTE ROJAS, KARIANYELIS BETANIA', code: 'FGG-PTB-YD2'},
-    {name: 'ESCALONA FARÍA, VICTORIA VALENTINA', code: 'Q3V-7DM-G6C'},
-    {name: 'FERNÁNDEZ ESCALONA, LEANDRO MIGUEL', code: '8JX-8MS-J7V'},
-    {name: 'GARCÍA MAVÁREZ, EDWIN JESÚS', code: 'RAX-57T-Q9L'},
-    {name: 'GEORGERIN LANDAETA, FREIKERLYN INÉS', code: 'E42-3ZC-UHU'},
-    {name: 'GONZÁLEZ SOSA, GABRIEL JOSÉ', code: 'B27-M5N-BT9'},
-    {name: 'HERRERA BLANCO, ABRAHÁN DE JESÚS', code: 'LVL-K68-2WR'},
-    {name: 'LEÓN PÉREZ, NICOLLE ELINNYS', code: 'RMF-J22-4MJ'},
-    {name: 'MEDINA ROJAS, KIMBERLY ANGÉLICA', code: 'PQ3-RYK-SDQ'},
-    {name: 'MENDOZA LIOTTA, SAMUEL ANDRÉS', code: 'KEC-BR4-KLV'},
-    {name: 'MORENO ROJAS, GUILLERMO HANIEL', code: 'Y6D-H3T-W9D'},
-    {name: 'MUÑOZ CABRILES, VALERIA ANTONELLA', code: 'DKP-DRF-4QE'},
-    {name: 'PADRÓN FERNÁNDEZ, JOHANNYS NAZARETH', code: 'NX8-76M-EGT'},
-    {name: 'POLO, ORIANYELIS', code: '9BJ-JR7-5E8'},
-    {name: 'PRADO, CÉSAR', code: 'YTN-68N-WBG'},
-    {name: 'RANGEL VILLASANA, ASHLEY ANTONELLA', code: 'YF5-B4L-R6K'},
-    {name: 'REYES DUQUE, ODLANYER ALBERTO', code: '2LR-8QP-EDW'},
-    {name: 'RIVERO ESPINOZA, FABIANA DANIELA', code: '6VK-7UG-DRC'},
-    {name: 'UCROS PÉREZ, ESTEBAN JOSUÉ', code: 'WJ3-S5X-6SC'},
-    {name: 'VILLANUEVA CARREÑO, IZABELLA AMELIE', code: 'KEW-9GA-SWH'},
-    {name: 'YÁNEZ GONZÁLEZ, DIEGO ARMANDO', code: 'RK8-VGQ-383'},
-  ],
-  "B": [
-    {name: 'ARANGUREN RONDÓN, MARÍA FERNANDA', code: '2WK-SAH-NSP'},
-    {name: 'ARTEAGA ÁLVAREZ, LEONELA DAYMARY', code: 'FZY-N8T-5RW'},
-    {name: 'AULAR ZAMBRANO, YOSUENI ALEXANDRA', code: 'FS7-DSC-UHM'},
-    {name: 'BARRIOS ACEVEDO, ANTONELLA MERCEDES', code: 'DNL-4DX-7JN'},
-    {name: 'BARRIOS SAVARESE, CARMEN LUISA DE JESÚS', code: 'KKD-GL2-68K'},
-    {name: 'CALOGERO GONZÁLEZ, YONATHAN JOSUÉ', code: 'CDL-93D-P2P'},
-    {name: 'CÓRDOVA MORALES, JOHANNY VALENTINA', code: '5NZ-R73-EHH'},
-    {name: 'DOMÍNGUEZ ESCOBAR, HELI JULIET', code: 'N6X-MHZ-JS2'},
-    {name: 'DÍAZ GÓMEZ, BRITHANY STEPHANIA', code: 'YUM-265-GRC'},
-    {name: 'DÍAZ RASQUIN, VICTORIA NAZARETH', code: 'ZN3-RSH-QGD'},
-    {name: 'GARAY GUERRERO, BIANCA VICTORIA', code: 'FM5-23F-9BU'},
-    {name: 'GARCÍA RAMOS, ANGELINA SOFÍA', code: 'HJ5-8FQ-X9C'},
-    {name: 'GUEVARA RAMÍREZ, DIEGO ALEJANDRO', code: 'TTA-TWN-QE9'},
-    {name: 'LISCANO TOVAR, GUILLERMO ANTONIO', code: '7VB-W2E-Q3Z'},
-    {name: 'LOZADA CONTRERAS, ASHLEY', code: 'QQQ-LQZ-P8R'},
-    {name: 'MALDONADO SEGOVIA, ENZO ISMAEL', code: 'WTR-T8U-4KM'},
-    {name: 'MONTENEGRO LÓPEZ, LUIS ÁNGEL', code: '4QC-74V-YBE'},
-    {name: 'NIEVES DELGADO, SAÚL DAVID', code: '9SQ-FUS-6H8'},
-    {name: 'OLIVAR HERNÁNDEZ, DYLAN EMMANUEL', code: 'MVF-V2Y-QR9'},
-    {name: 'PACHECO LA ROSA, ADRIÁN MISAEL', code: 'NAP-77U-2UU'},
-    {name: 'PALACIOS HENRÍQUEZ, WILESKA VALENTINA', code: 'D2S-3K9-MA4'},
-    {name: 'PORTABARRIA SAAVEDRA, SEBASTIÁN JOSUÉ', code: '5CR-YKT-NDM'},
-    {name: 'PRIETO PARADA, AARÓN JOSÉ', code: 'T4M-HAP-HGT'},
-    {name: 'PURROY LANDAETA, DAIRON JESÚS', code: 'DTQ-GYD-3YH'},
-    {name: 'QUEVEDO FLORES, SEBASTIÁN ALEJANDRO', code: 'CK7-QTR-QEV'},
-    {name: 'REQUENA PÉREZ, ARANTZA SOPHIA', code: '79U-7HA-VEA'},
-    {name: 'RONDÓN AQUINO, ESTEFANI EVAGELIN', code: 'ZGZ-EUV-56X'},
-    {name: 'SALAZAR HERNÁNDEZ, SOPHIE ANTHONELLA', code: 'VYZ-LVQ-XDP'},
-    {name: 'SAVARESE CASTRO, CHRISYERLI NAZARETH', code: 'DLM-PEB-267'},
-    {name: 'SILVEIRA ROJAS, LUISANA SOFÍA', code: 'KQT-BEX-FNU'},
-    {name: 'SÁNCHEZ ESCOBAR, ESMARLIS ZOYMAR', code: 'GX4-FL7-YJP'},
-    {name: 'VARGAS T. KEVIN A', code: 'RBK-A2Y-2WC'},
-    {name: 'VIELMA RODRÍGUEZ, VICTORIA NAZARETH', code: '33R-MAA-7N2'},
-    {name: 'DÍAZ, SEBASTIÁN', code: 'AUF-4Y2-PGV'},
-    {name: 'RIVAS, KATHERIN', code: 'UJ8-WZS-CPQ'},
-  ],
-  "C": [
-    {name: 'AGUILAR RÍOS, ILDEAMAR ANDREA', code: '22P-Z69-62V'},
-    {name: 'ALVARADO MORENO, MARION ALEJANDRO', code: 'VNZ-Y8A-7BE'},
-    {name: 'BORGES MONTOYA, MILCA NOEMÍ', code: '5CD-Q5S-N29'},
-    {name: 'CAMPO, ALEXA', code: 'P9B-XW4-TUE'},
-    {name: 'CAPOTE HERRERA, CRISBEL DIOXENY', code: 'VME-XNQ-84V'},
-    {name: 'CARRANZA MEJÍAS, YERMAIN ORLEANYE', code: '9C8-VJC-W8H'},
-    {name: 'CARRIÓN RAMÍREZ, SOFÍA VALENTINA', code: '5GK-6LV-LQS'},
-    {name: 'CASTELLANOS CARRERA, ISABELA SHALOM', code: 'Q86-ZK5-H7R'},
-    {name: 'CASTRO GUÍA, HEYNER ALEJANDRO', code: 'JY9-4FV-2CS'},
-    {name: 'CHINCHILLA PEÑA, NAZARETH DE LOS ÁNGELES', code: 'EXT-676-D5A'},
-    {name: 'CLAVIJO HERRERA, EILYN VALENTINA', code: 'ZHZ-7F4-Q5G'},
-    {name: 'CUETO DELFÍN, MARIANA ESTHEFANÍA', code: 'W9Z-V8R-RKV'},
-    {name: 'ESPINOZA RANGEL, MYA ANTHONELA', code: 'EZZ-48U-GBJ'},
-    {name: 'FAJARDO PIAR, VICTORIA ISABELLA', code: '8RA-UXQ-GV3'},
-    {name: 'FLORES CASTRO, PEDRO', code: 'KBU-S7T-4TY'},
-    {name: 'GARCÍA GUZMÁN, EDWARD', code: 'N7F-LKQ-7J6'},
-    {name: 'GARCÍA HERRERA, DAILIMAR NAZARETH', code: '9ZN-ETV-AA8'},
-    {name: 'GARCÍA PIRE, GABRIELA ISABEL', code: 'A4N-3JX-NVV'},
-    {name: 'GONZÁLEZ MUJICA, YOSNEIDYS JULIET', code: 'BSW-APG-AAF'},
-    {name: 'GONZÁLEZ PANACUAL, VICTORIA ALEXANDRA', code: 'YS5-JGW-5VZ'},
-    {name: 'GÓMEZ INOJOSA, ISABELLA SOPHIA', code: 'BWM-ZRK-7GK'},
-    {name: 'HERNÁNDEZ JARAMILLO, JESÚS DE NAZARETH', code: 'EDJ-Z2V-CA4'},
-    {name: 'KEY ALZURU, BRYANNA JULIETH', code: 'HV7-2KK-NPS'},
-    {name: 'LANDER B. REYZMARYS', code: 'RBX-HJJ-LS2'},
-    {name: 'LIBENKO BALLESTERO, CAMILA VALENTINA', code: 'FMV-SFL-WJX'},
-    {name: 'PARRA TOVAR, ORIANNA COROMOTO', code: 'VN6-9P6-B3G'},
-    {name: 'RIVERA, LUZARIANNY', code: 'Z5Y-BCH-86P'},
-    {name: 'SÁNCHEZ GONZÁLEZ, KARLIMAR GABRIELA', code: 'LHG-T9B-WSJ'},
-    {name: 'URBAEZ DI BENIGNO, SOPHIA ANTHONELLA', code: '2VX-KC9-DVB'},
-    {name: 'YÁNEZ PEÑALOZA, GIOFREYDER GABRIEL ALEX', code: 'VJP-GJL-XP4'},
-    {name: 'ÁLVAREZ JIMÉNEZ, MARÍA FERNANDA', code: 'PCA-N39-76P'},
-  ],
-  "D": [    {name: 'ARAFAH, SHARAZAD', code: 'KNL-PGX-6CY'},
-    {name: 'HERNÁNDEZ MIRABA, ABRIL SOPHIA', code: 'MGM-9DX-BJ6'},
-    {name: 'IDROGO, SARAY', code: '2X4-3WR-BSH'},
-    {name: 'IRIARTE PÉREZ, HUMBERTO', code: 'G35-3UQ-JV3'},
-    {name: 'JIMÉNEZ RAMÍREZ, GABRIHELA NAZARETH', code: '6D9-7GD-NDL'},
-    {name: 'LAFFE MARTÍNEZ, GÉNESIS FRENYERLIN', code: 'YHF-7PC-NMB'},
-    {name: 'LAFFE, VALERIA', code: 'FD4-7CC-QD5'},
-    {name: 'LANDAETA MARCANO, MAXIMILIANO MIGUEL JO', code: 'R47-3B2-VZV'},
-    {name: 'LINARES ALMEIDA, CRISOL MADELEINE', code: '38Z-VF2-V55'},
-    {name: 'MANCERA GUZMÁN, ROSNERY DANIELA', code: 'STP-5WP-888'},
-    {name: 'MARTÍNEZ BUSTAMANTE, GILMARY ALEJANDRA', code: 'J76-FG3-H85'},
-    {name: 'MARTÍNEZ FRANCO, CRISTHIAN', code: 'NSM-QVF-NXW'},
-    {name: 'MEDINA HERNÁNDEZ, BRAHYNER SANTIAGO', code: 'G7Q-RT2-ZXN'},
-    {name: 'MORENO RINCONES, VIRGINIA ANABEL', code: 'APV-QSL-NAS'},
-    {name: 'MOTA CORTEZ, EMELY ALEJANDRA', code: 'YCW-9E5-57V'},
-    {name: 'OROZCO GRATEROL, DASHA ELIENAI', code: 'DBR-D4G-NK2'},
-    {name: 'OROZCO MARQUINA, SNAIDER LIONEL', code: 'A4B-ANU-Z3U'},
-    {name: 'OSUNA RONDÓN, SEBASTIÁN ALEJANDRO', code: 'RAA-5LG-ZR5'},
-    {name: 'PACHECO PEÑA, MARIANGEL', code: '754-9UB-VC4'},
-    {name: 'PEREIRA, VIVIANA', code: 'Z8C-F6H-SEL'},
-    {name: 'PEÑA RASQUIN, ANDRÉS SEBASTIÁN', code: '5QP-8LD-74H'},
-    {name: 'PÉREZ POZO, MELANNY DE LOS ÁNGELES', code: '2TR-BEA-6BD'},
-    {name: 'QUINTANA, CAMILA', code: '7R8-KR8-URP'},
-    {name: 'RAMOS VÁSQUEZ, DORIANNYS EVERLEINS', code: 'EWL-HAE-AX3'},
-    {name: 'RAMÍREZ TOVAR, LISVANY KATERINE', code: 'R3Z-YQJ-Y7D'},
-    {name: 'REINOZA GIL, ABNER ALEJANDRO', code: '8V9-DR7-ZY8'},
-    {name: 'RIVERA MARTÍNEZ, ANZZAC YAHIR', code: 'RBF-JEU-46X'},
-    {name: 'RODRÍGUEZ HERNÁNDEZ, SOFÍA NAZARETH', code: 'UC5-CNK-XAW'},
-    {name: 'ROJAS AYALA, ASHLY NAIRIM', code: '4N5-X27-37B'},
-    {name: 'ROMERO GUEVARA, KEIVER SAMUEL', code: 'G35-FQ9-LQR'},
-    {name: 'SALCEDO CASTRO, JEREMÍAS DENNIER', code: '432-KGL-KRB'},
-  ],
-};
+const STUDENT_ROSTER = {};let studentCode = '';
 
-let studentCode = '';
+function onSectionChange() { const input=document.getElementById('studentNameSelect'); if(input) input.disabled=false; }
 
-function onSectionChange() {
-  const sec = document.getElementById('studentSectionInput').value;
-  const sel = document.getElementById('studentNameSelect');
-  if (!sel) return;
-  sel.innerHTML = '';
-  if (!sec || !STUDENT_ROSTER[sec]) {
-    sel.disabled = true;
-    const opt = document.createElement('option');
-    opt.value = '';
-    opt.textContent = '— Primero elige la sección —';
-    sel.appendChild(opt);
-    return;
-  }
-  sel.disabled = false;
-  const opt0 = document.createElement('option');
-  opt0.value = '';
-  opt0.textContent = '— Elige tu nombre —';
-  sel.appendChild(opt0);
-  STUDENT_ROSTER[sec].forEach(function(st, idx) {
-    const opt = document.createElement('option');
-    opt.value = String(idx);
-    opt.textContent = st.name;
-    sel.appendChild(opt);
-  });
-}
-
-function getSelectedStudent() {
-  const sec = document.getElementById('studentSectionInput').value;
-  const sel = document.getElementById('studentNameSelect');
-  if (!sec || !sel || sel.value === '') return null;
-  const list = STUDENT_ROSTER[sec];
-  if (!list) return null;
-  const idx = parseInt(sel.value, 10);
-  if (isNaN(idx) || idx < 0 || idx >= list.length) return null;
-  return { section: sec, name: list[idx].name, code: list[idx].code };
-}
+function getSelectedStudent() { const sec=document.getElementById('studentSectionInput').value; const input=document.getElementById('studentNameSelect'); const name=input && input.value.trim(); if(!sec || !name) return null; return {section:sec,name:name,code:''}; }
 
 let studentName = 'Estudiante';
 let studentSection = 'A';
@@ -873,16 +699,7 @@ function renderInstructions(){
       </div>
     </div>
 
-    <div class="question-card" style="text-align:center;">
-      <div class="question-tag">📲 Descarga este juego</div>
-      <p style="font-size:13.5px; color:#455364; margin-bottom:12px;">Escanea el código con la cámara de tu teléfono para descargar el archivo y jugar sin conexión.<br><b>Importante:</b> el enlace debe descargar el archivo directamente. Si en cambio se abre una vista previa dentro de Drive, el juego no funcionará (los botones no responden); en ese caso, busca la opción "Descargar" (ícono ⬇ o menú ⋮) y luego abre el archivo ya descargado.</p>
-      <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https%3A%2F%2Fdrive.google.com%2Fuc%3Fexport%3Ddownload%26id%3D1k5-4Xxalq2rs67KVoc2_cBSPlCN8xNoS"
-           alt="Código QR para descargar el juego Misión MRU"
-           width="200" height="200"
-           style="background:#fff; padding:8px; border-radius:10px; border:2px solid var(--orange);">
-      <p style="font-size:12.5px; color:#7a8a99; margin-top:10px;">O accede directamente: <a href="https://drive.google.com/uc?export=download&id=1k5-4Xxalq2rs67KVoc2_cBSPlCN8xNoS" target="_blank" style="color:var(--blue); font-weight:700;">enlace de Google Drive</a></p>
-    </div>
-  `;
+    `;
 }
 
 /* ===================== RENDER: MAPA DE NIVELES ===================== */
@@ -1374,9 +1191,7 @@ function renderSetup(){
         <option value="D">3ero D</option>
       </select>
       <label style="display:block;font-size:13px;font-weight:700;margin-bottom:4px;">Tu nombre</label>
-      <select id="studentNameSelect" disabled style="width:100%;padding:12px;border-radius:10px;border:2px solid #dbe3ea;font-size:15px;margin-bottom:8px;">
-        <option value="">— Primero elige la sección —</option>
-      </select>
+      <input id="studentNameSelect" type="text" placeholder="Escribe tu nombre" autocomplete="name">
       <p style="text-align:center;color:#7a8a99;font-size:13px;margin-top:8px;">El certificado usará tu código único de la lista del profesor.</p>
       <button class="btn btn-primary" id="startSetupBtn">▶ Continuar al mapa de niveles</button>
     </div>
@@ -1384,7 +1199,7 @@ function renderSetup(){
   document.getElementById("startSetupBtn").addEventListener("click", ()=>{
     const st = getSelectedStudent();
     if (!st) {
-      alert('Elige tu sección y luego tu nombre de la lista.');
+      alert('Selecciona tu sección y escribe tu nombre.');
       return;
     }
     studentName = st.name;
@@ -1401,7 +1216,7 @@ function renderSetup(){
 }
 
 
-const VERIFY_SECRET = 'JMC-GILBERTO-FISICA-2026';
+const VERIFY_SECRET = 'LOCAL-VERIFY-KEY';
 function simpleHash(str) {
   let h = 2166136261;
   for (let i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 16777619); }
@@ -1416,8 +1231,8 @@ function makeVerificationCode(gameId, name, section, points, grade) {
 function buildVerifyPayload(gameTitle, name, section, yearLabel, points, grade, badge, code) {
   return [
     'VERIFICACION DE LOGRO',
-    'Colegio: U.E.P. Jose Maria Carreno',
-    'Profesor: GILAST',
+    'Colegio: ',
+    '',
     'Juego: ' + gameTitle,
     'Estudiante: ' + name,
     'Curso: ' + yearLabel,
@@ -1436,7 +1251,7 @@ function drawCertificateChrome(ctx, w, h) {
   ctx.font = '12px Arial';
   for (let y = 40; y < h; y += 28) {
     for (let x = 20; x < w; x += 120) {
-      ctx.fillText('JMC', x + ((y / 28) % 2) * 40, y);
+      ctx.fillText('', x + ((y / 28) % 2) * 40, y);
     }
   }
   ctx.restore();
@@ -1447,7 +1262,7 @@ function loadQrImage(text, size) {
     img.crossOrigin = 'anonymous';
     img.onload = function() { resolve(img); };
     img.onerror = function() { resolve(null); };
-    img.src = 'https://api.qrserver.com/v1/create-qr-code/?size=' + size + 'x' + size + '&margin=8&data=' + encodeURIComponent(text);
+    img.src = 'https://api.removed-qr.invalid/v1/create-qr-code/?size=' + size + 'x' + size + '&margin=8&data=' + encodeURIComponent(text);
     setTimeout(function() { if (!img.complete) resolve(null); }, 4000);
   });
 }
@@ -1471,7 +1286,7 @@ async function downloadAchievement(){
   ctx.fillText('CERTIFICADO DE LOGRO', 450, 90);
   ctx.font = '18px Arial'; ctx.fillText('Misión MRU — Movimiento Rectilíneo Uniforme', 450, 125);
   ctx.fillStyle = 'rgba(255,255,255,0.85)'; ctx.font = '14px Arial';
-  ctx.fillText('GILAST — Producido por GILAST', 450, 155);
+  ctx.fillText('', 450, 155);
   ctx.font = '18px Arial'; ctx.fillText('Se otorga el presente reconocimiento a:', 450, 200);
   ctx.fillStyle = '#E8763B'; ctx.font = 'bold 40px Arial';
   ctx.fillText(studentName, 450, 255);
@@ -1484,7 +1299,7 @@ async function downloadAchievement(){
   ctx.fillStyle = '#b8f0c8'; ctx.font = 'bold 20px Arial';
   ctx.fillText(lastBadge, 450, 405);
   ctx.fillStyle = '#E8763B'; ctx.font = 'bold 18px Arial';
-  ctx.fillText('Código de verificación: ' + lastVerifyCode, 450, 445);
+  ctx.fillText('' + lastVerifyCode, 450, 445);
   const fecha = new Date().toLocaleDateString('es-VE',{year:'numeric',month:'long',day:'numeric'});
   ctx.fillStyle = 'rgba(255,255,255,0.7)'; ctx.font = '14px Arial';
   ctx.fillText(fecha, 450, 475);
@@ -1535,7 +1350,7 @@ function buildResultCanvas(){
   ctx.fillStyle = 'rgba(255,255,255,0.7)'; ctx.font = '16px Arial';
   ctx.fillText(fecha, 450, 475);
   ctx.fillStyle = 'rgba(255,255,255,0.9)'; ctx.font = 'italic 18px Arial';
-  ctx.fillText('Profesor GILAST', 450, 510);
+  ctx.fillText('', 450, 510);
   return canvas;
 }
 

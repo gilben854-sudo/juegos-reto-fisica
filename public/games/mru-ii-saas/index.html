@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="color-scheme" content="light only">
-<title>MRU II — GILAST</title>
+<title>MRU II — </title>
 <style>
   html { color-scheme: light only; }
   button, input, select, textarea {
@@ -122,7 +122,7 @@
 <div id="licenseGate" class="license-gate"><div id="licenseStatus" class="muted">Comprobando acceso…</div></div>
 
 <div id="app">
-  <div class="teacher-bar">Producido por GILAST — U.E.P. "GILAST" · MRU II</div>
+  <div class="teacher-bar">  — U.E.P. "" · MRU II</div>
   <header>
     <div>
       <h1 id="headerTitle">MRU II</h1>
@@ -163,80 +163,15 @@ const LEVELS=[
   {id:5,title:"Reto mixto 4to",tag:"Nivel 6 · desafío final",desc:"Encuentro, alcance y conversiones combinados."},
 ];
 
-const STUDENT_ROSTER = {
-  "D": [
-    {name: 'AGUILAR RÍOS, ILDEANDERLYS RAISALIS', code: 'VCJ-8T4-CTJ'},
-    {name: 'ARANGUREN SANTELIZ, NOHELIA VALENTINA', code: 'E7Q-VGF-LKU'},
-    {name: 'ASCANIO AZA, LIZ YASMIN', code: 'LMV-758-SZW'},
-    {name: 'ATOCHA SIFONTES, ELIEZER JOSUÉ', code: '4Y5-XNR-KSQ'},
-    {name: 'BARRETO, KARLA', code: 'SKY-TA5-6RR'},
-    {name: 'BARROSO LUGO, LISMAR MARÍA ANTONIETA', code: 'FW5-FF8-TKW'},
-    {name: 'BOLÍVAR SIMANCAS, ROYNER JAVIER', code: '65W-FJA-F5H'},
-    {name: 'BOLÍVAR, RAYNER', code: 'ZYW-KC7-HWZ'},
-    {name: 'BRITO ZERPA, SOFÍA VALERIA', code: '87K-NDL-R32'},
-    {name: 'CABRILES SOLÓRZANO, EDGAR ALBERTO', code: '6BW-URD-MY7'},
-    {name: 'CASTRO COITA, YIMBERSON ALEXANDER', code: 'L76-MP7-64M'},
-    {name: 'CASTRO RODRÍGUEZ, MARIANYELIS LIZMAR', code: 'QXJ-7E7-9Q8'},
-    {name: 'CIRELLI MACHADO, SAMUEL ISAAC', code: '2QQ-C3P-GEB'},
-    {name: 'FERNÁNDEZ MUÑOZ, LOREANNYS DEL CARMEN', code: '4PY-3AT-ANV'},
-    {name: 'GARCÍA HERRERA, DAILYN', code: 'PBP-N3D-Z3U'},
-    {name: 'GARCÍA MEZA, ALICE VALENTINA', code: 'TCF-YUB-BGL'},
-    {name: 'GONZÁLEZ MONTESINOS, LUIS ALEJANDRO', code: 'MSK-TDE-HZP'},
-    {name: 'HERNÁNDEZ SARMIENTO, ABRAHAM JOSÉ', code: 'HN4-HDH-KTZ'},
-    {name: 'HERNÁNDEZ SERRANO, ROBIANNYS ANDREA', code: '9BM-ZQR-CUG'},
-    {name: 'LÓPEZ MOYA, NAZARETH ALEJANDRA', code: 'JTF-3XV-GA9'},
-    {name: 'MARTÍNEZ, JOGHER', code: '3AB-EWN-JGZ'},
-    {name: 'MARÍN RODRÍGUEZ, EMANUEL AMILCAR', code: '5XU-ABP-QK6'},
-    {name: 'MATA CHACÓN, SINAÍ VICTORIA', code: 'WXQ-SS9-J7J'},
-    {name: 'MEGY SILVA, LEXIBETH DE LOS ÁNGELES', code: '2AK-UGA-9TU'},
-    {name: 'MEJÍAS DURÁN, AARÓN DAVID', code: 'CZA-W87-F72'},
-    {name: 'MEJÍAS ROMERO, RONALD SANTIAGO', code: '4ZU-KA7-3FJ'},
-    {name: 'MIJARES MUÑOZ, DIOGLINGER AARÓN', code: 'C56-692-NNH'},
-    {name: 'MÁRQUEZ OLIVEROS, ALEXANDRA', code: 'XGN-CFS-JXN'},
-    {name: 'PALMA GUZMÁN, NAYMAR ALEXANDRA', code: 'E25-3DR-UG3'},
-    {name: 'RESTREPO MÉNDEZ, MARÍA VICTORIA', code: 'GZH-8AS-CCT'},
-    {name: 'REVETE DÍAZ, FRANCISCO ANTONIO', code: 'ZFB-R7Q-D2R'},
-    {name: 'REYES, LEONARDO', code: 'ZNH-LDR-FRJ'},
-    {name: 'RODRÍGUEZ FLORES, MARIANA NAZARETH', code: '74B-VWP-MLL'},
-    {name: 'RODRÍGUEZ GUZMÁN, ARCÁNGEL JADNIEL', code: 'ANQ-GGC-9JS'},
-    {name: 'RODRÍGUEZ SOLÓRZANO, KRISBEILIS SARAÍ', code: 'E4V-F9A-BP7'},
-    {name: 'RODRÍGUEZ UREA, JOSÉ RICARDO', code: 'UVS-GBV-S2T'},
-    {name: 'ROJAS BLANCO, JESÚS MIGUEL', code: '89F-CDR-U2R'},
-    {name: 'SANTAELLA PÉREZ, VALERI SOFÍA', code: '6W2-3RW-5PK'},
-    {name: 'SARABIA ECHENIQUE, ALFONZO EMMANUEL', code: '9Z3-B3V-SWT'},
-    {name: 'SÁNCHEZ ROMERO, YAHIR ARCÁNGEL', code: 'XZK-GYP-GH2'},
-    {name: 'TRAVIESO, VALERY', code: '8KJ-3TW-UJS'},
-  
-  ],
-};
+const STUDENT_ROSTER = {};let studentCode = '';
 
-let studentCode = '';
-
-function fillNameSelect() {
-  const sel = document.getElementById('studentNameSelect');
-  if (!sel) return;
-  sel.innerHTML = '';
-  const list = (STUDENT_ROSTER && STUDENT_ROSTER['D']) || [];
-  sel.disabled = false;
-  const opt0 = document.createElement('option');
-  opt0.value = '';
-  opt0.textContent = '— Elige tu nombre —';
-  sel.appendChild(opt0);
-  list.forEach(function(st, idx) {
-    const opt = document.createElement('option');
-    opt.value = String(idx);
-    opt.textContent = st.name;
-    sel.appendChild(opt);
-  });
-}
+function fillNameSelect() { /* nombres manuales */ }
 
 function getSelectedStudent() {
-  const sel = document.getElementById('studentNameSelect');
-  if (!sel || sel.value === '') return null;
-  const list = (STUDENT_ROSTER && STUDENT_ROSTER['D']) || [];
-  const idx = parseInt(sel.value, 10);
-  if (isNaN(idx) || idx < 0 || idx >= list.length) return null;
-  return { section: 'D', name: list[idx].name, code: list[idx].code };
+  const input = document.getElementById('studentNameSelect');
+  const name = input && input.value.trim();
+  if (!name) return null;
+  return { section: 'D', name: name, code: '' };
 }
 
 let studentName="Estudiante", studentSection="D";
@@ -393,9 +328,7 @@ function renderSetup(){
     <div class="form-box">
       <p class="year-label">MRU II — Sección D</p>
       <label>Tu nombre</label>
-      <select id="studentNameSelect" style="width:100%;padding:12px;border-radius:10px;border:2px solid #dbe3ea;font-size:15px;margin-bottom:8px;">
-        <option value="">— Elige tu nombre —</option>
-      </select>
+      <input id="studentNameSelect" type="text" placeholder="Escribe tu nombre" autocomplete="name">
       <p style="text-align:center;color:#7a8a99;font-size:13px;">El certificado usará tu código único de la lista del profesor.</p>
       <button class="btn btn-primary" id="startSetupBtn">▶ Continuar al mapa de niveles</button>
     </div>`;
@@ -403,7 +336,7 @@ function renderSetup(){
   document.getElementById("startSetupBtn").onclick=()=>{
     const st = getSelectedStudent();
     if (!st) {
-      alert('Elige tu nombre de la lista.');
+      alert('Escribe tu nombre.');
       return;
     }
     studentName = st.name;
@@ -456,16 +389,7 @@ function renderInstructions(){
       </div>
     </div>
 
-    <div class="question-card" style="text-align:center;">
-      <div class="question-tag">📲 Descarga este juego</div>
-      <p style="font-size:13.5px; color:#455364; margin-bottom:12px;">Escanea el código con la cámara de tu teléfono para descargar el archivo y jugar sin conexión.<br><b>Importante:</b> el enlace debe descargar el archivo directamente. Si en cambio se abre una vista previa dentro de Drive, el juego no funcionará (los botones no responden); en ese caso, busca la opción "Descargar" (ícono ⬇ o menú ⋮) y luego abre el archivo ya descargado.</p>
-      <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https%3A%2F%2Fdrive.google.com%2Fuc%3Fexport%3Ddownload%26id%3D1rJLymYZl6pQlki2g-zNfAfPuAjDZXNGt"
-           alt="Código QR para descargar el juego Misión MRU 4to"
-           width="200" height="200"
-           style="background:#fff; padding:8px; border-radius:10px; border:2px solid var(--orange);">
-      <p style="font-size:12.5px; color:#7a8a99; margin-top:10px;">O accede directamente: <a href="https://drive.google.com/uc?export=download&id=1rJLymYZl6pQlki2g-zNfAfPuAjDZXNGt" target="_blank" style="color:var(--blue); font-weight:700;">enlace de Google Drive</a></p>
-    </div>
-  `;
+    `;
 }
 
 function renderLevelMap(){
@@ -606,7 +530,7 @@ function renderResult(correctCount,stars,passed){
       ${allDone?`
         <button class="btn btn-success" id="dlCert">📥 Descargar mi logro</button>
         <button class="btn btn-secondary" id="notifyT">📧 Avisar a mi profesor</button>
-        <p style="font-size:12px;color:#7a8a99;margin-top:8px;">Se genera certificado con código y QR para compartir o enviar al profesor.</p>
+        <p style="font-size:12px;color:#7a8a99;margin-top:8px;">Se genera certificado para compartir o enviar al profesor.</p>
       `:`<p style="font-size:12px;color:#9AA7B2;margin-top:10px;">🔒 Certificado al completar los 6 niveles.</p>`}
       <button class="btn btn-primary" id="retryBtn">Repetir este nivel</button>
       ${(passed&&session.levelId<LEVELS.length-1)?`<button class="btn btn-secondary" id="nextLevelBtn">Siguiente nivel ➜</button>`:""}
@@ -623,7 +547,7 @@ function renderResult(correctCount,stars,passed){
 }
 
 
-const VERIFY_SECRET = 'JMC-GILBERTO-FISICA-2026';
+const VERIFY_SECRET = 'LOCAL-VERIFY-KEY';
 let lastVerifyCode = '';
 function simpleHash(str) {
   let h = 2166136261;
@@ -639,8 +563,8 @@ function makeVerificationCode(gameId, name, section, points, grade) {
 function buildVerifyPayload(gameTitle, name, section, yearLabel, points, grade, badge, code) {
   return [
     'VERIFICACION DE LOGRO',
-    'Colegio: U.E.P. Jose Maria Carreno',
-    'Profesor: GILAST',
+    'Colegio: ',
+    '',
     'Juego: ' + gameTitle,
     'Estudiante: ' + name,
     'Curso: ' + yearLabel,
@@ -659,7 +583,7 @@ function drawCertificateChrome(ctx, w, h) {
   ctx.font = '12px Arial';
   for (let y = 40; y < h; y += 28) {
     for (let x = 20; x < w; x += 120) {
-      ctx.fillText('JMC', x + ((y / 28) % 2) * 40, y);
+      ctx.fillText('', x + ((y / 28) % 2) * 40, y);
     }
   }
   ctx.restore();
@@ -670,7 +594,7 @@ function loadQrImage(text, size) {
     img.crossOrigin = 'anonymous';
     img.onload = function() { resolve(img); };
     img.onerror = function() { resolve(null); };
-    img.src = 'https://api.qrserver.com/v1/create-qr-code/?size=' + size + 'x' + size + '&margin=8&data=' + encodeURIComponent(text);
+    img.src = 'https://api.removed-qr.invalid/v1/create-qr-code/?size=' + size + 'x' + size + '&margin=8&data=' + encodeURIComponent(text);
     setTimeout(function() { if (!img.complete) resolve(null); }, 4000);
   });
 }
@@ -694,7 +618,7 @@ async function downloadAchievement(){
   ctx.fillText('CERTIFICADO DE LOGRO', 450, 90);
   ctx.font = '18px Arial'; ctx.fillText('Misión MRU 4to — Encuentro de móviles', 450, 125);
   ctx.fillStyle = 'rgba(255,255,255,0.85)'; ctx.font = '14px Arial';
-  ctx.fillText('GILAST — Producido por GILAST', 450, 155);
+  ctx.fillText('', 450, 155);
   ctx.font = '18px Arial'; ctx.fillText('Se otorga el presente reconocimiento a:', 450, 200);
   ctx.fillStyle = '#E8763B'; ctx.font = 'bold 40px Arial';
   ctx.fillText(studentName, 450, 255);
@@ -707,7 +631,7 @@ async function downloadAchievement(){
   ctx.fillStyle = '#b8f0c8'; ctx.font = 'bold 20px Arial';
   ctx.fillText(lastBadge, 450, 405);
   ctx.fillStyle = '#E8763B'; ctx.font = 'bold 18px Arial';
-  ctx.fillText('Código de verificación: ' + lastVerifyCode, 450, 445);
+  ctx.fillText('' + lastVerifyCode, 450, 445);
   const fecha = new Date().toLocaleDateString('es-VE',{year:'numeric',month:'long',day:'numeric'});
   ctx.fillStyle = 'rgba(255,255,255,0.7)'; ctx.font = '14px Arial';
   ctx.fillText(fecha, 450, 475);

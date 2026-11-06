@@ -14,7 +14,14 @@ const PORT = process.env.PORT || 3780;
 const DB_PATH = path.join(__dirname, 'data', 'db.json');
 const PUBLIC = path.join(__dirname, 'public');
 
-app.use(cors());
+app.use(cors({ origin: process.env.APP_ORIGIN || false }));
+app.disable('x-powered-by');
+app.use((_req, res, next) => {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'DENY');
+  res.setHeader('Referrer-Policy', 'no-referrer');
+  next();
+});
 app.use(express.json({ limit: '1mb' }));
 app.use(express.static(PUBLIC));
 
@@ -26,18 +33,39 @@ function saveDb(db) {
 }
 function hashPw(pw, salt) {
   salt = salt || crypto.randomBytes(16).toString('hex');
-  const h = crypto.createHash('sha256').update(salt + pw).digest('hex');
-  return salt + ':' + h;
+  const hash = crypto.scryptSync(String(pw), salt, 64).toString('hex');
+  return 'scrypt:' + salt + ':' + hash;
 }
 function verifyPw(pw, stored) {
-  if (!stored || !stored.includes(':')) return false;
-  const [salt, hash] = stored.split(':');
-  const h = crypto.createHash('sha256').update(salt + pw).digest('hex');
-  return h === hash;
+  if (!stored) return false;
+  const parts = stored.split(':');
+  try {
+    if (parts.length === 3 && parts[0] === 'scrypt') {
+      const actual = crypto.scryptSync(String(pw), parts[1], 64);
+      const expected = Buffer.from(parts[2], 'hex');
+      return expected.length === actual.length && crypto.timingSafeEqual(actual, expected);
+    }
+    // Accept legacy salted SHA-256 hashes only to migrate existing accounts on login.
+    if (parts.length === 2) {
+      const actual = crypto.createHash('sha256').update(parts[0] + String(pw)).digest('hex');
+      const expected = Buffer.from(parts[1], 'hex');
+      const actualBuf = Buffer.from(actual, 'hex');
+      return expected.length === actualBuf.length && crypto.timingSafeEqual(actualBuf, expected);
+    }
+  } catch (_) {}
+  return false;
 }
-function token() {
-  return crypto.randomBytes(32).toString('hex');
+function needsRehash(stored) { return !String(stored || '').startsWith('scrypt:'); }
+function token() { return crypto.randomBytes(32).toString('hex'); }
+const loginAttempts = new Map();
+function loginAllowed(key) {
+  const now = Date.now();
+  const item = loginAttempts.get(key) || { count: 0, reset: now + 15 * 60 * 1000 };
+  if (item.reset <= now) { item.count = 0; item.reset = now + 15 * 60 * 1000; }
+  item.count += 1; loginAttempts.set(key, item);
+  return item.count <= 10;
 }
+function clearLoginAttempts(key) { loginAttempts.delete(key); }
 function authTeacher(req) {
   const h = req.headers.authorization || '';
   const t = h.startsWith('Bearer ') ? h.slice(7) : '';
@@ -91,18 +119,38 @@ function publicTeacher(t) {
 // ---------- AUTH ----------
 app.post('/api/admin/login', (req, res) => {
   const { username, password } = req.body || {};
+  const ip = req.ip || req.socket.remoteAddress || 'unknown';
+  if (!loginAllowed('admin:' + ip)) return res.status(429).json({ error: 'Demasiados intentos. Espera unos minutos.' });
   const db = loadDb();
   if (username !== db.admin.username || !verifyPw(password || '', db.admin.password_hash)) {
     return res.status(401).json({ error: 'Credenciales de administrador incorrectas' });
   }
+  clearLoginAttempts('admin:' + ip);
+  if (needsRehash(db.admin.password_hash)) db.admin.password_hash = hashPw(password || '');
   const t = token();
   db.sessions[t] = { role: 'admin', expires: Date.now() + 12 * 3600 * 1000 };
   saveDb(db);
   res.json({ token: t, role: 'admin' });
 });
 
+app.post('/api/admin/change-password', (req, res) => {
+  const a = authAdmin(req);
+  if (!a) return res.status(401).json({ error: 'No autorizado' });
+  const current = String(req.body.currentPassword || '');
+  const next = String(req.body.newPassword || '');
+  if (!current || !next) return res.status(400).json({ error: 'Completa la clave actual y la nueva clave' });
+  if (next.length < 8) return res.status(400).json({ error: 'La nueva clave debe tener al menos 8 caracteres' });
+  if (current === next) return res.status(400).json({ error: 'La nueva clave debe ser diferente' });
+  if (!verifyPw(current, a.db.admin.password_hash)) return res.status(401).json({ error: 'La clave actual es incorrecta' });
+  a.db.admin.password_hash = hashPw(next);
+  saveDb(a.db);
+  res.json({ ok: true });
+});
 app.post('/api/teacher/login', (req, res) => {
   const { email, password } = req.body || {};
+  const ip = req.ip || req.socket.remoteAddress || 'unknown';
+  const loginKey = 'teacher:' + ip;
+  if (!loginAllowed(loginKey)) return res.status(429).json({ error: 'Demasiados intentos. Espera unos minutos.' });
   const db = loadDb();
   const entry = Object.values(db.teachers).find(
     (x) => (x.email || '').toLowerCase() === (email || '').toLowerCase()
@@ -110,6 +158,8 @@ app.post('/api/teacher/login', (req, res) => {
   if (!entry || !verifyPw(password || '', entry.password_hash)) {
     return res.status(401).json({ error: 'Correo o contraseña incorrectos' });
   }
+  clearLoginAttempts(loginKey);
+  if (needsRehash(entry.password_hash)) entry.password_hash = hashPw(password || '');
   const t = token();
   db.sessions[t] = {
     role: 'teacher',
@@ -346,5 +396,4 @@ app.get('*', (req, res, next) => {
 
 app.listen(PORT, () => {
   console.log('Física SaaS control en http://localhost:' + PORT);
-  console.log('Admin por defecto: admin / NewtonSaaS2026!  (cámbialo en producción)');
 });

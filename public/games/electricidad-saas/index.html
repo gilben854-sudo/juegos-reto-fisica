@@ -253,8 +253,8 @@
 
 <div class="wrap">
   <header class="top no-print">
-    <p class="teacher">GILAST · Profesor de Electricidad</p>
-    <p class="teacher" style="margin-top:2px;font-size:.75rem;color:#94a3b8;">GILAST · Monseñor Juan José Bernal · 3° año Electricidad</p>
+    <p class="teacher"></p>
+    <p class="teacher" style="margin-top:2px;font-size:.75rem;color:#94a3b8;"></p>
     <h1>⚡ Electricidad Aplicada</h1>
     <p>Taller · Motor · Multímetro · Prácticas · Ohm · Watts · Planos · Reto</p>
   </header>
@@ -279,7 +279,7 @@
 
   <div class="card no-print" id="studentGate" style="margin:12px;">
     <h2 style="font-size:1rem;">Identificación</h2>
-    <p class="muted">3° año — Electricidad · GILAST</p>
+    <p class="muted">3° año — Electricidad · </p>
     <label class="field">¿Cuántos trabajan?</label>
     <div class="mode-row" id="workModeRow">
       <button type="button" class="on" id="mode1" data-size="1">1 persona</button>
@@ -289,15 +289,15 @@
     <div id="memberFields">
       <div id="memberWrap1">
         <label class="field" id="label1">Estudiante 1</label>
-        <select id="groupSel1"><option value="">— Elige nombre —</option></select>
+        <input id="groupSel1" type="text" placeholder="Escribe el nombre" autocomplete="name">
       </div>
       <div id="memberWrap2" style="display:none;">
         <label class="field">Estudiante 2</label>
-        <select id="groupSel2"><option value="">— Elige nombre —</option></select>
+        <input id="groupSel2" type="text" placeholder="Escribe el nombre" autocomplete="name">
       </div>
       <div id="memberWrap3" style="display:none;">
         <label class="field">Estudiante 3</label>
-        <select id="groupSel3"><option value="">— Elige nombre —</option></select>
+        <input id="groupSel3" type="text" placeholder="Escribe el nombre" autocomplete="name">
       </div>
     </div>
     <p class="muted" id="studentCodeHint" style="margin-top:8px;">El reto es solo individual (1 persona).</p>
@@ -482,7 +482,7 @@
             <div>Escala: s/e</div>
             <div>Fecha: <span id="planDate"></span></div>
             <div id="planStudentOut">Elaboró: —</div>
-            <div id="planCodeOut">Prof.: GILAST</div>
+            <div id="planCodeOut"> </div>
           </div>
           <div class="schematic-wrap">
             <svg id="schematicSvg" viewBox="0 0 720 280" xmlns="http://www.w3.org/2000/svg"></svg>
@@ -769,46 +769,17 @@
       </div>
     </section>
   </main>
-  <footer class="note no-print">GILAST · GILAST</footer>
+  <footer class="note no-print"> · </footer>
 </div>
 
 <script>
-const STUDENT_ROSTER = null; /* SaaS sin nómina */
+const STUDENT_ROSTER = {};let currentGroup = [];
 
-let workSize = 1; // 1, 2 o 3 personas
-let currentStudent = { name: '', section: 'B' };
-let currentGroup = [];
+function rosterList(){ return []; }
 
-function rosterList(){
-  try {
-    return (STUDENT_ROSTER.B || []).slice().sort((a,b)=>a.name.localeCompare(b.name,'es'));
-  } catch (e) {
-    return [];
-  }
-}
+function findByName(name){ return name ? {name:name.trim(),section:'',code:''} : null; }
 
-function findByName(name){
-  if (!name) return null;
-  return rosterList().find(s => s.name === name) || null;
-}
-
-function fillSelectOptions(sel, emptyLabel){
-  if (!sel) return;
-  const prev = sel.value;
-  const list = rosterList();
-  sel.innerHTML = '';
-  const o0 = document.createElement('option');
-  o0.value = '';
-  o0.textContent = emptyLabel || '— Elige nombre —';
-  sel.appendChild(o0);
-  list.forEach(s => {
-    const o = document.createElement('option');
-    o.value = s.name;
-    o.textContent = s.name;
-    sel.appendChild(o);
-  });
-  if (prev && list.some(s => s.name === prev)) sel.value = prev;
-}
+function fillSelectOptions(sel, emptyLabel){ if(sel && !sel.value) sel.placeholder=emptyLabel || 'Escribe el nombre'; }
 
 function groupLabel(){
   if (currentGroup.length > 1) return currentGroup.map(g => g.name).join(' / ');
@@ -895,9 +866,9 @@ function fillStudentSelect(){
       const hint = document.getElementById('studentCodeHint');
       if (hint) hint.textContent = '⚠️ No se cargó la lista. Recarga la página.';
     }
-    fillSelectOptions(document.getElementById('groupSel1'), '— Elige nombre —');
-    fillSelectOptions(document.getElementById('groupSel2'), '— Elige nombre —');
-    fillSelectOptions(document.getElementById('groupSel3'), '— Elige nombre —');
+    fillSelectOptions(document.getElementById('groupSel1'), 'Escribe el nombre');
+    fillSelectOptions(document.getElementById('groupSel2'), 'Escribe el nombre');
+    fillSelectOptions(document.getElementById('groupSel3'), 'Escribe el nombre');
     [1,2,3].forEach(function(i){
       const btn = document.getElementById('mode' + i);
       if (btn) btn.onclick = function(e){ if(e) e.preventDefault(); setWorkSize(i); };
@@ -1799,7 +1770,7 @@ function drawSchematic(){
         ? currentGroup.map((g, i) => (i + 1) + '. ' + g.name).join('  |  ')
         : ('Elaboró: ' + names);
     }
-    if (planCod) planCod.textContent = 'Prof.: GILAST · 3° año Electricidad · GILAST';
+    if (planCod) planCod.textContent = '  · 3° año Electricidad · ';
 
     const src = (document.getElementById('planSource') || {}).value || 'dc';
     const topo = (planTopology === 'paralelo' || planTopology === 'mixto') ? planTopology : 'serie';
@@ -2067,7 +2038,7 @@ function buildCajetinHtml(title, extraLeft, extraRight){
     <div>${extraLeft || 'Escala: s/e'}</div>
     <div>Fecha: ${date}</div>
     <div style="grid-column:1/-1;font-size:9pt;"><b>Integrantes:</b> ${escapeXml(names)}</div>
-    <div style="grid-column:1/-1;font-size:9pt;">Prof.: GILAST · 3° año Electricidad · GILAST · ${extraRight || ''}</div>
+    <div style="grid-column:1/-1;font-size:9pt;">  · 3° año Electricidad  ${extraRight || ''}</div>
   </div>`;
 }
 
@@ -2096,7 +2067,7 @@ function doPrint(html){
   parts.push('</style></head><body>');
   parts.push('<div class="sheet">');
   parts.push(html);
-  parts.push('<p class="foot">GILAST · GILAST · 3° año</p>');
+  parts.push('<p class="foot">  3° año</p>');
   parts.push('</div>');
   parts.push('</body></html>');
   w.document.open();
@@ -3128,8 +3099,8 @@ function printCertificado(){
 
   ctx.fillStyle = 'rgba(255,255,255,0.85)';
   ctx.font = '14px Arial';
-  ctx.fillText('GILAST · Monseñor Juan José Bernal', 450, 158);
-  ctx.fillText('3° año Electricidad · Producido por GILAST', 450, 180);
+  ctx.fillText(' · ', 450, 158);
+  ctx.fillText('3° año Electricidad ·  ', 450, 180);
 
   ctx.fillStyle = 'rgba(255,255,255,0.95)';
   ctx.font = '18px Arial';
@@ -3217,7 +3188,7 @@ function printSeguridad(){
       <div>3° año Electricidad</div>
       <div>Fecha: ${new Date().toLocaleDateString('es-VE')}</div>
       <div style="grid-column:1/-1"><b>Integrantes:</b> ${escapeXml(namesLine()||'—')}</div>
-      <div style="grid-column:1/-1">Prof.: GILAST · GILAST</div>
+      <div style="grid-column:1/-1">  · </div>
     </div>
     <ol style="font-size:11pt;line-height:1.5;">
       <li>No trabajar con manos mojadas.</li>
@@ -3239,10 +3210,10 @@ function sendTeacherEmail(kind){
   const pr = practicesSummary();
   const subject = encodeURIComponent('Taller Electricidad — ' + kind + ' — ' + names);
   const body = encodeURIComponent(
-    'Profesor GILAST\n\n' +
+    '\n\n' +
     'Tipo: ' + kind + '\n' +
     'Estudiantes: ' + names + '\n' +
-    'Curso: 3° año Electricidad — GILAST\n' +
+    'Curso: 3° año Electricidad — \n' +
     'Puntaje reto: ' + score + '\n' +
     'Prácticas marcadas: ' + pr.done + '/' + pr.total + '\n' +
     'Fecha: ' + new Date().toLocaleString('es-VE') + '\n'

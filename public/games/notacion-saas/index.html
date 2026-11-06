@@ -275,7 +275,7 @@
 
 <div class="container">
   <header>
-    <p style="font-size:0.85em; opacity:0.75; margin-bottom:4px;">Profesor GILAST</p>
+    <p style="font-size:0.85em; opacity:0.75; margin-bottom:4px;"></p>
     <h1>🔬 Notación Científica</h1>
     <p>Simulador y desafíos para practicar conversión y operaciones</p>
   </header>
@@ -372,11 +372,9 @@
       </div>
       <div style="display:flex; gap:10px; align-items:center; margin-bottom:16px; flex-wrap:wrap;">
         <label style="min-width:110px;">Tu nombre:</label>
-        <select id="studentNameSelect" disabled style="flex:1; padding:10px; border-radius:8px; border:2px solid #475569; font-size:1em; min-width:160px; background:#f8fafc; color:#0f172a;">
-          <option value="">— Primero elige la sección —</option>
-        </select>
+        <input id="studentNameSelect" type="text" placeholder="Escribe tu nombre" autocomplete="name">
       </div>
-      <p style="font-size:0.85em;color:#94a3b8;margin-bottom:12px;text-align:center;">Elige tu sección y luego tu nombre de la lista. No se escribe a mano.</p>
+      <p style="font-size:0.85em;color:#94a3b8;margin-bottom:12px;text-align:center;">Selecciona tu sección y escribe tu nombre. Puedes escribirlo manualmente.</p>
       <h3 style="text-align:center; margin-bottom:14px;">Elige tu nivel</h3>
       <div class="level-select">
         <button class="level-btn" data-level="1" onclick="selectLevel(1)">Nivel 1<br><small>Conversión básica</small></button>
@@ -438,16 +436,6 @@
         <button class="btn-secondary" onclick="backToLevels()">🔄 Jugar de nuevo</button>
       </div>
     </div>
-  </div>
-
-  <div class="panel visible" style="text-align:center; margin-top:20px;">
-    <h3 style="margin-bottom:10px;">📲 Descarga este juego</h3>
-    <p class="sim-hint" style="margin-bottom:14px;">Escanea el código con la cámara de tu teléfono para descargar el archivo y jugar sin conexión.<br><b>Importante:</b> el enlace debe descargar el archivo directamente. Si en cambio se abre una vista previa dentro de Drive, el juego no funcionará (los botones no responden); en ese caso, busca la opción "Descargar" (ícono ⬇ o menú ⋮) y luego abre el archivo ya descargado.</p>
-    <img src="https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=https%3A%2F%2Fdrive.google.com%2Fuc%3Fexport%3Ddownload%26id%3D1sdXQlEtLUUENxx22v7JmfHLe6N0aWy9q"
-         alt="Código QR para descargar el juego Notación Científica"
-         width="220" height="220"
-         style="background:#fff; padding:10px; border-radius:12px; border:2px solid #ffcc00;">
-    <p class="sim-hint" style="margin-top:10px;">O accede directamente: <a href="https://drive.google.com/uc?export=download&id=1sdXQlEtLUUENxx22v7JmfHLe6N0aWy9q" target="_blank" style="color:#ffcc00;">enlace de Google Drive</a></p>
   </div>
 
   <footer>Notación Científica · Juego educativo offline · 3er año</footer>
@@ -863,220 +851,11 @@ function shuffle(arr) {
   return a;
 }
 
-const STUDENT_ROSTER = {
-  "2A": [
-    {name: 'APONTE DÍAZ, FABIAN ANTONIO', code: 'MXP-GY7-BPB'},
-    {name: 'ARANGUREN RONDON, CARLOS JAVIER', code: '8TY-ZWB-U8W'},
-    {name: 'ASTUDILLO GUEVARA, PAULINA SOLSIRETH', code: 'FSF-W6H-ZBK'},
-    {name: 'AULAR ROJAS, ANGEL SEBASTIAN', code: 'AL8-MUQ-EFU'},
-    {name: 'BABILONIA ROMERO, DANIELA VALENTINA', code: 'W99-VXU-F8B'},
-    {name: 'GIL CONTRERAS, DAVID ALEJANDRO', code: 'R8V-CJE-PRW'},
-    {name: 'GONZÁLEZ YANEZ, FRANSHESKA KAROLINA', code: 'R2R-DJ5-7QJ'},
-    {name: 'GONZÁLEZ YANEZ, KEIVER JOSÉ', code: 'DJF-LG5-TZP'},
-    {name: 'GRANADINOS LEDEZMA, NICOLE VICTORIA', code: 'ZDW-H9G-KFS'},
-    {name: 'HERNANDEZ MACHADO, JOSE SAMUEL', code: 'Z62-STX-QLA'},
-    {name: 'HERNÁNDEZ, J.', code: 'EU4-RJX-PYE'},
-    {name: 'HIDALGO PEÑA, DEBORA ESTHER', code: 'V77-YVN-MEV'},
-    {name: 'IDROGO DELGADO, SAMUEL ISAAS', code: 'NLK-3NN-Q9X'},
-    {name: 'LARA LARA, MIGUELANGEL', code: '7P4-36V-RGR'},
-    {name: 'LARA VISPO, PAOLA ANDREA', code: 'N8D-KV3-M52'},
-    {name: 'LAVERDE PÉREZ, JHOANDERT JOEL', code: '3UY-EUA-QCX'},
-    {name: 'LORCA GARCIA, DAIBER ISAAC', code: '8DL-EW6-6PL'},
-    {name: 'LÓPEZ VILLEGAS, CARLOS JAVIER', code: 'AZL-6D6-6NN'},
-    {name: 'MARTÍNEZ DÍAZ, SAMANTHA ANTHONELLA', code: 'JJX-TPN-SBV'},
-    {name: 'MEDINA CARVALLO, ABRAHAM DAVID', code: 'A3A-JRL-G6Z'},
-    {name: 'MORA HURTADO, ASLHEY GABRIELA', code: 'K55-MZP-SBV'},
-    {name: 'OROPEZA LAMPLA, AIMARA SOFIA', code: '9SM-CAQ-6A3'},
-    {name: 'PÉREZ MENESES, MARIANGEL SOFIA', code: 'HYM-BFQ-4JD'},
-    {name: 'QUIROGA, JAZHIEL', code: 'KWS-BH3-2T6'},
-    {name: 'RAMÍREZ GARCIA, SARA GABRIELA', code: 'KCM-2BY-UBS'},
-    {name: 'REYES GIL, DARIANNA VICTORIA', code: '9J7-JYE-QK2'},
-    {name: 'RICAURTE MEJIA, YEHAISBELSON ROSLAYNER', code: 'C9D-LYD-KUB'},
-    {name: 'RIVERA ZEOLI, NICOLÁS ALEJANDRO', code: 'CLL-BPX-MXM'},
-    {name: 'ROMERO COLLANTES, NATALIA ALEJANDRA', code: 'XGA-DGM-8CS'},
-    {name: 'RON GIL, MAXIMILIANO VALENTINO', code: 'TLU-5PN-9B6'},
-    {name: 'RUIZ BOLÍVAR, SGLEIBERT JESÚS', code: 'FWW-PMB-48K'},
-    {name: 'SÁNCHEZ, MARLIN', code: 'FGV-86A-L4N'},
-    {name: 'YANEZ GONZÁLEZ, DILAN IGNACIO', code: 'UHV-URA-ZEQ'},
-  ],
-  "A": [    {name: 'ARISTIZÁBAL HERRERA, SERGIO ISMAEL', code: 'LC5-DMA-Z8L'},
-    {name: 'BLANCO RODRÍGUEZ, ROIDELYS EUDEMAR', code: 'MHU-5W8-4Q7'},
-    {name: 'BLANCO SEIJAS, MÍA VALENTINA DE PAULA', code: 'QCW-K6T-ZV5'},
-    {name: 'BOLÍVAR ALFONZO, EMILIANNYS DARIELA', code: 'BTV-P4L-JBJ'},
-    {name: 'CALZADILLA CARRILLO, CAMILA ALEJANDRA', code: 'ECR-Y46-W5T'},
-    {name: 'CARRERO MORA, VALERIA ALEJANDRA', code: '6Q5-M72-BNJ'},
-    {name: 'CEBALLOS ANCHETA, DANIELA ALEJANDRA', code: 'QQY-DCK-87B'},
-    {name: 'CHACOA ECHEZURÍA, EMMARI VICTORIA', code: '373-ULJ-ZQZ'},
-    {name: 'CHACÓN TOVAR, SAMUEL ERNESTO', code: '8W4-F34-F6N'},
-    {name: 'COLINA CARDOZO, JHOINNER DAVID', code: 'G7Z-C7M-XEE'},
-    {name: 'CORREA REYES, MARIELENA', code: 'E7X-ZTQ-L46'},
-    {name: 'CRESPO GUARAMATA, FERNANDO ABRAHAM', code: 'XY7-HUX-EMX'},
-    {name: 'DA CRUZ MIJARES, SAMUEL DAVID', code: '8CP-BVP-YC7'},
-    {name: 'DA CRUZ MIJARES, SEBASTIÁN ALEJANDRO', code: 'TV9-NWR-MQA'},
-    {name: 'DUARTE ROJAS, KARIANYELIS BETANIA', code: '38J-RY5-4QG'},
-    {name: 'ESCALONA FARÍA, VICTORIA VALENTINA', code: 'PTJ-LJC-4BJ'},
-    {name: 'FERNÁNDEZ ESCALONA, LEANDRO MIGUEL', code: 'E82-JYC-FZZ'},
-    {name: 'GARCÍA MAVÁREZ, EDWIN JESÚS', code: 'Q69-TXZ-TY4'},
-    {name: 'GEORGERIN LANDAETA, FREIKERLYN INÉS', code: '8DT-AAL-JC4'},
-    {name: 'GONZÁLEZ SOSA, GABRIEL JOSÉ', code: '9Z9-PS2-HRX'},
-    {name: 'HERRERA BLANCO, ABRAHÁN DE JESÚS', code: 'H26-K96-8E7'},
-    {name: 'LEÓN PÉREZ, NICOLLE ELINNYS', code: 'C7F-S5Z-GSN'},
-    {name: 'MEDINA ROJAS, KIMBERLY ANGÉLICA', code: 'M72-L9M-V6L'},
-    {name: 'MENDOZA LIOTTA, SAMUEL ANDRÉS', code: 'TAK-9TF-P8B'},
-    {name: 'MORENO ROJAS, GUILLERMO HANIEL', code: 'B2A-SEN-PVY'},
-    {name: 'MUÑOZ CABRILES, VALERIA ANTONELLA', code: 'AH8-CDG-TAZ'},
-    {name: 'PADRÓN FERNÁNDEZ, JOHANNYS NAZARETH', code: 'NCJ-9QN-YAP'},
-    {name: 'POLO, ORIANYELIS', code: 'RCG-XAM-PN8'},
-    {name: 'PRADO, CÉSAR', code: 'W52-EFD-GBJ'},
-    {name: 'RANGEL VILLASANA, ASHLEY ANTONELLA', code: '5YZ-WLE-CQH'},
-    {name: 'REYES DUQUE, ODLANYER ALBERTO', code: 'SJW-2LF-5PP'},
-    {name: 'RIVERO ESPINOZA, FABIANA DANIELA', code: 'GVJ-AE7-ZQW'},
-    {name: 'UCROS PÉREZ, ESTEBAN JOSUÉ', code: 'LD6-HSM-RUA'},
-    {name: 'VILLANUEVA CARREÑO, IZABELLA AMELIE', code: '3ER-U6V-77X'},
-    {name: 'YÁNEZ GONZÁLEZ, DIEGO ARMANDO', code: '3HQ-PW4-W4F'},
-  ],
-  "B": [
-    {name: 'ARANGUREN RONDÓN, MARÍA FERNANDA', code: 'NVY-MZG-E28'},
-    {name: 'ARTEAGA ÁLVAREZ, LEONELA DAYMARY', code: 'G32-B74-2VR'},
-    {name: 'AULAR ZAMBRANO, YOSUENI ALEXANDRA', code: 'PA6-RV8-J6P'},
-    {name: 'BARRIOS ACEVEDO, ANTONELLA MERCEDES', code: 'VHG-VBQ-46K'},
-    {name: 'BARRIOS SAVARESE, CARMEN LUISA DE JESÚS', code: 'R7A-328-LXT'},
-    {name: 'CALOGERO GONZÁLEZ, YONATHAN JOSUÉ', code: 'MGW-R4C-Y6S'},
-    {name: 'CÓRDOVA MORALES, JOHANNY VALENTINA', code: 'JYX-CDM-V3G'},
-    {name: 'DOMÍNGUEZ ESCOBAR, HELI JULIET', code: 'VKJ-YAY-8M8'},
-    {name: 'DÍAZ GÓMEZ, BRITHANY STEPHANIA', code: 'QBF-BSJ-UGY'},
-    {name: 'DÍAZ RASQUIN, VICTORIA NAZARETH', code: 'MY8-LHK-GXZ'},
-    {name: 'GARAY GUERRERO, BIANCA VICTORIA', code: 'PQT-JXG-53H'},
-    {name: 'GARCÍA RAMOS, ANGELINA SOFÍA', code: '5HX-5XE-YNJ'},
-    {name: 'GUEVARA RAMÍREZ, DIEGO ALEJANDRO', code: 'MDZ-B8F-XZ5'},
-    {name: 'LISCANO TOVAR, GUILLERMO ANTONIO', code: 'AU7-SFW-REA'},
-    {name: 'LOZADA CONTRERAS, ASHLEY', code: 'BDW-XRQ-CP2'},
-    {name: 'MALDONADO SEGOVIA, ENZO ISMAEL', code: '82V-JVU-N9H'},
-    {name: 'MONTENEGRO LÓPEZ, LUIS ÁNGEL', code: 'BAH-J5S-4Z4'},
-    {name: 'NIEVES DELGADO, SAÚL DAVID', code: 'MBZ-H3Q-L8K'},
-    {name: 'OLIVAR HERNÁNDEZ, DYLAN EMMANUEL', code: '2S8-GSS-YQE'},
-    {name: 'PACHECO LA ROSA, ADRIÁN MISAEL', code: 'EXZ-UZ5-MLU'},
-    {name: 'PALACIOS HENRÍQUEZ, WILESKA VALENTINA', code: 'KFC-8ZP-WFX'},
-    {name: 'PORTABARRIA SAAVEDRA, SEBASTIÁN JOSUÉ', code: 'EM5-W4Q-WVV'},
-    {name: 'PRIETO PARADA, AARÓN JOSÉ', code: 'MNA-6LE-KQZ'},
-    {name: 'PURROY LANDAETA, DAIRON JESÚS', code: 'ZR4-9DL-FZU'},
-    {name: 'QUEVEDO FLORES, SEBASTIÁN ALEJANDRO', code: 'F94-SXC-U8L'},
-    {name: 'REQUENA PÉREZ, ARANTZA SOPHIA', code: 'JWR-3UG-N8D'},
-    {name: 'RONDÓN AQUINO, ESTEFANI EVAGELIN', code: 'G6G-T54-XNY'},
-    {name: 'SALAZAR HERNÁNDEZ, SOPHIE ANTHONELLA', code: 'JRT-BHX-LQJ'},
-    {name: 'SAVARESE CASTRO, CHRISYERLI NAZARETH', code: 'UE3-6KK-G3B'},
-    {name: 'SILVEIRA ROJAS, LUISANA SOFÍA', code: 'Q54-HHU-S2F'},
-    {name: 'SÁNCHEZ ESCOBAR, ESMARLIS ZOYMAR', code: '3WM-ZBB-MH5'},
-    {name: 'VARGAS T. KEVIN A', code: '2LL-BN8-MWU'},
-    {name: 'VIELMA RODRÍGUEZ, VICTORIA NAZARETH', code: '97J-S4N-NJ8'},
-    {name: 'DÍAZ, SEBASTIÁN', code: 'P4M-6ZJ-PAE'},
-    {name: 'RIVAS, KATHERIN', code: 'TYN-2XL-Q8Z'},
-  ],
-  "C": [
-    {name: 'AGUILAR RÍOS, ILDEAMAR ANDREA', code: 'S86-JDW-CVW'},
-    {name: 'ALVARADO MORENO, MARION ALEJANDRO', code: 'NZ3-868-P55'},
-    {name: 'BORGES MONTOYA, MILCA NOEMÍ', code: 'EPW-ER2-TM6'},
-    {name: 'CAMPO, ALEXA', code: 'X2P-9MW-5US'},
-    {name: 'CAPOTE HERRERA, CRISBEL DIOXENY', code: 'QAM-UVG-WDD'},
-    {name: 'CARRANZA MEJÍAS, YERMAIN ORLEANYE', code: 'JWD-B8F-4PP'},
-    {name: 'CARRIÓN RAMÍREZ, SOFÍA VALENTINA', code: 'YJ4-FQT-7KH'},
-    {name: 'CASTELLANOS CARRERA, ISABELA SHALOM', code: '2JZ-GA7-VTM'},
-    {name: 'CASTRO GUÍA, HEYNER ALEJANDRO', code: 'K7D-47L-338'},
-    {name: 'CHINCHILLA PEÑA, NAZARETH DE LOS ÁNGELES', code: 'TG4-FCK-YSA'},
-    {name: 'CLAVIJO HERRERA, EILYN VALENTINA', code: '24N-KG5-6GC'},
-    {name: 'CUETO DELFÍN, MARIANA ESTHEFANÍA', code: 'B7A-EES-C7V'},
-    {name: 'ESPINOZA RANGEL, MYA ANTHONELA', code: 'A25-VE9-UEQ'},
-    {name: 'FAJARDO PIAR, VICTORIA ISABELLA', code: '6AL-8HV-AMU'},
-    {name: 'FLORES CASTRO, PEDRO', code: 'HUU-ADY-V64'},
-    {name: 'GARCÍA GUZMÁN, EDWARD', code: 'XK2-LCH-K4B'},
-    {name: 'GARCÍA HERRERA, DAILIMAR NAZARETH', code: 'HSC-DG2-2XP'},
-    {name: 'GARCÍA PIRE, GABRIELA ISABEL', code: 'NV3-UUW-W55'},
-    {name: 'GONZÁLEZ MUJICA, YOSNEIDYS JULIET', code: 'MB9-S4A-J2H'},
-    {name: 'GONZÁLEZ PANACUAL, VICTORIA ALEXANDRA', code: 'LER-KSF-SG3'},
-    {name: 'GÓMEZ INOJOSA, ISABELLA SOPHIA', code: '59R-AWG-NAA'},
-    {name: 'HERNÁNDEZ JARAMILLO, JESÚS DE NAZARETH', code: 'BGD-JEP-EXH'},
-    {name: 'KEY ALZURU, BRYANNA JULIETH', code: '5F3-M5B-DWC'},
-    {name: 'LANDER B. REYZMARYS', code: 'QRW-GFD-CPK'},
-    {name: 'LIBENKO BALLESTERO, CAMILA VALENTINA', code: 'XHR-P8F-687'},
-    {name: 'PARRA TOVAR, ORIANNA COROMOTO', code: 'NLR-9KG-9PK'},
-    {name: 'RIVERA, LUZARIANNY', code: 'HNU-X2L-FTW'},
-    {name: 'SÁNCHEZ GONZÁLEZ, KARLIMAR GABRIELA', code: 'QRP-MGP-T7B'},
-    {name: 'URBAEZ DI BENIGNO, SOPHIA ANTHONELLA', code: 'K75-JQP-LR2'},
-    {name: 'YÁNEZ PEÑALOZA, GIOFREYDER GABRIEL ALEX', code: '4F6-T6S-NM5'},
-    {name: 'ÁLVAREZ JIMÉNEZ, MARÍA FERNANDA', code: 'SKY-GJA-6MA'},
-  ],
-  "D": [    {name: 'ARAFAH, SHARAZAD', code: '3F2-AMN-DH8'},
-    {name: 'HERNÁNDEZ MIRABA, ABRIL SOPHIA', code: 'UGR-XND-P8H'},
-    {name: 'IDROGO, SARAY', code: 'Y5T-DCF-WAR'},
-    {name: 'IRIARTE PÉREZ, HUMBERTO', code: 'QL2-VLP-AT3'},
-    {name: 'JIMÉNEZ RAMÍREZ, GABRIHELA NAZARETH', code: 'RLX-TNH-WNV'},
-    {name: 'LAFFE MARTÍNEZ, GÉNESIS FRENYERLIN', code: '5WC-XZ5-2KD'},
-    {name: 'LAFFE, VALERIA', code: 'L24-4DU-R4T'},
-    {name: 'LANDAETA MARCANO, MAXIMILIANO MIGUEL JO', code: '7LK-RFH-99E'},
-    {name: 'LINARES ALMEIDA, CRISOL MADELEINE', code: '2VK-GGF-D7Y'},
-    {name: 'MANCERA GUZMÁN, ROSNERY DANIELA', code: 'TQA-RFG-A5H'},
-    {name: 'MARTÍNEZ BUSTAMANTE, GILMARY ALEJANDRA', code: 'ALH-YLG-YQE'},
-    {name: 'MARTÍNEZ FRANCO, CRISTHIAN', code: 'W3U-C26-BLX'},
-    {name: 'MEDINA HERNÁNDEZ, BRAHYNER SANTIAGO', code: 'TZU-97S-EZ7'},
-    {name: 'MORENO RINCONES, VIRGINIA ANABEL', code: 'PR9-RFZ-NBK'},
-    {name: 'MOTA CORTEZ, EMELY ALEJANDRA', code: '25T-FEF-GLP'},
-    {name: 'OROZCO GRATEROL, DASHA ELIENAI', code: '6J3-G9D-EUU'},
-    {name: 'OROZCO MARQUINA, SNAIDER LIONEL', code: 'PDZ-2L4-SDS'},
-    {name: 'OSUNA RONDÓN, SEBASTIÁN ALEJANDRO', code: 'K49-VPN-TQL'},
-    {name: 'PACHECO PEÑA, MARIANGEL', code: 'HCN-C7L-VQ9'},
-    {name: 'PEREIRA, VIVIANA', code: 'AKJ-H6A-5CV'},
-    {name: 'PEÑA RASQUIN, ANDRÉS SEBASTIÁN', code: 'EDW-D56-WPG'},
-    {name: 'PÉREZ POZO, MELANNY DE LOS ÁNGELES', code: 'FPY-YWD-ZC2'},
-    {name: 'QUINTANA, CAMILA', code: 'YEB-EPY-ZA9'},
-    {name: 'RAMOS VÁSQUEZ, DORIANNYS EVERLEINS', code: '6VJ-9MC-SK8'},
-    {name: 'RAMÍREZ TOVAR, LISVANY KATERINE', code: '63T-NLB-ZYN'},
-    {name: 'REINOZA GIL, ABNER ALEJANDRO', code: 'GMW-RY7-Z2K'},
-    {name: 'RIVERA MARTÍNEZ, ANZZAC YAHIR', code: '8XR-TH8-HW9'},
-    {name: 'RODRÍGUEZ HERNÁNDEZ, SOFÍA NAZARETH', code: 'AJD-GFC-WL3'},
-    {name: 'ROJAS AYALA, ASHLY NAIRIM', code: 'SE7-NSM-EHR'},
-    {name: 'ROMERO GUEVARA, KEIVER SAMUEL', code: 'Q9Y-4V7-VEV'},
-    {name: 'SALCEDO CASTRO, JEREMÍAS DENNIER', code: '9FZ-PG9-DD7'},
-  ],
-};
+const STUDENT_ROSTER = {};let studentCode = '';
 
-let studentCode = '';
+function onSectionChange() { const input=document.getElementById('studentNameSelect'); if(input) input.disabled=false; }
 
-function onSectionChange() {
-  const sec = document.getElementById('studentSectionInput').value;
-  const sel = document.getElementById('studentNameSelect');
-  if (!sel) return;
-  sel.innerHTML = '';
-  if (!sec || !STUDENT_ROSTER[sec]) {
-    sel.disabled = true;
-    const opt = document.createElement('option');
-    opt.value = '';
-    opt.textContent = '— Primero elige la sección —';
-    sel.appendChild(opt);
-    return;
-  }
-  sel.disabled = false;
-  const opt0 = document.createElement('option');
-  opt0.value = '';
-  opt0.textContent = '— Elige tu nombre —';
-  sel.appendChild(opt0);
-  STUDENT_ROSTER[sec].forEach(function(st, idx) {
-    const opt = document.createElement('option');
-    opt.value = String(idx);
-    opt.textContent = st.name;
-    sel.appendChild(opt);
-  });
-}
-
-function getSelectedStudent() {
-  const sec = document.getElementById('studentSectionInput').value;
-  const sel = document.getElementById('studentNameSelect');
-  if (!sec || !sel || sel.value === '') return null;
-  const list = STUDENT_ROSTER[sec];
-  if (!list) return null;
-  const idx = parseInt(sel.value, 10);
-  if (isNaN(idx) || idx < 0 || idx >= list.length) return null;
-  return { section: sec, name: list[idx].name, code: list[idx].code };
-}
+function getSelectedStudent() { const sec=document.getElementById('studentSectionInput').value; const input=document.getElementById('studentNameSelect'); const name=input && input.value.trim(); if(!sec || !name) return null; return {section:sec,name:name,code:''}; }
 
 let studentName = 'Estudiante';
 let studentSection = 'A';
@@ -1090,8 +869,8 @@ function startGame() {
   const st = getSelectedStudent();
   if (!st) {
     const msg = document.getElementById('unlockMessage');
-    if (msg) msg.textContent = '⚠️ Elige tu sección y tu nombre de la lista antes de comenzar.';
-    alert('Elige tu sección y luego tu nombre de la lista.');
+    if (msg) msg.textContent = '⚠️ Selecciona tu sección y escribe tu nombre antes de comenzar.';
+    alert('Selecciona tu sección y escribe tu nombre.');
     return;
   }
   studentName = st.name;
@@ -1337,7 +1116,7 @@ function endGame() {
 /* ============================================================
    VERIFICACIÓN ANTI-PLAGIO (código + QR)
    ============================================================ */
-const VERIFY_SECRET = 'JMC-GILBERTO-FISICA-2026';
+const VERIFY_SECRET = 'LOCAL-VERIFY-KEY';
 
 function simpleHash(str) {
   let h = 2166136261;
@@ -1358,8 +1137,8 @@ function makeVerificationCode(gameId, name, section, points, grade) {
 function buildVerifyPayload(gameTitle, name, section, yearLabel, points, grade, badge, code) {
   return [
     'VERIFICACION DE LOGRO',
-    'Colegio: U.E.P. Jose Maria Carreno',
-    'Profesor: GILAST',
+    'Colegio: ',
+    '',
     'Juego: ' + gameTitle,
     'Estudiante: ' + name,
     'Curso: ' + yearLabel,
@@ -1380,7 +1159,7 @@ function drawCertificateChrome(ctx, w, h, accent) {
   ctx.font = '12px Arial';
   for (let y = 40; y < h; y += 28) {
     for (let x = 20; x < w; x += 120) {
-      ctx.fillText('JMC', x + ((y / 28) % 2) * 40, y);
+      ctx.fillText('', x + ((y / 28) % 2) * 40, y);
     }
   }
   ctx.restore();
@@ -1390,7 +1169,7 @@ function loadQrImage(text, size) {
   return new Promise(function(resolve) {
     const img = new Image();
     img.crossOrigin = 'anonymous';
-    const url = 'https://api.qrserver.com/v1/create-qr-code/?size=' + size + 'x' + size + '&margin=8&data=' + encodeURIComponent(text);
+    const url = 'https://api.removed-qr.invalid/v1/create-qr-code/?size=' + size + 'x' + size + '&margin=8&data=' + encodeURIComponent(text);
     img.onload = function() { resolve(img); };
     img.onerror = function() { resolve(null); };
     img.src = url;
@@ -1437,7 +1216,7 @@ async function downloadAchievement() {
 
   ctx.fillStyle = 'rgba(255,255,255,0.85)';
   ctx.font = '16px Arial';
-  ctx.fillText('GILAST — Producido por GILAST', 450, 155);
+  ctx.fillText('', 450, 155);
 
   ctx.fillStyle = 'rgba(255,255,255,0.85)';
   ctx.font = '18px Arial';
@@ -1464,7 +1243,7 @@ async function downloadAchievement() {
 
   ctx.fillStyle = '#ffcc00';
   ctx.font = 'bold 18px Arial';
-  ctx.fillText('Código de verificación: ' + lastVerifyCode, 450, 445);
+  ctx.fillText('' + lastVerifyCode, 450, 445);
 
   const fecha = new Date().toLocaleDateString('es-VE', { year: 'numeric', month: 'long', day: 'numeric' });
   ctx.fillStyle = 'rgba(255,255,255,0.7)';

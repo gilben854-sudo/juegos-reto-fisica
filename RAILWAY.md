@@ -8,5 +8,5 @@
 6. Generate Domain en Settings → Networking
 7. Abre la URL /catalogo.html y /profesor.html
 
-Admin: admin / NewtonSaaS2026!
-Cambia la contraseña en producción.
+Admin: entra en `/admin.html` con tus credenciales privadas.
+La contraseña puede cambiarse desde el panel; no la guardes en este archivo.

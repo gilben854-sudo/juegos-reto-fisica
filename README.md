@@ -18,10 +18,10 @@ npm start
 ```
 Abre http://localhost:3780
 
-### Admin por defecto
+### Acceso del administrador
 - Usuario: `admin`
-- Contraseña: `NewtonSaaS2026!`
-**Cámbiala en producción.**
+- La contraseña se configura de forma privada y puede cambiarse desde `/admin.html`.
+- No publiques contraseñas ni hashes en la documentación.
 
 ## Despliegue (Railway / Render / VPS)
 1. Sube esta carpeta a GitHub.
@@ -34,6 +34,8 @@ Abre http://localhost:3780
 - Los juegos deben consultar esto **antes** de habilitar el reto.
 
 ## Seguridad
-- Contraseñas con hash SHA-256 + salt (mejorable a bcrypt en producción).
+- Contraseñas con hash scrypt y migración automática de hashes antiguos.
+- Límite de intentos de inicio de sesión y tokens de sesión temporales.
+- No uses una base de datos de producción dentro de un repositorio público.
 - Tokens de sesión con expiración 12 h.
 - Sin licencia activa no hay configuración ni resultados.

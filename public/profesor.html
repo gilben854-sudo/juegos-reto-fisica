@@ -84,7 +84,7 @@
       method: body ? 'POST' : 'GET',
       headers: { 'Content-Type': 'application/json' }
     };
-    var token = localStorage.getItem('saas_token') || '';
+    var token = sessionStorage.getItem('saas_token') || '';
     if (token) opts.headers.Authorization = 'Bearer ' + token;
     if (body) opts.body = JSON.stringify(body);
     var r = await fetch(path, opts);
@@ -130,8 +130,8 @@
       var code = data.teacher && data.teacher.classCode;
       showMsg('Cuenta creada. Codigo: ' + code, true);
       var login = await api('/api/teacher/login', { email: email, password: pass });
-      localStorage.setItem('saas_token', login.token);
-      localStorage.setItem('saas_role', 'teacher');
+      sessionStorage.setItem('saas_token', login.token);
+      sessionStorage.setItem('saas_role', 'teacher');
       showDash(login.teacher || data.teacher);
     } catch (e) {
       showMsg(e.message || String(e), false);
@@ -149,8 +149,8 @@
     }
     try {
       var login = await api('/api/teacher/login', { email: email, password: pass });
-      localStorage.setItem('saas_token', login.token);
-      localStorage.setItem('saas_role', 'teacher');
+      sessionStorage.setItem('saas_token', login.token);
+      sessionStorage.setItem('saas_role', 'teacher');
       showDash(login.teacher);
     } catch (e) {
       showMsg(e.message || String(e), false);
@@ -164,12 +164,12 @@
     alert('Codigo copiado: ' + c);
   };
   document.getElementById('btnOut').onclick = function(){
-    localStorage.removeItem('saas_token');
-    localStorage.removeItem('saas_role');
+    sessionStorage.removeItem('saas_token');
+    sessionStorage.removeItem('saas_role');
     location.reload();
   };
 
-  if (localStorage.getItem('saas_token') && localStorage.getItem('saas_role') === 'teacher') {
+  if (sessionStorage.getItem('saas_token') && sessionStorage.getItem('saas_role') === 'teacher') {
     api('/api/teacher/me').then(function(data){ showDash(data.teacher); }).catch(function(){});
   }
 })();
