@@ -31,7 +31,7 @@
     <label>Correo</label>
     <input id="rEmail" type="email" placeholder="correo@ejemplo.com">
     <label>Contraseña (mínimo 6 caracteres)</label>
-    <input id="rPass" type="password" placeholder="******">
+    <div class="password-wrap"><input id="rPass" type="password" placeholder="******"><button type="button" class="password-toggle" onclick="togglePassword('rPass',this)" aria-label="Mostrar la contraseña">Mostrar</button></div>
     <label>Colegio (opcional)</label>
     <input id="rSchool" placeholder="Nombre del colegio">
     <p style="margin-top:12px">
@@ -44,7 +44,7 @@
     <label>Correo</label>
     <input id="email" type="email">
     <label>Contraseña</label>
-    <input id="pass" type="password">
+    <div class="password-wrap"><input id="pass" type="password"><button type="button" class="password-toggle" onclick="togglePassword('pass',this)" aria-label="Mostrar la contraseña">Mostrar</button></div>
     <p style="margin-top:12px">
       <button class="btn btn-outline" type="button" id="btnLogin">Entrar</button>
     </p>
@@ -69,6 +69,14 @@
 </div>
 <script>
 (function(){
+  function togglePassword(id, button){
+    var input = document.getElementById(id);
+    if (!input) return;
+    var visible = input.type === 'text';
+    input.type = visible ? 'password' : 'text';
+    button.textContent = visible ? 'Mostrar' : 'Ocultar';
+    button.setAttribute('aria-label', (visible ? 'Mostrar' : 'Ocultar') + ' la contraseña');
+  }
   function showMsg(text, ok){
     var el = document.getElementById('msg');
     el.className = 'msg show ' + (ok ? 'ok' : 'bad');

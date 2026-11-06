@@ -16,7 +16,7 @@
     <label>Usuario</label>
     <input id="user" value="admin" autocomplete="username">
     <label>Contraseña</label>
-    <input id="pass" type="password" autocomplete="current-password">
+    <div class="password-wrap"><input id="pass" type="password" autocomplete="current-password"><button type="button" class="password-toggle" onclick="togglePassword('pass',this)" aria-label="Mostrar la contraseña">Mostrar</button></div>
     <button class="btn btn-primary" type="button" onclick="doLogin()">Entrar</button>
     <p class="muted">Usa la clave configurada por el administrador.</p>
   </div>
@@ -30,9 +30,9 @@
       <h2>Cambiar clave de administrador</h2>
       <p class="muted">La clave nunca se muestra ni se guarda en el navegador. Debe tener al menos 8 caracteres.</p>
       <div class="grid">
-        <div><label>Clave actual</label><input id="adminCurrentPass" type="password" autocomplete="current-password"></div>
-        <div><label>Nueva clave</label><input id="adminNewPass" type="password" autocomplete="new-password"></div>
-        <div><label>Repetir nueva clave</label><input id="adminNewPass2" type="password" autocomplete="new-password"></div>
+        <div><label>Clave actual</label><div class="password-wrap"><input id="adminCurrentPass" type="password" autocomplete="current-password"><button type="button" class="password-toggle" onclick="togglePassword('adminCurrentPass',this)" aria-label="Mostrar la contraseña">Mostrar</button></div></div>
+        <div><label>Nueva clave</label><div class="password-wrap"><input id="adminNewPass" type="password" autocomplete="new-password"><button type="button" class="password-toggle" onclick="togglePassword('adminNewPass',this)" aria-label="Mostrar la contraseña">Mostrar</button></div></div>
+        <div><label>Repetir nueva clave</label><div class="password-wrap"><input id="adminNewPass2" type="password" autocomplete="new-password"><button type="button" class="password-toggle" onclick="togglePassword('adminNewPass2',this)" aria-label="Mostrar la contraseña">Mostrar</button></div></div>
       </div>
       <button class="btn btn-gold" type="button" onclick="changeAdminPassword()">Guardar nueva clave</button>
       <div class="ok" id="passOk"></div>
@@ -43,7 +43,7 @@
       <div class="grid">
         <div><label>Nombre</label><input id="nName"></div>
         <div><label>Correo</label><input id="nEmail" type="email"></div>
-        <div><label>Contraseña temporal</label><input id="nPass" type="text"></div>
+        <div><label>Contraseña temporal</label><div class="password-wrap"><input id="nPass" type="password" autocomplete="new-password"><button type="button" class="password-toggle" onclick="togglePassword('nPass',this)" aria-label="Mostrar la contraseña">Mostrar</button></div></div>
         <div><label>Colegio</label><input id="nSchool"></div>
         <div><label>Días de acceso</label><input id="nDays" type="number" value="30"></div>
       </div>
@@ -64,6 +64,14 @@
 </div>
 <script src="/js/api.js"></script>
 <script>
+function togglePassword(id, button){
+  const input=document.getElementById(id);
+  if(!input) return;
+  const visible=input.type==='text';
+  input.type=visible?'password':'text';
+  button.textContent=visible?'Mostrar':'Ocultar';
+  button.setAttribute('aria-label',(visible?'Mostrar':'Ocultar')+' la contraseña');
+}
 async function doLogin(){
   hide(err); 
   try{
