@@ -45,9 +45,13 @@ async function checkAccess(){
     localStorage.setItem('saas_classCode', code);
     localStorage.setItem('saas_studentName', name);
     localStorage.setItem('saas_certEmail', data.certificateEmail||'');
+    localStorage.setItem('saas_teacherName', data.teacherName||'');
+    localStorage.setItem('saas_access_ok','1');
+    localStorage.setItem('saas_subjects', JSON.stringify(data.subjects||[]));
     show(ok,'Acceso concedido. Profesor: '+(data.teacherName||'')+' · Colegio: '+(data.school||'—'));
     info.textContent='Correo del profesor (certificados): '+(data.certificateEmail||'—')+' · Código: '+data.classCode;
     playBox.classList.remove('locked');
+    location.href='/catalogo.html';
   }catch(e){ show(err,e.message); }
 }
 </script>

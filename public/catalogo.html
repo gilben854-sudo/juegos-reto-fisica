@@ -260,7 +260,20 @@ document.getElementById('grid').addEventListener('click', function(ev){
   if(a){ ev.preventDefault(); show(document.getElementById('err'), 'Primero comprueba el acceso con el código de clase'); }
 });
 
+async function revalidateSavedAccess(){
+  const code=(localStorage.getItem('saas_classCode')||'').trim().toUpperCase();
+  const name=(localStorage.getItem('saas_studentName')||'').trim();
+  if(!code || !name || localStorage.getItem('saas_access_ok')!=='1') return;
+  try{
+    const r=await fetch(API_BASE+'/api/access/check?classCode='+encodeURIComponent(code),{cache:'no-store'});
+    const d=await r.json();
+    if(!d.allowed){ clearAccess(); show(document.getElementById('err'),'La licencia del profesor venció o fue suspendida. Ingresa con un código vigente.'); return; }
+    localStorage.setItem('saas_subjects',JSON.stringify(d.subjects||[]));
+  }catch(e){ clearAccess(); show(document.getElementById('err'),'No se pudo validar la vigencia del código.'); }
+}
+
 statusLine();
+revalidateSavedAccess();
 showSubject('fisica', document.querySelector('[data-subject-button="fisica"]'));
 if(localStorage.getItem('saas_classCode')) document.getElementById('classCode').value=localStorage.getItem('saas_classCode');
 if(localStorage.getItem('saas_studentName')) document.getElementById('studentName').value=localStorage.getItem('saas_studentName');

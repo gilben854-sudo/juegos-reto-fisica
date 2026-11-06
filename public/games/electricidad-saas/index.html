@@ -1,6 +1,23 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+<script id="SAAS_ACCESS_GUARD_V1">
+/* El código del profesor es obligatorio y se revalida contra la licencia en cada apertura. */
+(async function(){
+  const code=(localStorage.getItem('saas_classCode')||'').trim().toUpperCase();
+  const name=(localStorage.getItem('saas_studentName')||'').trim();
+  const fail=function(){ ['saas_access_ok','saas_classCode','saas_studentName','saas_subjects'].forEach(k=>localStorage.removeItem(k)); location.replace('/catalogo.html?access=expired'); };
+  if(!code||!name) return fail();
+  try{
+    const r=await fetch('/api/access/check?classCode='+encodeURIComponent(code),{cache:'no-store'});
+    const d=await r.json();
+    if(!d.allowed || (Array.isArray(d.subjects)&&d.subjects.length&&!d.subjects.includes('fisica'))) return fail();
+    localStorage.setItem('saas_access_ok','1');
+    localStorage.setItem('saas_subjects',JSON.stringify(d.subjects||[]));
+  }catch(e){ return fail(); }
+})();
+</script>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="color-scheme" content="light only">
