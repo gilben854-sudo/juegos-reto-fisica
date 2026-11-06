@@ -221,6 +221,20 @@ const server = http.createServer(async (req, res) => {
       return send(res, 200, { teachers: Object.values(a.db.teachers).map(publicTeacher) });
     }
 
+    if (p.startsWith('/api/admin/teachers/') && p.endsWith('/password') && req.method === 'POST') {
+      const a = auth(req, 'admin');
+      if (!a) return send(res, 401, { error: 'No autorizado' });
+      const id = p.split('/')[4];
+      const t = a.db.teachers[id];
+      if (!t) return send(res, 404, { error: 'No encontrado' });
+      const body = await readBody(req);
+      const password = String(body.password || '');
+      if (password.length < 8) return send(res, 400, { error: 'La nueva clave debe tener al menos 8 caracteres' });
+      t.password_hash = hashPw(password);
+      saveDb(a.db);
+      return send(res, 200, { ok: true });
+    }
+
     if (p.startsWith('/api/admin/teachers/') && p.endsWith('/activate') && req.method === 'POST') {
       const a = auth(req, 'admin');
       if (!a) return send(res, 401, { error: 'No autorizado' });

@@ -218,6 +218,18 @@ app.get('/api/admin/teachers', (req, res) => {
   res.json({ teachers: list });
 });
 
+app.post('/api/admin/teachers/:id/password', (req, res) => {
+  const a = authAdmin(req);
+  if (!a) return res.status(401).json({ error: 'No autorizado' });
+  const t = a.db.teachers[req.params.id];
+  if (!t) return res.status(404).json({ error: 'Profesor no encontrado' });
+  const password = String(req.body.password || '');
+  if (password.length < 8) return res.status(400).json({ error: 'La nueva clave debe tener al menos 8 caracteres' });
+  t.password_hash = hashPw(password);
+  saveDb(a.db);
+  res.json({ ok: true });
+});
+
 app.post('/api/admin/teachers/:id/activate', (req, res) => {
   const a = authAdmin(req);
   if (!a) return res.status(401).json({ error: 'No autorizado' });

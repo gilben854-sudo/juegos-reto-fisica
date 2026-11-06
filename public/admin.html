@@ -102,12 +102,24 @@ async function loadTeachers(){
     const tr=document.createElement('tr');
     tr.innerHTML=`<td>${esc(t.name)}</td><td>${esc(t.email)}</td><td>${plan}</td><td>${st}</td><td>${t.validUntil?new Date(t.validUntil).toLocaleDateString():'—'}</td><td><b>${esc(t.classCode||'')}</b></td>
       <td>
+        <input id="resetPass-${t.id}" type="password" placeholder="Nueva clave (8+)" autocomplete="new-password">
+        <button class="btn btn-gold" type="button" onclick="resetTeacherPassword('${t.id}')">Cambiar clave</button>
         <button class="btn btn-ok" type="button" onclick="activate('${t.id}',30)">+30 días</button>
         <button class="btn btn-gold" type="button" onclick="activate('${t.id}',365)">+1 año</button>
         <button class="btn btn-bad" type="button" onclick="suspend('${t.id}')">Suspender</button>
       </td>`;
     tbody.appendChild(tr);
   });
+}
+async function resetTeacherPassword(id){
+  const field=document.getElementById('resetPass-'+id);
+  const password=field ? field.value : '';
+  if(password.length < 8){ alert('La nueva clave debe tener al menos 8 caracteres.'); return; }
+  try{
+    await API.req('/api/admin/teachers/'+id+'/password',{method:'POST',body:JSON.stringify({password})});
+    field.value='';
+    alert('Clave del profesor actualizada.');
+  }catch(e){ alert(e.message); }
 }
 async function activate(id,days){
   await API.req('/api/admin/teachers/'+id+'/activate',{method:'POST',body:JSON.stringify({days,plan:'paid'})});
