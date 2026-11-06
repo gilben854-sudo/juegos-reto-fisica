@@ -42,7 +42,7 @@ footer{text-align:center;color:#64748b;font-size:.8rem;padding:24px 12px}
 <header>
   <h1>Juegos de Reto para Física y Química</h1>
   <p class="slogan">Aprende ciencias resolviendo retos</p>
-  <p class="sub">Física y Química · 21 módulos</p>
+  <p class="sub">Física, Química y Biología · 30 módulos</p>
 </header>
 <div class="wrap">
   <div class="gate">
@@ -65,6 +65,7 @@ footer{text-align:center;color:#64748b;font-size:.8rem;padding:24px 12px}
   <div class="subject-nav" aria-label="Materias">
     <button type="button" class="btn subject-btn active" data-subject-button="fisica" onclick="showSubject('fisica',this)">Física</button>
     <button type="button" class="btn subject-btn" data-subject-button="quimica" onclick="showSubject('quimica',this)">Química</button>
+    <button type="button" class="btn subject-btn" data-subject-button="biologia" onclick="showSubject('biologia',this)">Biología</button>
   </div>
   <div class="grid locked-overlay" id="grid">
     <div class="section-title" data-subject="fisica">Juegos de Física</div>
@@ -143,9 +144,19 @@ footer{text-align:center;color:#64748b;font-size:.8rem;padding:24px 12px}
     <a class="card-mod" href="games/oxidacion-saas/index.html" data-module="quimica-oxidacion"><div class="card-title">Estados de oxidación</div><div class="card-desc">Calcula estados de oxidación</div><div class="card-go">Entrar →</div></a>
     <a class="card-mod" href="games/mol-masa-molar-saas/index.html" data-module="quimica-mol"><div class="card-title">Mol y masa molar</div><div class="card-desc">Cantidad de sustancia y masa</div><div class="card-go">Entrar →</div></a>
     <a class="card-mod" href="games/acidos-bases-ph-saas/index.html" data-module="quimica-ph"><div class="card-title">Ácidos, bases y pH</div><div class="card-desc">Reconoce pH, ácidos y bases</div><div class="card-go">Entrar →</div></a>
+    <div class="section-title" data-subject="biologia">Juegos de Biología</div>
+    <a class="card-mod" href="games/celula-saas/index.html" data-module="biologia-celula"><div class="card-title">La célula</div><div class="card-desc">Estructura y funciones celulares</div><div class="card-go">Entrar →</div></a>
+    <a class="card-mod" href="games/genetica-saas/index.html" data-module="biologia-genetica"><div class="card-title">Genética</div><div class="card-desc">ADN, genes y herencia</div><div class="card-go">Entrar →</div></a>
+    <a class="card-mod" href="games/ecosistemas-saas/index.html" data-module="biologia-ecosistemas"><div class="card-title">Ecosistemas</div><div class="card-desc">Relaciones entre seres vivos y ambiente</div><div class="card-go">Entrar →</div></a>
+    <a class="card-mod" href="games/fotosintesis-saas/index.html" data-module="biologia-fotosintesis"><div class="card-title">Fotosíntesis</div><div class="card-desc">Cómo las plantas producen alimento</div><div class="card-go">Entrar →</div></a>
+    <a class="card-mod" href="games/sistemas-cuerpo-saas/index.html" data-module="biologia-sistemas"><div class="card-title">Sistemas del cuerpo humano</div><div class="card-desc">Funciones de los principales sistemas</div><div class="card-go">Entrar →</div></a>
+    <a class="card-mod" href="games/anatomia-saas/index.html" data-module="biologia-anatomia"><div class="card-title">Anatomía básica</div><div class="card-desc">Órganos, tejidos y organización corporal</div><div class="card-go">Entrar →</div></a>
+    <a class="card-mod" href="games/reproduccion-saas/index.html" data-module="biologia-reproduccion"><div class="card-title">Reproducción</div><div class="card-desc">Reproducción y desarrollo</div><div class="card-go">Entrar →</div></a>
+    <a class="card-mod" href="games/evolucion-saas/index.html" data-module="biologia-evolucion"><div class="card-title">Evolución y adaptación</div><div class="card-desc">Cambios en poblaciones a través del tiempo</div><div class="card-go">Entrar →</div></a>
+    <a class="card-mod" href="games/simulador-biologia-saas/index.html" data-module="biologia-simulador"><div class="card-title">Simulador de laboratorio biológico</div><div class="card-desc">Microscopía, observación y seguridad</div><div class="card-go">Entrar →</div></a>
   </div>
 </div>
-<footer>Juegos de Reto para Física y Química · Aprende ciencias resolviendo retos · Producido por GILAST</footer>
+<footer>Juegos de Reto para Física, Química y Biología · Aprende ciencias resolviendo retos · Producido por GILAST</footer>
 <script>
 // API base: same origin when served by saas-platform; override if games on another host
 const API_BASE = localStorage.getItem('saas_api_base') || '';
@@ -204,8 +215,8 @@ function lockGrid(locked){
 function showSubject(subject, button){
   document.querySelectorAll('[data-subject-button]').forEach(b=>b.classList.toggle('active', b===button));
   document.querySelectorAll('#grid .card-mod, #grid .section-title').forEach(el=>{
-    const isChemistry=(el.dataset.module||'').startsWith('quimica-') || el.dataset.subject==='quimica';
-    const current=isChemistry?'quimica':'fisica';
+    const module=(el.dataset.module||'');
+    const current=el.dataset.subject || (module.startsWith('quimica-')?'quimica':module.startsWith('biologia-')?'biologia':'fisica');
     el.style.display=current===subject?'block':'none';
   });
 }
