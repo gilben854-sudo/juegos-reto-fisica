@@ -23,6 +23,12 @@
       <a class="btn btn-gold" href="/admin.html">Administración</a>
     </div>
   </div>
+  <div class="card install-card" id="installCard" style="border:2px solid #2563eb;background:#eff6ff">
+    <h2>Instalar Juegos de Reto</h2>
+    <p class="muted" id="installHelp">Puedes instalar la plataforma como una aplicación en tu teléfono. Si no aparece el botón, abre el menú del navegador y elige <b>Instalar aplicación</b> o <b>Añadir a pantalla de inicio</b>.</p>
+    <button class="btn btn-primary" id="installButton" type="button" hidden>Instalar aplicación</button>
+    <p class="muted" id="installStatus" aria-live="polite" style="margin-top:8px"></p>
+  </div>
   <div class="card">
     <h2>Cómo funciona el control</h2>
     <ol class="muted">
@@ -34,5 +40,13 @@
     </ol>
   </div>
 </div>
-<script>if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("/sw.js").catch(()=>{}));}</script></body>
+<script>
+let deferredInstallPrompt=null;
+const installButton=document.getElementById('installButton');
+const installStatus=document.getElementById('installStatus');
+window.addEventListener('beforeinstallprompt',event=>{event.preventDefault();deferredInstallPrompt=event;installButton.hidden=false;});
+installButton.addEventListener('click',async()=>{if(!deferredInstallPrompt)return;deferredInstallPrompt.prompt();const choice=await deferredInstallPrompt.userChoice;installStatus.textContent=choice.outcome==='accepted'?'Instalación iniciada. Revisa tu pantalla de inicio.':'La instalación fue cancelada; puedes intentarlo nuevamente desde el menú del navegador.';deferredInstallPrompt=null;installButton.hidden=true;});
+window.addEventListener('appinstalled',()=>{installStatus.textContent='Aplicación instalada correctamente.';installButton.hidden=true;});
+if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("/sw.js").then(()=>{if(window.matchMedia('(display-mode: standalone)').matches)installStatus.textContent='Aplicación instalada y funcionando.';}).catch(()=>{installStatus.textContent='Para instalar: abre el menú del navegador y elige Añadir a pantalla de inicio.';}));}
+</script></body>
 </html>
