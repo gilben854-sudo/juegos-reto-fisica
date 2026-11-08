@@ -256,6 +256,9 @@ async function unlockCatalog(){
     show(ok, 'Acceso concedido · Profesor: ' + (data.teacherName||'') + ' · Puedes entrar a los módulos');
     lockGrid(false);
     statusLine();
+    const allowedAfterLogin=Array.isArray(data.subjects)?data.subjects:[];
+    const firstAfterLogin=allowedAfterLogin[0]||'fisica';
+    showSubject(firstAfterLogin, document.querySelector('[data-subject-button="'+firstAfterLogin+'"]'));
   }catch(e){
     show(err, 'No se pudo contactar el servidor de licencias. ¿Está en marcha la plataforma? (' + e.message + ')');
     lockGrid(true);
@@ -287,7 +290,7 @@ function showSubject(subject, button){
   document.querySelectorAll('#grid .card-mod, #grid .section-title').forEach(el=>{
     const module=(el.dataset.module||'');
     const current=el.dataset.subject || (module.startsWith('quimica-')?'quimica':module.startsWith('biologia-')?'biologia':module.startsWith('matematicas-')?'matematicas':'fisica');
-    el.style.display=current===subject?'block':'none';
+    el.style.setProperty('display', current===subject?'block':'none', 'important');
   });
 }
 
@@ -320,6 +323,9 @@ async function revalidateSavedAccess(){
     if(!d.allowed){ clearAccess(); show(document.getElementById('err'),'La licencia del profesor venció o fue suspendida. Ingresa con un código vigente.'); return; }
     localStorage.setItem('saas_subjects',JSON.stringify(d.subjects||[]));
     localStorage.setItem('saas_student_token',d.accessToken||localStorage.getItem('saas_student_token')||'');
+    const allowedSaved=Array.isArray(d.subjects)?d.subjects:[];
+    const firstSaved=allowedSaved[0]||'fisica';
+    showSubject(firstSaved, document.querySelector('[data-subject-button="'+firstSaved+'"]'));
   }catch(e){ clearAccess(); show(document.getElementById('err'),'No se pudo validar la vigencia del código.'); }
 }
 
