@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="es">
+<head><script id="SAAS_ACCESS_GUARD_V1">
+(async function(){
+  const code=(localStorage.getItem('saas_classCode')||'').trim().toUpperCase();
+  const name=(localStorage.getItem('saas_studentName')||'').trim();
+  const fail=function(){ ['saas_access_ok','saas_classCode','saas_studentName','saas_subjects','saas_student_token'].forEach(k=>localStorage.removeItem(k)); location.replace('/catalogo.html?access=expired'); };
+  if(!code||!name) return fail();
+  try{
+    const r=await fetch('/api/access/check?classCode='+encodeURIComponent(code),{cache:'no-store',headers:{Authorization:'Bearer '+(localStorage.getItem('saas_student_token')||'')}});
+    const d=await r.json();
+    if(!d.allowed || (Array.isArray(d.subjects)&&d.subjects.length&&!d.subjects.includes('biologia'))) return fail();
+    localStorage.setItem('saas_access_ok','1');
+    localStorage.setItem('saas_student_token',d.accessToken||localStorage.getItem('saas_student_token')||'');
+    localStorage.setItem('saas_subjects',JSON.stringify(d.subjects||[]));
+  }catch(e){ return fail(); }
+})();
+window.saasSubmitResult=async function(result){ const t=localStorage.getItem('saas_student_token')||''; if(!t) return {ok:false}; const r=await fetch('/api/results',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+t},body:JSON.stringify(result||{})}); return r.json(); };
+</script>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Juegos de Reto — Fotosintópolis multijugador</title>
+<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<style>
+:root{--bg:#0f172a;--card:#1e293b;--accent:#4ade80;--success:#22c55e;--danger:#ef4444;--text:#f8fafc;--muted:#94a3b8}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100dvh}
+.screen{display:none;padding:12px;max-width:480px;margin:0 auto}.screen.active{display:block}
+h1{font-size:1.4rem;text-align:center;margin:6px 0;background:linear-gradient(90deg,#4ade80,#38bdf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.btn{display:block;width:100%;padding:13px;margin:6px 0;border:none;border-radius:12px;font-size:.95rem;font-weight:700;background:var(--accent);color:#0f172a;cursor:pointer}
+.btn:active{transform:scale(.97)}.btn:disabled{opacity:.4}
+.btn-secondary{background:var(--card);color:var(--text);border:1px solid #475569}
+.btn-success{background:var(--success);color:#fff}.btn-danger{background:var(--danger);color:#fff}
+.card{background:var(--card);border-radius:14px;padding:14px;margin:10px 0;border:1px solid #334155}
+input{width:100%;padding:12px;border-radius:10px;border:1px solid #334155;background:#0f172a;color:var(--text);font-size:1rem;margin:6px 0}
+.goal{background:linear-gradient(90deg,#14532d,#0c4a6e);border:1px solid #4ade80;border-radius:10px;padding:8px;text-align:center;font-size:.82rem;margin-bottom:6px}
+.ranking{display:flex;gap:5px;overflow-x:auto;padding:2px 0 6px}
+.rank-chip{flex-shrink:0;background:var(--card);border-radius:10px;padding:6px 10px;border:2px solid #334155;min-width:100px;text-align:center;font-size:.72rem}
+.rank-chip.me{border-color:var(--accent);background:#14532d}
+.rank-chip .money{color:var(--success);font-weight:800}
+.guide{background:#14532d;border:1px solid #22c55e;border-radius:10px;padding:10px;text-align:center;font-weight:700;font-size:.88rem;margin-bottom:8px}
+.guide.wait{background:#1e293b;border-color:#475569;color:var(--muted)}
+.board-scroll{width:100%;overflow:auto;-webkit-overflow-scrolling:touch;border-radius:12px;border:3px solid #1e293b;background:#14532d;margin-bottom:8px;max-height:42vh}
+.board-container{display:grid;grid-template-columns:repeat(11,1fr);grid-template-rows:repeat(11,1fr);width:640px;height:640px;background:#166534;margin:0 auto}
+.board-center{grid-column:2/11;grid-row:2/11;background:linear-gradient(160deg,#0f172a,#1e293b);border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;border:2px solid #334155;z-index:2}
+.board-center .title{font-size:1rem;color:var(--accent);font-weight:800}
+.dice{display:inline-block;width:42px;height:42px;margin:0 3px;background:#fff;color:#0f172a;border-radius:9px;font-size:1.3rem;font-weight:800;line-height:42px}
+.space{background:#f8fafc;color:#0f172a;font-size:.58rem;font-weight:700;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;border:1px solid #64748b;overflow:hidden;position:relative;min-height:0}
+.space .sym{font-size:.72rem;font-weight:800}.space .price{font-size:.5rem;color:#475569}
+.space.corner{font-size:.6rem;font-weight:800;background:#e2e8f0}
+.space.chance{background:#fef3c7;color:#92400e}.space.community{background:#dbeafe;color:#1e40af}
+.space.station{background:#e0e7ff;color:#3730a3}.space.lab{background:#fce7f3;color:#9d174d}
+.space.current-highlight{box-shadow:inset 0 0 0 3px #4ade80;background:#dcfce7!important}
+.g-photo{border-top:5px solid #22c55e}.g-resp{border-top:5px solid #f97316}.g-org{border-top:5px solid #3b82f6}.g-mol{border-top:5px solid #a855f7}
+.token{position:absolute;width:16px;height:16px;border-radius:50%;border:2px solid #fff;z-index:12;font-size:.55rem;font-weight:800;color:#fff;display:flex;align-items:center;justify-content:center;top:50%;left:50%;transform:translate(-50%,-50%)}
+.space-info{background:var(--card);border-radius:10px;padding:9px 11px;margin-bottom:6px;border:1px solid #334155;font-size:.82rem}
+.space-info .name{font-weight:800;color:var(--accent)}
+.positions{background:var(--card);border-radius:9px;padding:7px 9px;margin-bottom:6px;border:1px solid #334155;font-size:.78rem}
+.pos-row{display:flex;justify-content:space-between;padding:2px 0}.pos-row .pspace{color:var(--accent)}
+.log{background:#0f172a;border-radius:8px;padding:6px 8px;max-height:55px;overflow-y:auto;font-size:.7rem;color:var(--muted)}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.92);display:flex;align-items:flex-end;justify-content:center;z-index:100}
+.modal{background:var(--card);border-radius:16px 16px 0 0;padding:16px;width:100%;max-width:480px;max-height:88dvh;overflow-y:auto}
+.modal h3{color:var(--accent);margin-bottom:8px}
+.options{display:flex;flex-direction:column;gap:6px;margin-top:8px}
+.option-btn{padding:12px;border-radius:10px;border:2px solid #334155;background:#0f172a;color:var(--text);font-size:.9rem;text-align:left}
+.option-btn.correct{border-color:var(--success);background:#14532d}.option-btn.wrong{border-color:var(--danger);background:#7f1d1d}
+.hidden{display:none!important}.flex{display:flex;gap:8px}.flex>*{flex:1}.mt-2{margin-top:10px}
+.info-box{background:#0f172a;border-radius:9px;padding:9px;font-size:.82rem;margin:7px 0;border-left:4px solid var(--accent)}
+.room-code{font-size:2rem;font-weight:900;letter-spacing:6px;text-align:center;color:var(--accent);padding:12px;background:#0f172a;border-radius:12px;margin:10px 0}
+.player-list div{padding:8px;background:#0f172a;border-radius:8px;margin:4px 0;font-size:.9rem}
+.status{text-align:center;font-size:.8rem;color:var(--muted);margin:6px 0}
+.hint{text-align:center;font-size:.7rem;color:var(--muted);margin:2px 0 6px}
+.fact{background:#14532d;border-radius:8px;padding:8px;margin:6px 0;font-size:.8rem;border-left:4px solid var(--success)}
+.eq-box{background:#0f172a;border-radius:10px;padding:12px;margin:8px 0;font-family:monospace;text-align:center}
+</style>
+</head>
+<body>
+
+<div id="screen-lobby" class="screen active">
+  <h1>🌿 Fotosintópolis</h1>
+  <p style="text-align:center;color:var(--muted);font-size:.85rem">Multijugador · Fotosíntesis y respiración</p>
+  <div class="card">
+    <button class="btn" onclick="show('screen-create')">Crear sala</button>
+    <button class="btn btn-secondary" onclick="show('screen-join')">Unirse a sala</button>
+  </div>
+  <div class="card" style="font-size:.85rem;line-height:1.45;color:var(--muted)">
+    <b style="color:var(--accent)">Cómo jugar en varios móviles</b><br>
+    1. Un jugador crea la sala y comparte el código<br>
+    2. Los demás se unen con ese código<br>
+    3. El anfitrión inicia la partida
+  </div>
+</div>
+
+<div id="screen-create" class="screen">
+  <h1>Crear sala</h1>
+  <div class="card">
+    <label>Tu nombre</label>
+    <input id="host-name" value="Anfitrión" maxlength="12">
+    <label>Turnos máximos (0 = sin límite)</label>
+    <input type="number" id="host-turns" value="20" min="0" max="40">
+    <button class="btn" id="btn-create" onclick="createRoom()">Crear y esperar jugadores</button>
+    <button class="btn btn-secondary" onclick="show('screen-lobby')">← Volver</button>
+  </div>
+  <div id="create-status" class="status"></div>
+  <div id="room-info" class="hidden">
+    <div class="card">
+      <p style="text-align:center;color:var(--muted);font-size:.85rem">Comparte este código:</p>
+      <div class="room-code" id="room-code">----</div>
+      <div class="player-list" id="host-players"></div>
+      <button class="btn btn-success" id="btn-start" onclick="hostStartGame()" disabled>Empezar partida</button>
+    </div>
+  </div>
+</div>
+
+<div id="screen-join" class="screen">
+  <h1>Unirse</h1>
+  <div class="card">
+    <label>Tu nombre</label>
+    <input id="join-name" value="Jugador" maxlength="12">
+    <label>Código de sala</label>
+    <input id="join-code" placeholder="Ej: AB12" maxlength="6" style="text-transform:uppercase;letter-spacing:3px;font-size:1.2rem;text-align:center">
+    <button class="btn" id="btn-join" onclick="joinRoom()">Unirse</button>
+    <button class="btn btn-secondary" onclick="show('screen-lobby')">← Volver</button>
+  </div>
+  <div id="join-status" class="status"></div>
+</div>
+
+<div id="screen-game" class="screen">
+  <h1 style="font-size:1.15rem">Fotosintópolis</h1>
+  <div class="goal">Sala <span id="g-room"></span> · Puntaje = créditos + conc.×80</div>
+  <div class="ranking" id="ranking"></div>
+  <div class="guide" id="guide">Esperando...</div>
+  <p class="hint">Turno <span id="turn-count">1</span></p>
+  <div class="board-scroll">
+    <div class="board-container" id="board">
+      <div class="board-center">
+        <div class="title">🌿</div>
+        <div style="font-size:.75rem;color:var(--muted)" id="turn-info">—</div>
+        <div><span class="dice" id="die1">?</span><span class="dice" id="die2">?</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="space-info"><div class="name" id="space-name">—</div><div id="space-desc" style="color:var(--muted);font-size:.78rem"></div></div>
+  <div class="positions"><div id="positions-list"></div></div>
+  <button class="btn hidden" id="btn-roll" onclick="sendAction({type:'roll'})">🎲 Tirar dados</button>
+  <button class="btn btn-secondary hidden" id="btn-end" onclick="sendAction({type:'endTurn'})">Terminar turno</button>
+  <div class="log" id="log"></div>
+</div>
+
+<div id="modal" class="modal-overlay hidden"><div class="modal" id="modal-content"></div></div>
+
+<script>
+const BOARD=[
+{name:"INICIO",short:"INICIO",type:"go"},
+{name:"Luz solar",short:"Luz",type:"property",group:"photo",price:60,rent:12,key:"luz"},
+{name:"Clorofila",short:"Clorof.",type:"property",group:"photo",price:60,rent:12,key:"clorofila"},
+{name:"Descubrimiento",short:"✨",type:"chance"},
+{name:"Agua (H₂O)",short:"H₂O",type:"property",group:"photo",price:80,rent:16,key:"agua"},
+{name:"Estación ATP",short:"ATP+",type:"station",price:150,rent:25},
+{name:"CO₂",short:"CO₂",type:"property",group:"mol",price:100,rent:20,key:"co2"},
+{name:"Glucosa",short:"Gluc.",type:"property",group:"mol",price:100,rent:20,key:"glucosa"},
+{name:"Accidente",short:"⚠️",type:"community"},
+{name:"Oxígeno (O₂)",short:"O₂",type:"property",group:"mol",price:120,rent:24,key:"oxigeno"},
+{name:"CÁRCEL",short:"CÁRCEL",type:"jail"},
+{name:"Cloroplasto",short:"Cloropl.",type:"property",group:"org",price:140,rent:28,key:"cloroplasto"},
+{name:"Tilacoide",short:"Tilac.",type:"property",group:"org",price:140,rent:28,key:"tilacoide"},
+{name:"Descubrimiento",short:"✨",type:"chance"},
+{name:"Estroma",short:"Estroma",type:"property",group:"org",price:160,rent:32,key:"estroma"},
+{name:"Estación ATP",short:"ATP+",type:"station",price:150,rent:25},
+{name:"ATP",short:"ATP",type:"property",group:"mol",price:180,rent:36,key:"atp"},
+{name:"NADPH",short:"NADPH",type:"property",group:"mol",price:180,rent:36,key:"nadph"},
+{name:"⚖️ Ecuación",short:"EQ",type:"equation"},
+{name:"LABORATORIO",short:"LAB",type:"lab"},
+{name:"PARQUEO",short:"LIBRE",type:"free"},
+{name:"Mitocondria",short:"Mitoc.",type:"property",group:"org",price:200,rent:40,key:"mitocondria"},
+{name:"Glucólisis",short:"Glucól.",type:"property",group:"resp",price:200,rent:40,key:"glucolisis"},
+{name:"Descubrimiento",short:"✨",type:"chance"},
+{name:"Ciclo de Krebs",short:"Krebs",type:"property",group:"resp",price:220,rent:44,key:"krebs"},
+{name:"Estación ATP",short:"ATP+",type:"station",price:150,rent:25},
+{name:"Cadena de e⁻",short:"Cadena",type:"property",group:"resp",price:240,rent:48,key:"cadena"},
+{name:"Estoma",short:"Estoma",type:"property",group:"photo",price:240,rent:48,key:"estoma"},
+{name:"Accidente",short:"⚠️",type:"community"},
+{name:"Fase luminosa",short:"F. Luz",type:"property",group:"photo",price:260,rent:52,key:"luz"},
+{name:"¡A LA CÁRCEL!",short:"CÁRCEL!",type:"gotojail"},
+{name:"Fase oscura",short:"Calvin",type:"property",group:"photo",price:280,rent:60,key:"estroma"},
+{name:"Respir. aerobia",short:"Aerobia",type:"property",group:"resp",price:280,rent:60,key:"mitocondria"},
+{name:"Descubrimiento",short:"✨",type:"chance"},
+{name:"Respir. anaerobia",short:"Anaer.",type:"property",group:"resp",price:300,rent:70,key:"glucolisis"},
+{name:"Estación ATP",short:"ATP+",type:"station",price:150,rent:25},
+{name:"Fotosíntesis",short:"Foto.",type:"property",group:"photo",price:320,rent:80,key:"cloroplasto"},
+{name:"Respiración",short:"Respir.",type:"property",group:"resp",price:350,rent:90,key:"mitocondria"},
+{name:"⚖️ Ecuación",short:"EQ",type:"equation"},
+{name:"Ciclo completo",short:"Ciclo",type:"property",group:"mol",price:400,rent:100,key:"glucosa"}
+];
+const GROUP_CLASS={photo:"g-photo",resp:"g-resp",org:"g-org",mol:"g-mol"};
+const TOKEN_COLORS=["#22c55e","#3b82f6","#f97316","#a855f7"];
+const FACTS={luz:"Sin luz no hay fase luminosa.",clorofila:"Da el color verde a las plantas.",agua:"Al romperse libera O₂.",co2:"Entra por los estomas.",glucosa:"C₆H₁₂O₆, producto de la fotosíntesis.",oxigeno:"Lo que respiramos sale de las plantas.",atp:"Moneda energética de la célula.",nadph:"Lleva electrones a la fase oscura.",cloroplasto:"Solo en células vegetales.",mitocondria:"Central energética de la célula.",glucolisis:"No necesita oxígeno.",krebs:"Ciclo del ácido cítrico.",cadena:"Aquí se produce la mayor parte del ATP.",estoma:"Intercambian gases en la hoja.",tilacoide:"Membranas de la fase luminosa.",estroma:"Aquí se fabrica la glucosa."};
+
+const Q={
+luz:[{q:"¿Qué capta la energía de la luz?",o:["Mitocondria","Clorofila","Núcleo"],a:1}],
+clorofila:[{q:"¿Dónde está la clorofila?",o:["Mitocondria","Cloroplasto","Núcleo"],a:1}],
+agua:[{q:"¿Qué gas se libera al romper el agua?",o:["CO₂","O₂","N₂"],a:1}],
+co2:[{q:"¿Por dónde entra el CO₂ a la hoja?",o:["Raíces","Estomas","Flores"],a:1}],
+glucosa:[{q:"¿Fórmula de la glucosa?",o:["H₂O","CO₂","C₆H₁₂O₆"],a:2}],
+oxigeno:[{q:"¿De dónde sale el O₂ que respiramos?",o:["Del suelo","De la fotosíntesis","De las rocas"],a:1}],
+atp:[{q:"¿Qué es el ATP?",o:["Un gas","Moneda energética","Un pigmento"],a:1}],
+mitocondria:[{q:"¿Dónde ocurre la respiración celular?",o:["Cloroplasto","Mitocondria","Núcleo"],a:1}],
+cloroplasto:[{q:"¿Dónde ocurre la fotosíntesis?",o:["Mitocondria","Cloroplasto","Núcleo"],a:1}],
+glucolisis:[{q:"¿La glucólisis necesita oxígeno?",o:["Sí","No","Solo de noche"],a:1}],
+krebs:[{q:"¿Dónde ocurre el ciclo de Krebs?",o:["Citoplasma","Matriz mitocondrial","Tilacoide"],a:1}],
+cadena:[{q:"¿Qué produce la cadena de e⁻?",o:["Glucosa","Mucho ATP","Clorofila"],a:1}]
+};
+const GQ=[
+{q:"¿Ecuación de la fotosíntesis?",o:["Glucosa+O₂→CO₂+H₂O","CO₂+H₂O→Glucosa+O₂","CO₂→O₂"],a:1},
+{q:"¿Ecuación de la respiración?",o:["CO₂+H₂O→Glucosa+O₂","Glucosa+O₂→CO₂+H₂O+ATP","O₂→CO₂"],a:1},
+{q:"¿Qué proceso libera oxígeno?",o:["Respiración","Fotosíntesis","Digestión"],a:1},
+{q:"¿Orgánulo de la respiración?",o:["Cloroplasto","Mitocondria","Vacuola"],a:1}
+];
+const EQ=[
+{q:"¿Ecuación de la fotosíntesis?",options:["6CO₂+6H₂O→C₆H₁₂O₆+6O₂","C₆H₁₂O₆+6O₂→6CO₂+6H₂O"],a:0},
+{q:"¿Ecuación de la respiración aerobia?",options:["6CO₂+6H₂O→C₆H₁₂O₆+6O₂","C₆H₁₂O₆+6O₂→6CO₂+6H₂O+ATP"],a:1},
+{q:"¿Reactivos de la fotosíntesis?",options:["Glucosa y O₂","CO₂ y H₂O"],a:1}
+];
+const CHANCE=[{t:"+100 créditos (día soleado)",e:"money",v:100},{t:"Ve al Laboratorio",e:"goto",v:19},{t:"Ve a INICIO +200",e:"goto",v:0},{t:"-50 créditos",e:"money",v:-50}];
+const COMMUNITY=[{t:"-50 créditos",e:"money",v:-50},{t:"Pierdes el turno",e:"skip"},{t:"Cárcel",e:"jail"},{t:"+100 créditos",e:"money",v:100}];
+
+let peer=null,conn=null,connections=[];
+let isHost=false,myId=null,myName='',roomCode='';
+let state=null,myPlayerIndex=-1,busy=false;
+
+function $(id){return document.getElementById(id)}
+function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));$(id).classList.add('active')}
+function log(m){const el=$('log');if(!el)return;const d=document.createElement('div');d.textContent=m;el.prepend(d);if(el.children.length>8)el.lastChild.remove()}
+function showModal(h){$('modal-content').innerHTML=h;$('modal').classList.remove('hidden')}
+function closeModal(){$('modal').classList.add('hidden')}
+function setGuide(t,w){const g=$('guide');if(g){g.textContent=t;g.className='guide'+(w?' wait':'')}}
+function score(p){return p.money+(p.concepts.length*80)}
+function genCode(){const c='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';let s='';for(let i=0;i<4;i++)s+=c[Math.floor(Math.random()*c.length)];return s}
+function getQ(key){if(key&&Q[key])return Q[key][Math.floor(Math.random()*Q[key].length)];return GQ[Math.floor(Math.random()*GQ.length)]}
+
+function createRoom(){
+  myName=$('host-name').value.trim()||'Anfitrión';
+  roomCode=genCode();isHost=true;
+  $('btn-create').disabled=true;$('create-status').textContent='Conectando...';
+  peer=new Peer('foto-'+roomCode,{debug:0});
+  peer.on('open',id=>{
+    myId=id;$('create-status').textContent='Sala lista';
+    $('room-code').textContent=roomCode;$('room-info').classList.remove('hidden');
+    state={players:[{name:myName,money:1500,position:0,jail:false,jailTurns:0,skip:false,concepts:[],properties:[]}],
+      currentPlayer:0,properties:{},turnNumber:1,maxTurns:parseInt($('host-turns').value)||0,canRoll:true,doublesCount:0,phase:'lobby',dice:[0,0]};
+    updateHostList();
+  });
+  peer.on('connection',c=>{
+    connections.push(c);
+    c.on('data',d=>onHostData(c,d));
+    c.on('close',()=>{connections=connections.filter(x=>x!==c);updateHostList()});
+  });
+  peer.on('error',e=>{$('create-status').textContent='Error: '+e.type;$('btn-create').disabled=false});
+}
+
+function updateHostList(){
+  $('host-players').innerHTML=state.players.map((p,i)=>`<div>${i+1}. ${p.name}${i===0?' (tú)':''}</div>`).join('');
+  $('btn-start').disabled=state.players.length<2;
+}
+
+function onHostData(c,data){
+  if(data.type==='join'){
+    if(state.phase!=='lobby'){c.send({type:'err',msg:'Partida ya empezó'});return}
+    if(state.players.length>=4){c.send({type:'err',msg:'Sala llena'});return}
+    const idx=state.players.length;
+    state.players.push({name:data.name,money:1500,position:0,jail:false,jailTurns:0,skip:false,concepts:[],properties:[]});
+    c.send({type:'joined',playerIndex:idx,players:state.players.map(p=>p.name)});
+    broadcast({type:'lobbyUpdate',players:state.players.map(p=>p.name)});
+    updateHostList();
+  } else if(data.type==='action') handleHostAction(data.playerIndex,data.action);
+}
+
+function broadcast(msg){connections.forEach(c=>{try{c.send(msg)}catch(e){}})}
+
+function joinRoom(){
+  myName=$('join-name').value.trim()||'Jugador';
+  roomCode=$('join-code').value.trim().toUpperCase();
+  if(roomCode.length<4){alert('Código inválido');return}
+  isHost=false;$('btn-join').disabled=true;$('join-status').textContent='Conectando...';
+  peer=new Peer({debug:0});
+  peer.on('open',id=>{
+    myId=id;conn=peer.connect('foto-'+roomCode,{reliable:true});
+    conn.on('open',()=>{conn.send({type:'join',name:myName});$('join-status').textContent='Esperando...'});
+    conn.on('data',onClientData);
+    conn.on('close',()=>$('join-status').textContent='Desconectado');
+  });
+  peer.on('error',()=>{$('join-status').textContent='No se encontró la sala';$('btn-join').disabled=false});
+}
+
+function onClientData(data){
+  if(data.type==='joined'){myPlayerIndex=data.playerIndex;$('join-status').textContent='¡Conectado! Esperando inicio... '+data.players.join(', ')}
+  else if(data.type==='err'){alert(data.msg);$('btn-join').disabled=false}
+  else if(data.type==='lobbyUpdate')$('join-status').textContent='Jugadores: '+data.players.join(', ')
+  else if(data.type==='state') applyState(data.state)
+  else if(data.type==='question') showQ(data)
+  else if(data.type==='equation') showEq(data)
+  else if(data.type==='card') showModal(`<h3>${data.title}</h3><p style="margin:12px 0">${data.text}</p><button class="btn" onclick="closeModal()">Ok</button>`)
+  else if(data.type==='buyOffer') showBuy(data)
+  else if(data.type==='gameOver') showOver(data.ranking)
+}
+
+function hostStartGame(){
+  if(state.players.length<2)return;
+  state.phase='playing';state.currentPlayer=0;state.canRoll=true;
+  buildBoard();show('screen-game');$('g-room').textContent=roomCode;myPlayerIndex=0;
+  broadcastState();render();setGuide('Turno de '+state.players[0].name);
+}
+
+function broadcastState(){broadcast({type:'state',state:JSON.parse(JSON.stringify(state))})}
+function applyState(s){const was=state&&state.phase==='playing';state=s;if(state.phase==='playing'){if(!was){buildBoard();show('screen-game');$('g-room').textContent=roomCode}render()}}
+function sendAction(a){if(isHost)handleHostAction(myPlayerIndex,a);else if(conn)conn.send({type:'action',playerIndex:myPlayerIndex,action:a})}
+
+function handleHostAction(pi,a){
+  if(state.phase!=='playing')return;
+  if(pi!==state.currentPlayer&&a.type!=='answer'&&a.type!=='buy'&&a.type!=='skipBuy')return;
+  if(a.type==='roll'){if(!state.canRoll||busy)return;doRoll()}
+  else if(a.type==='endTurn') hostEndTurn();
+  else if(a.type==='answer') resolveAnswer(pi,a);
+  else if(a.type==='buy') hostBuy(pi,a.pos);
+  else if(a.type==='skipBuy') finishAct();
+}
+
+function doRoll(){
+  const p=state.players[state.currentPlayer];
+  if(p.skip){p.skip=false;hostEndTurn();return}
+  const d1=1+Math.floor(Math.random()*6),d2=1+Math.floor(Math.random()*6);
+  state.dice=[d1,d2];
+  if(p.jail){
+    if(d1===d2){p.jail=false;p.jailTurns=0;state.canRoll=false;hostMove(d1+d2)}
+    else{p.jailTurns++;if(p.jailTurns>=3){p.money-=50;p.jail=false;p.jailTurns=0;state.canRoll=false;hostMove(d1+d2)}
+    else{state.canRoll=false;finishAct()}}
+    broadcastState();render();return;
+  }
+  if(d1===d2){state.doublesCount++;if(state.doublesCount>=3){toJail(state.currentPlayer);state.canRoll=false;finishAct();broadcastState();render();return}}
+  else state.doublesCount=0;
+  state.canRoll=false;hostMove(d1+d2);
+}
+
+function hostMove(steps){
+  busy=true;const p=state.players[state.currentPlayer];let left=steps;
+  function step(){
+    if(left<=0){busy=false;broadcastState();render();handleSpace(p.position);return}
+    p.position=(p.position+1)%40;if(p.position===0)p.money+=200;
+    left--;broadcastState();render();setTimeout(step,240);
+  }
+  step();
+}
+
+function handleSpace(pos){
+  const s=BOARD[pos],p=state.players[state.currentPlayer];
+  if(s.type==='gotojail'){toJail(state.currentPlayer);finishAct();broadcastState();render();return}
+  if(s.type==='chance'||s.type==='community'){
+    const deck=s.type==='chance'?CHANCE:COMMUNITY;
+    const card=deck[Math.floor(Math.random()*deck.length)];
+    broadcast({type:'card',title:s.type==='chance'?'✨ Descubrimiento':'⚠️ Accidente',text:card.t});
+    if(isHost) showModal(`<h3>${s.type==='chance'?'✨':'⚠️'}</h3><p style="margin:12px 0">${card.t}</p><button class="btn" onclick="closeModal()">Ok</button>`);
+    if(card.e==='money')p.money+=card.v;
+    else if(card.e==='goto'){if(card.v<p.position)p.money+=200;p.position=card.v}
+    else if(card.e==='jail')toJail(state.currentPlayer);
+    else if(card.e==='skip')p.skip=true;
+    finishAct();broadcastState();render();return;
+  }
+  if(s.type==='lab'||s.type==='equation'||((s.type==='property'||s.type==='station')&&state.properties[pos]===undefined)){
+    if(s.type==='equation'){
+      const eq=EQ[Math.floor(Math.random()*EQ.length)];
+      const payload={type:'equation',q:eq.q,options:eq.options,a:eq.a};
+      broadcast(payload);if(state.currentPlayer===myPlayerIndex)showEq(payload);else setGuide('Esperando respuesta...');
+    } else {
+      const q=getQ(s.key);
+      const payload={type:'question',q:q.q,options:q.o,a:q.a,isLab:s.type==='lab',pos:s.type==='lab'?null:pos,key:s.key};
+      broadcast(payload);if(state.currentPlayer===myPlayerIndex)showQ(payload);else setGuide('Esperando respuesta...');
+    }
+    return;
+  }
+  if((s.type==='property'||s.type==='station')&&state.properties[pos]!==undefined&&state.properties[pos]!==state.currentPlayer){
+    const rent=s.rent||25,owner=state.properties[pos];
+    if(p.money>=rent){p.money-=rent;state.players[owner].money+=rent}else p.money=0;
+    finishAct();broadcastState();render();return;
+  }
+  finishAct();broadcastState();render();
+}
+
+function resolveAnswer(pi,a){
+  if(pi!==state.currentPlayer)return;
+  const ok=a.selected===a.correct,p=state.players[pi];
+  if(a.isLab){if(ok)p.money+=150;else toJail(pi);finishAct();broadcastState();render();return}
+  if(a.isEq){if(ok)p.money+=120;finishAct();broadcastState();render();return}
+  if(ok&&a.pos!=null){
+    const s=BOARD[a.pos];
+    if(p.money>=s.price){
+      const payload={type:'buyOffer',pos:a.pos,price:s.price,rent:s.rent,name:s.name,key:s.key};
+      broadcast(payload);if(pi===myPlayerIndex)showBuy(payload);else setGuide('Esperando compra...');
+      return;
+    }
+  }
+  finishAct();broadcastState();render();
+}
+
+function hostBuy(pi,pos){
+  const p=state.players[pi],s=BOARD[pos];
+  if(p.money<s.price){finishAct();broadcastState();render();return}
+  p.money-=s.price;state.properties[pos]=pi;p.properties.push(pos);
+  if(s.key&&!p.concepts.includes(s.key))p.concepts.push(s.key);
+  finishAct();broadcastState();render();
+}
+
+function toJail(i){state.players[i].position=10;state.players[i].jail=true;state.players[i].jailTurns=0;state.doublesCount=0}
+function finishAct(){state.canRoll=state.doublesCount>0&&!state.players[state.currentPlayer].jail;broadcastState();render()}
+function hostEndTurn(){
+  state.doublesCount=0;state.currentPlayer=(state.currentPlayer+1)%state.players.length;
+  if(state.currentPlayer===0)state.turnNumber++;
+  if(state.maxTurns&&state.turnNumber>state.maxTurns){endGame();return}
+  state.canRoll=true;broadcastState();render();
+}
+function endGame(){
+  const ranking=[...state.players].map((p,i)=>({...p,sc:score(p)})).sort((a,b)=>b.sc-a.sc);
+  broadcast({type:'gameOver',ranking});showOver(ranking);
+}
+
+function showQ(d){
+  if(state.currentPlayer!==myPlayerIndex)return;
+  let h=`<h3>❓ Pregunta</h3><p style="margin:10px 0">${d.q}</p><div class="options">`;
+  d.options.forEach((o,i)=>h+=`<button class="option-btn" onclick="submitA(${i},${d.a},${d.isLab?1:0},${d.pos==null?'null':d.pos},0)">${o}</button>`);
+  h+=`</div>`;showModal(h);
+}
+function showEq(d){
+  if(state.currentPlayer!==myPlayerIndex)return;
+  let h=`<h3>⚖️ Ecuación</h3><div class="eq-box">${d.q}</div><div class="options">`;
+  d.options.forEach((o,i)=>h+=`<button class="option-btn" onclick="submitA(${i},${d.a},0,null,1)">${o}</button>`);
+  h+=`</div>`;showModal(h);
+}
+function submitA(sel,cor,isLab,pos,isEq){
+  document.querySelectorAll('.option-btn').forEach((b,i)=>{b.disabled=true;if(i===cor)b.classList.add('correct');if(i===sel&&sel!==cor)b.classList.add('wrong')});
+  setTimeout(()=>{closeModal();sendAction({type:'answer',selected:sel,correct:cor,isLab:!!isLab,pos,isEq:!!isEq})},sel===cor?800:1400);
+}
+function showBuy(d){
+  if(state.currentPlayer!==myPlayerIndex)return;
+  const fact=d.key&&FACTS[d.key]?`<div class="fact">💡 ${FACTS[d.key]}</div>`:'';
+  showModal(`<h3>✅ ¿Comprar?</h3><p><b>${d.name}</b></p>${fact}<div class="info-box">Precio ${d.price} ₡ · Renta ${d.rent}</div>
+    <div class="flex mt-2"><button class="btn btn-success" onclick="closeModal();sendAction({type:'buy',pos:${d.pos}})">Comprar</button>
+    <button class="btn btn-secondary" onclick="closeModal();sendAction({type:'skipBuy'})">No</button></div>`);
+}
+function showOver(r){
+  if(r&&r.length&&window.saasSubmitResult){const winner=r[0];window.saasSubmitResult({module:'Fotosintópolis multijugador',score:winner.sc,level:1,meta:{mode:'multijugador',players:r.map(p=>p.name),ranking:r.map(p=>({name:p.name,score:p.sc}))}}).catch(()=>{});}
+  let h=`<h3>🏁 Fin</h3>`;
+  r.forEach((p,i)=>h+=`<div style="padding:8px;margin:4px 0;background:#0f172a;border-radius:8px;${i===0?'border:2px solid #22c55e':''}"><b>${i+1}. ${p.name}</b> ${i===0?'🏆':''}<br>${p.money} ₡ · ${p.concepts.length} conc. · <b>${p.sc} pts</b></div>`);
+  h+=`<button class="btn mt-2" onclick="location.reload()">Salir</button>`;showModal(h);
+}
+
+function buildBoard(){
+  const board=$('board');board.querySelectorAll('.space,.token').forEach(el=>el.remove());
+  const gp=[];gp[0]=[11,1];for(let i=1;i<=9;i++)gp[i]=[11,i+1];gp[10]=[11,11];
+  for(let i=11;i<=19;i++)gp[i]=[10-(i-11),11];gp[20]=[1,11];
+  for(let i=21;i<=29;i++)gp[i]=[1,10-(i-21)];gp[30]=[1,1];
+  for(let i=31;i<=39;i++)gp[i]=[2+(i-31),1];
+  BOARD.forEach((s,i)=>{
+    const el=document.createElement('div');el.className='space';el.id='space-'+i;
+    if(['go','jail','free','gotojail'].includes(s.type))el.classList.add('corner');
+    if(s.type==='chance')el.classList.add('chance');if(s.type==='community')el.classList.add('community');
+    if(s.type==='station')el.classList.add('station');if(s.type==='lab'||s.type==='equation')el.classList.add('lab');
+    if(s.group)el.classList.add(GROUP_CLASS[s.group]);
+    el.innerHTML=s.type==='property'?`<span class="sym">${s.short}</span><span class="price">${s.price}</span>`:`<span class="sym">${s.short}</span>`;
+    el.style.gridRow=gp[i][0];el.style.gridColumn=gp[i][1];board.appendChild(el);
+  });
+}
+
+function render(){
+  if(!state)return;
+  const sorted=[...state.players].map((p,i)=>({...p,i})).sort((a,b)=>score(b)-score(a));
+  $('ranking').innerHTML=sorted.map((p,idx)=>`<div class="rank-chip ${p.i===state.currentPlayer?'me':''}"><div>${idx+1}. ${p.name}</div><div class="money">${p.money} ₡</div><div style="font-size:.65rem;color:var(--muted)">${p.concepts.length} · ${score(p)} pts</div></div>`).join('');
+  $('positions-list').innerHTML=state.players.map((p,i)=>`<div class="pos-row"><span>${i===state.currentPlayer?'👉 ':''}${p.name}${p.jail?' 🔒':''}</span><span class="pspace">${BOARD[p.position].name}</span></div>`).join('');
+  const p=state.players[state.currentPlayer],s=BOARD[p.position];
+  $('space-name').textContent=s.name;$('turn-info').textContent='Turno de '+p.name;
+  $('turn-count').textContent=state.turnNumber+(state.maxTurns?'/'+state.maxTurns:'');
+  if(state.dice){$('die1').textContent=state.dice[0]||'?';$('die2').textContent=state.dice[1]||'?'}
+  document.querySelectorAll('.token').forEach(t=>t.remove());
+  state.players.forEach((pl,pi)=>{
+    const sp=$('space-'+pl.position);if(!sp)return;
+    const t=document.createElement('div');t.className='token';t.style.background=TOKEN_COLORS[pi];t.textContent=pl.name[0].toUpperCase();
+    const ox=(pi%2)*5-2,oy=Math.floor(pi/2)*5-2;t.style.transform=`translate(calc(-50% + ${ox}px),calc(-50% + ${oy}px))`;sp.appendChild(t);
+  });
+  document.querySelectorAll('.space').forEach(s=>s.classList.remove('current-highlight'));
+  const cur=$('space-'+p.position);if(cur){cur.classList.add('current-highlight');cur.scrollIntoView({behavior:'smooth',block:'center',inline:'center'})}
+  const mine=state.currentPlayer===myPlayerIndex;
+  $('btn-roll').classList.toggle('hidden',!(mine&&state.canRoll));
+  $('btn-end').classList.toggle('hidden',!(mine&&!state.canRoll));
+  if(mine&&state.canRoll)setGuide('Tu turno: tira los dados');
+  else if(mine)setGuide('Tu turno');
+  else setGuide('Turno de '+p.name+'...',true);
+}
+</script>
+</body>
+</html>
