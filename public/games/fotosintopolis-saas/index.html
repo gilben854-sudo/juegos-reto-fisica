@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="es">
+<head><script id="SAAS_ACCESS_GUARD_V1">
+(async function(){
+  const code=(localStorage.getItem('saas_classCode')||'').trim().toUpperCase();
+  const name=(localStorage.getItem('saas_studentName')||'').trim();
+  const fail=function(){ ['saas_access_ok','saas_classCode','saas_studentName','saas_subjects','saas_student_token'].forEach(k=>localStorage.removeItem(k)); location.replace('/catalogo.html?access=expired'); };
+  if(!code||!name) return fail();
+  try{
+    const r=await fetch('/api/access/check?classCode='+encodeURIComponent(code),{cache:'no-store',headers:{Authorization:'Bearer '+(localStorage.getItem('saas_student_token')||'')}});
+    const d=await r.json();
+    if(!d.allowed || (Array.isArray(d.subjects)&&d.subjects.length&&!d.subjects.includes('biologia'))) return fail();
+    localStorage.setItem('saas_access_ok','1');
+    localStorage.setItem('saas_student_token',d.accessToken||localStorage.getItem('saas_student_token')||'');
+    localStorage.setItem('saas_subjects',JSON.stringify(d.subjects||[]));
+  }catch(e){ return fail(); }
+})();
+window.saasSubmitResult=async function(result){ const t=localStorage.getItem('saas_student_token')||''; if(!t) return {ok:false}; const r=await fetch('/api/results',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+t},body:JSON.stringify(result||{})}); return r.json(); };
+</script>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Juegos de Reto — Fotosintópolis</title>
+<style>
+:root{--bg:#0f172a;--card:#1e293b;--accent:#4ade80;--success:#22c55e;--danger:#ef4444;--text:#f8fafc;--muted:#94a3b8}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100dvh}
+.screen{display:none;padding:10px;max-width:480px;margin:0 auto}.screen.active{display:block}
+h1{font-size:1.4rem;text-align:center;margin:4px 0;background:linear-gradient(90deg,#4ade80,#38bdf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.btn{display:block;width:100%;padding:13px;margin:6px 0;border:none;border-radius:12px;font-size:.95rem;font-weight:700;background:var(--accent);color:#0f172a;cursor:pointer}
+.btn:active{transform:scale(.97)}.btn:disabled{opacity:.4}
+.btn-secondary{background:var(--card);color:var(--text);border:1px solid #475569}
+.btn-success{background:var(--success);color:#fff}.btn-danger{background:var(--danger);color:#fff}
+.btn-small{padding:7px 11px;font-size:.8rem;width:auto}
+.card{background:var(--card);border-radius:14px;padding:12px;margin:8px 0;border:1px solid #334155}
+.player-setup{display:flex;gap:8px;margin:7px 0;align-items:center}
+.player-setup input{flex:1;padding:11px;border-radius:10px;border:1px solid #334155;background:#0f172a;color:var(--text);font-size:.95rem}
+.goal{background:linear-gradient(90deg,#14532d,#0c4a6e);border:1px solid #4ade80;border-radius:10px;padding:8px;text-align:center;font-size:.82rem;margin-bottom:6px}
+.goal strong{color:#86efac}
+.ranking{display:flex;gap:5px;overflow-x:auto;padding:2px 0 6px}
+.rank-chip{flex-shrink:0;background:var(--card);border-radius:10px;padding:6px 10px;border:2px solid #334155;min-width:105px;text-align:center;font-size:.72rem}
+.rank-chip.me{border-color:var(--accent);background:#14532d}
+.rank-chip .money{color:var(--success);font-weight:800}.rank-chip .els{color:var(--muted);font-size:.65rem}
+.guide{background:#14532d;border:1px solid #22c55e;border-radius:10px;padding:10px;text-align:center;font-weight:700;font-size:.9rem;margin-bottom:8px}
+.guide.wait{background:#1e293b;border-color:#475569;color:var(--muted)}
+.board-scroll{width:100%;overflow:auto;-webkit-overflow-scrolling:touch;border-radius:12px;border:3px solid #1e293b;background:#14532d;margin-bottom:8px;max-height:45vh}
+.board-container{display:grid;grid-template-columns:repeat(11,1fr);grid-template-rows:repeat(11,1fr);width:660px;height:660px;background:#166534;margin:0 auto}
+.board-center{grid-column:2/11;grid-row:2/11;background:linear-gradient(160deg,#0f172a,#1e293b);border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;border:2px solid #334155;z-index:2}
+.board-center .title{font-size:1.1rem;color:var(--accent);font-weight:800}
+.board-center .turn-info{font-size:.75rem;color:var(--muted);margin:3px 0}
+.dice{display:inline-block;width:44px;height:44px;margin:0 4px;background:#fff;color:#0f172a;border-radius:10px;font-size:1.35rem;font-weight:800;line-height:44px;box-shadow:0 2px 6px rgba(0,0,0,.4)}
+.space{background:#f8fafc;color:#0f172a;font-size:.6rem;font-weight:700;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;border:1px solid #64748b;overflow:hidden;line-height:1.05;position:relative;min-height:0}
+.space .sym{font-size:.72rem;font-weight:800}.space .price{font-size:.52rem;color:#475569}
+.space.corner{font-size:.62rem;font-weight:800;background:#e2e8f0}
+.space.chance{background:#fef3c7;color:#92400e}.space.community{background:#dbeafe;color:#1e40af}
+.space.station{background:#e0e7ff;color:#3730a3}.space.lab{background:#fce7f3;color:#9d174d}
+.space.current-highlight{box-shadow:inset 0 0 0 3px #4ade80;z-index:6;background:#dcfce7!important}
+.g-photo{border-top:6px solid #22c55e}.g-resp{border-top:6px solid #f97316}.g-org{border-top:6px solid #3b82f6}.g-mol{border-top:6px solid #a855f7}
+.token{position:absolute;width:18px;height:18px;border-radius:50%;border:2px solid #fff;box-shadow:0 2px 4px rgba(0,0,0,.5);z-index:12;font-size:.6rem;font-weight:800;color:#fff;display:flex;align-items:center;justify-content:center;top:50%;left:50%;transform:translate(-50%,-50%)}
+.space-info{background:var(--card);border-radius:12px;padding:10px 12px;margin-bottom:6px;border:1px solid #334155;font-size:.85rem}
+.space-info .name{font-weight:800;color:var(--accent);font-size:1rem}.space-info .desc{color:var(--muted);font-size:.78rem;margin-top:2px}
+.positions{background:var(--card);border-radius:10px;padding:8px 10px;margin-bottom:6px;border:1px solid #334155;font-size:.8rem}
+.pos-row{display:flex;justify-content:space-between;padding:3px 0}.pos-row .pspace{color:var(--accent)}
+.log{background:#0f172a;border-radius:8px;padding:6px 8px;max-height:65px;overflow-y:auto;font-size:.72rem;color:var(--muted)}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.9);display:flex;align-items:flex-end;justify-content:center;z-index:100}
+.modal{background:var(--card);border-radius:18px 18px 0 0;padding:18px;width:100%;max-width:480px;max-height:88dvh;overflow-y:auto}
+.modal h3{color:var(--accent);margin-bottom:8px}
+.options{display:flex;flex-direction:column;gap:7px;margin-top:10px}
+.option-btn{padding:12px;border-radius:11px;border:2px solid #334155;background:#0f172a;color:var(--text);font-size:.92rem;text-align:left}
+.option-btn.correct{border-color:var(--success);background:#14532d}.option-btn.wrong{border-color:var(--danger);background:#7f1d1d}
+.hidden{display:none!important}.flex{display:flex;gap:8px}.flex>*{flex:1}.mt-2{margin-top:10px}
+.info-box{background:#0f172a;border-radius:10px;padding:10px;font-size:.85rem;margin:8px 0;border-left:4px solid var(--accent)}
+.hint{text-align:center;font-size:.7rem;color:var(--muted);margin:2px 0 6px}
+.concept-card{background:linear-gradient(145deg,#1e293b,#0f172a);border:2px solid var(--accent);border-radius:14px;padding:14px;text-align:center;margin:8px 0}
+.concept-card .big-name{font-size:1.2rem;font-weight:800;color:var(--accent);margin:4px 0}
+.concept-card .props{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-top:10px;text-align:left}
+.concept-card .prop{background:#0f172a;border-radius:8px;padding:7px 9px;font-size:.75rem}
+.concept-card .prop b{color:var(--accent);display:block;font-size:.62rem}
+.mini-table{display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:5px;margin:8px 0}
+.mini-el{background:#0f172a;border-radius:8px;padding:8px 6px;text-align:center;border:1px solid #334155;font-size:.75rem}
+.mini-el.owned{border-color:var(--accent);background:#14532d}
+.fact{background:#14532d;border-radius:10px;padding:9px;margin:7px 0;font-size:.82rem;border-left:4px solid var(--success)}
+.eq-box{background:#0f172a;border-radius:10px;padding:12px;margin:8px 0;font-family:monospace;font-size:.95rem;text-align:center;border:1px solid #334155}
+</style>
+</head>
+<body>
+<div id="screen-start" class="screen active">
+  <h1>🌿 Fotosintópolis</h1>
+  <p style="text-align:center;color:var(--muted);font-size:.85rem;margin-bottom:10px">Monopoly de fotosíntesis y respiración</p>
+  <div class="card">
+    <div style="font-size:.9rem;line-height:1.5">
+      <b style="color:var(--accent)">Objetivo:</b> Tener el mayor puntaje.<br>
+      Puntaje = créditos + (conceptos × 80)<br><br>
+      Compra conceptos de fotosíntesis y respiración respondiendo preguntas. Completa grupos para ganar más.
+    </div>
+  </div>
+  <div class="card">
+    <h2 style="font-size:1rem;color:var(--accent);margin-bottom:6px">Jugadores (2-4)</h2>
+    <div id="players-setup">
+      <div class="player-setup"><input type="text" value="Ana" maxlength="10"></div>
+      <div class="player-setup"><input type="text" value="Luis" maxlength="10"></div>
+    </div>
+    <button class="btn btn-secondary" onclick="addPlayer()">+ Añadir jugador</button>
+  </div>
+  <div class="card">
+    <label style="font-size:.85rem;color:var(--muted)">Turnos máximos (0 = sin límite)</label>
+    <input type="number" id="max-turns" value="20" min="0" max="40" style="width:100%;padding:10px;border-radius:10px;border:1px solid #334155;background:#0f172a;color:var(--text);margin-top:4px">
+  </div>
+  <button class="btn" onclick="startGame()">¡Empezar partida!</button>
+  <button class="btn btn-secondary" onclick="loadGame()">Cargar partida</button>
+</div>
+
+<div id="screen-game" class="screen">
+  <h1 style="font-size:1.2rem">Fotosintópolis</h1>
+  <div class="goal"><strong>Puntaje</strong> = créditos + conceptos×80</div>
+  <div class="ranking" id="ranking"></div>
+  <div class="guide" id="guide">Pulsa “Tirar dados”</div>
+  <p class="hint">Turno <span id="turn-count">1</span> · ↔️ Desliza el tablero</p>
+  <div class="board-scroll" id="board-scroll">
+    <div class="board-container" id="board">
+      <div class="board-center">
+        <div class="title">🌿</div>
+        <div class="turn-info" id="turn-info">Turno</div>
+        <div><span class="dice" id="die1">?</span><span class="dice" id="die2">?</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="space-info">
+    <div class="name" id="space-name">INICIO</div>
+    <div class="desc" id="space-desc">Casilla de salida</div>
+  </div>
+  <div class="positions"><div id="positions-list"></div></div>
+  <button class="btn" id="btn-roll" onclick="rollDice()">🎲 Tirar dados</button>
+  <button class="btn btn-secondary hidden" id="btn-end" onclick="endTurn()">Terminar turno → Siguiente</button>
+  <div class="flex">
+    <button class="btn btn-secondary" onclick="showMyTable()">📋 Mis conceptos</button>
+    <button class="btn btn-secondary" onclick="saveGame()">💾 Guardar</button>
+  </div>
+  <div class="log" id="log"></div>
+</div>
+
+<div id="modal" class="modal-overlay hidden"><div class="modal" id="modal-content"></div></div>
+
+<script>
+const CONCEPTS = {
+  luz:{name:"Luz solar", key:"luz", process:"Fotosíntesis", role:"Energía inicial", place:"Tilacoides", fact:"Sin luz no hay fase luminosa."},
+  clorofila:{name:"Clorofila", key:"clorofila", process:"Fotosíntesis", role:"Pigmento que capta luz", place:"Cloroplasto", fact:"Es la que da el color verde a las plantas."},
+  agua:{name:"Agua (H₂O)", key:"agua", process:"Fotosíntesis", role:"Donante de electrones", place:"Tilacoides", fact:"Al romperse libera O₂ a la atmósfera."},
+  co2:{name:"CO₂", key:"co2", process:"Fotosíntesis", role:"Fuente de carbono", place:"Estroma", fact:"Entra por los estomas de la hoja."},
+  glucosa:{name:"Glucosa", key:"glucosa", process:"Ambos", role:"Almacén de energía", place:"Citoplasma", fact:"C₆H₁₂O₆ — producto de la fotosíntesis."},
+  oxigeno:{name:"Oxígeno (O₂)", key:"oxigeno", process:"Fotosíntesis", role:"Producto residual", place:"Atmósfera", fact:"Lo que respiramos sale de las plantas."},
+  atp:{name:"ATP", key:"atp", process:"Ambos", role:"Energía usable", place:"Mitocondria / cloroplasto", fact:"La 'moneda energética' de la célula."},
+  nadph:{name:"NADPH", key:"nadph", process:"Fotosíntesis", role:"Poder reductor", place:"Estroma", fact:"Lleva electrones a la fase oscura."},
+  cloroplasto:{name:"Cloroplasto", key:"cloroplasto", process:"Fotosíntesis", role:"Orgánulo", place:"Célula vegetal", fact:"Solo en células vegetales y algas."},
+  mitocondria:{name:"Mitocondria", key:"mitocondria", process:"Respiración", role:"Orgánulo", place:"Casi todas las células", fact:"La central energética de la célula."},
+  glucolisis:{name:"Glucólisis", key:"glucolisis", process:"Respiración", role:"Primera etapa", place:"Citoplasma", fact:"No necesita oxígeno."},
+  krebs:{name:"Ciclo de Krebs", key:"krebs", process:"Respiración", role:"Segunda etapa", place:"Matriz mitocondrial", fact:"También llamado ciclo del ácido cítrico."},
+  cadena:{name:"Cadena de e⁻", key:"cadena", process:"Respiración", role:"Tercera etapa", place:"Crestas mitocondriales", fact:"Aquí se produce la mayor parte del ATP."},
+  estoma:{name:"Estoma", key:"estoma", process:"Fotosíntesis", role:"Intercambio de gases", place:"Epidermis de la hoja", fact:"Se abren y cierran según la luz y el agua."},
+  tilacoide:{name:"Tilacoide", key:"tilacoide", process:"Fotosíntesis", role:"Fase luminosa", place:"Cloroplasto", fact:"Membranas apiladas en grana."},
+  estroma:{name:"Estroma", key:"estroma", process:"Fotosíntesis", role:"Ciclo de Calvin", place:"Cloroplasto", fact:"Aquí se fabrica la glucosa."}
+};
+
+const BOARD = [
+  {name:"INICIO", short:"INICIO", type:"go"},
+  {name:"Luz solar", short:"Luz", type:"property", group:"photo", price:60, rent:12, key:"luz"},
+  {name:"Clorofila", short:"Clorof.", type:"property", group:"photo", price:60, rent:12, key:"clorofila"},
+  {name:"Descubrimiento", short:"✨", type:"chance"},
+  {name:"Agua (H₂O)", short:"H₂O", type:"property", group:"photo", price:80, rent:16, key:"agua"},
+  {name:"Estación ATP", short:"ATP+", type:"station", price:150, rent:25},
+  {name:"CO₂", short:"CO₂", type:"property", group:"mol", price:100, rent:20, key:"co2"},
+  {name:"Glucosa", short:"Gluc.", type:"property", group:"mol", price:100, rent:20, key:"glucosa"},
+  {name:"Accidente", short:"⚠️", type:"community"},
+  {name:"Oxígeno (O₂)", short:"O₂", type:"property", group:"mol", price:120, rent:24, key:"oxigeno"},
+  {name:"CÁRCEL", short:"CÁRCEL", type:"jail"},
+  {name:"Cloroplasto", short:"Cloropl.", type:"property", group:"org", price:140, rent:28, key:"cloroplasto"},
+  {name:"Tilacoide", short:"Tilac.", type:"property", group:"org", price:140, rent:28, key:"tilacoide"},
+  {name:"Descubrimiento", short:"✨", type:"chance"},
+  {name:"Estroma", short:"Estroma", type:"property", group:"org", price:160, rent:32, key:"estroma"},
+  {name:"Estación ATP", short:"ATP+", type:"station", price:150, rent:25},
+  {name:"ATP", short:"ATP", type:"property", group:"mol", price:180, rent:36, key:"atp"},
+  {name:"NADPH", short:"NADPH", type:"property", group:"mol", price:180, rent:36, key:"nadph"},
+  {name:"⚖️ Ecuación", short:"EQ", type:"equation"},
+  {name:"LABORATORIO", short:"LAB", type:"lab"},
+  {name:"PARQUEO", short:"LIBRE", type:"free"},
+  {name:"Mitocondria", short:"Mitoc.", type:"property", group:"org", price:200, rent:40, key:"mitocondria"},
+  {name:"Glucólisis", short:"Glucól.", type:"property", group:"resp", price:200, rent:40, key:"glucolisis"},
+  {name:"Descubrimiento", short:"✨", type:"chance"},
+  {name:"Ciclo de Krebs", short:"Krebs", type:"property", group:"resp", price:220, rent:44, key:"krebs"},
+  {name:"Estación ATP", short:"ATP+", type:"station", price:150, rent:25},
+  {name:"Cadena de e⁻", short:"Cadena", type:"property", group:"resp", price:240, rent:48, key:"cadena"},
+  {name:"Estoma", short:"Estoma", type:"property", group:"photo", price:240, rent:48, key:"estoma"},
+  {name:"Accidente", short:"⚠️", type:"community"},
+  {name:"Fase luminosa", short:"F. Luz", type:"property", group:"photo", price:260, rent:52, key:"luz"},
+  {name:"¡A LA CÁRCEL!", short:"CÁRCEL!", type:"gotojail"},
+  {name:"Fase oscura", short:"Calvin", type:"property", group:"photo", price:280, rent:60, key:"estroma"},
+  {name:"Respir. aerobia", short:"Aerobia", type:"property", group:"resp", price:280, rent:60, key:"mitocondria"},
+  {name:"Descubrimiento", short:"✨", type:"chance"},
+  {name:"Respir. anaerobia", short:"Anaer.", type:"property", group:"resp", price:300, rent:70, key:"glucolisis"},
+  {name:"Estación ATP", short:"ATP+", type:"station", price:150, rent:25},
+  {name:"Fotosíntesis", short:"Foto.", type:"property", group:"photo", price:320, rent:80, key:"cloroplasto"},
+  {name:"Respiración", short:"Respir.", type:"property", group:"resp", price:350, rent:90, key:"mitocondria"},
+  {name:"⚖️ Ecuación", short:"EQ", type:"equation"},
+  {name:"Ciclo completo", short:"Ciclo", type:"property", group:"mol", price:400, rent:100, key:"glucosa"}
+];
+
+const GROUP_CLASS = {photo:"g-photo", resp:"g-resp", org:"g-org", mol:"g-mol"};
+const GROUPS = {
+  photo:["luz","clorofila","agua","estoma"],
+  resp:["glucolisis","krebs","cadena"],
+  org:["cloroplasto","tilacoide","estroma","mitocondria"],
+  mol:["co2","glucosa","oxigeno","atp","nadph"]
+};
+
+const QUESTIONS = {
+  luz:[
+    {q:"¿Qué capta la energía de la luz en la planta?",o:["Mitocondria","Clorofila","Núcleo","Ribosoma"],a:1},
+    {q:"¿En qué fase se usa la luz solar?",o:["Fase oscura","Fase luminosa","Glucólisis","Krebs"],a:1}
+  ],
+  clorofila:[
+    {q:"¿De qué color es la clorofila?",o:["Roja","Azul","Verde","Amarilla"],a:2},
+    {q:"¿Dónde está la clorofila?",o:["Mitocondria","Núcleo","Cloroplasto","Vacuola"],a:2}
+  ],
+  agua:[
+    {q:"¿Qué gas se libera al romper la molécula de agua?",o:["CO₂","N₂","O₂","H₂"],a:2},
+    {q:"¿El agua aporta qué a la fase luminosa?",o:["Carbono","Electrones","Nitrógeno","Calcio"],a:1}
+  ],
+  co2:[
+    {q:"¿Por dónde entra el CO₂ a la hoja?",o:["Raíces","Estomas","Flores","Tallos"],a:1},
+    {q:"¿En qué proceso se usa el CO₂?",o:["Respiración","Fotosíntesis","Digestión","Excreción"],a:1}
+  ],
+  glucosa:[
+    {q:"¿Fórmula de la glucosa?",o:["H₂O","CO₂","C₆H₁₂O₆","O₂"],a:2},
+    {q:"¿La glucosa se produce en...?",o:["Mitocondria","Estroma","Núcleo","Ribosoma"],a:1}
+  ],
+  oxigeno:[
+    {q:"¿De dónde sale el O₂ que respiramos?",o:["Del suelo","De la fotosíntesis","De las rocas","Del sol"],a:1},
+    {q:"¿El O₂ es producto de...?",o:["Respiración","Fotosíntesis","Digestión","Fermentación"],a:1}
+  ],
+  atp:[
+    {q:"¿Qué es el ATP?",o:["Un gas","Moneda energética","Un pigmento","Una vitamina"],a:1},
+    {q:"¿Dónde se produce mucho ATP?",o:["Núcleo","Mitocondria","Vacuola","Pared celular"],a:1}
+  ],
+  nadph:[
+    {q:"¿El NADPH se produce en...?",o:["Fase luminosa","Glucólisis","Krebs","Cadena de e⁻"],a:0},
+    {q:"¿Para qué sirve el NADPH?",o:["Captar luz","Llevar electrones","Romper agua","Abrir estomas"],a:1}
+  ],
+  cloroplasto:[
+    {q:"¿Dónde ocurre la fotosíntesis?",o:["Mitocondria","Cloroplasto","Núcleo","Citoplasma"],a:1},
+    {q:"¿El cloroplasto está en células...?",o:["Animales","Vegetales","Bacterianas solo","Todas"],a:1}
+  ],
+  mitocondria:[
+    {q:"¿Dónde ocurre la respiración celular?",o:["Cloroplasto","Mitocondria","Núcleo","Pared"],a:1},
+    {q:"¿La mitocondria produce sobre todo...?",o:["CO₂","ATP","Glucosa","Clorofila"],a:1}
+  ],
+  glucolisis:[
+    {q:"¿Dónde ocurre la glucólisis?",o:["Mitocondria","Citoplasma","Núcleo","Cloroplasto"],a:1},
+    {q:"¿La glucólisis necesita oxígeno?",o:["Sí","No","Solo de noche","Solo de día"],a:1}
+  ],
+  krebs:[
+    {q:"¿Otro nombre del ciclo de Krebs?",o:["Ciclo de Calvin","Ciclo del ácido cítrico","Fase luminosa","Fermentación"],a:1},
+    {q:"¿Dónde ocurre el ciclo de Krebs?",o:["Citoplasma","Matriz mitocondrial","Tilacoide","Estroma"],a:1}
+  ],
+  cadena:[
+    {q:"¿Dónde está la cadena de transporte de e⁻?",o:["Citoplasma","Crestas mitocondriales","Núcleo","Estroma"],a:1},
+    {q:"¿Qué produce la cadena de e⁻?",o:["Glucosa","Mucho ATP","Clorofila","CO₂ solo"],a:1}
+  ],
+  estoma:[
+    {q:"¿Qué hacen los estomas?",o:["Captan luz","Intercambian gases","Producen ATP","Rompen glucosa"],a:1},
+    {q:"¿Dónde están los estomas?",o:["Raíz","Epidermis de la hoja","Núcleo","Mitocondria"],a:1}
+  ],
+  tilacoide:[
+    {q:"¿Qué fase ocurre en los tilacoides?",o:["Fase oscura","Fase luminosa","Krebs","Glucólisis"],a:1},
+    {q:"¿Los tilacoides están en...?",o:["Mitocondria","Cloroplasto","Núcleo","Citoplasma"],a:1}
+  ],
+  estroma:[
+    {q:"¿Qué fase ocurre en el estroma?",o:["Fase luminosa","Ciclo de Calvin","Glucólisis","Cadena de e⁻"],a:1},
+    {q:"¿En el estroma se fabrica...?",o:["O₂","Glucosa","Clorofila","Agua"],a:1}
+  ]
+};
+
+const GENERAL_Q = [
+  {q:"¿Ecuación resumida de la fotosíntesis?",o:["C₆H₁₂O₆ + O₂ → CO₂ + H₂O","CO₂ + H₂O → C₆H₁₂O₆ + O₂","CO₂ → O₂","H₂O → ATP"],a:1},
+  {q:"¿Ecuación resumida de la respiración?",o:["CO₂ + H₂O → C₆H₁₂O₆ + O₂","C₆H₁₂O₆ + O₂ → CO₂ + H₂O + ATP","O₂ → CO₂","ATP → Glucosa"],a:1},
+  {q:"¿La fotosíntesis ocurre en...?",o:["Animales","Plantas y algas","Solo bacterias","Hongos"],a:1},
+  {q:"¿La respiración celular ocurre en...?",o:["Solo plantas","Solo animales","Casi todos los seres vivos","Solo bacterias"],a:2},
+  {q:"¿Qué proceso libera oxígeno?",o:["Respiración","Fotosíntesis","Digestión","Excreción"],a:1},
+  {q:"¿Qué proceso consume oxígeno?",o:["Fotosíntesis","Respiración aerobia","Fase oscura","Captación de luz"],a:1},
+  {q:"¿Producto principal de la fotosíntesis?",o:["ATP solo","Glucosa","CO₂","Agua"],a:1},
+  {q:"¿Orgánulo de la respiración?",o:["Cloroplasto","Mitocondria","Vacuola","Ribosoma"],a:1}
+];
+
+const EQUATIONS = [
+  {q:"¿Ecuación de la fotosíntesis?",options:["6CO₂ + 6H₂O → C₆H₁₂O₆ + 6O₂","C₆H₁₂O₆ + 6O₂ → 6CO₂ + 6H₂O","CO₂ + H₂O → O₂","C₆H₁₂O₆ → ATP"],a:0},
+  {q:"¿Ecuación de la respiración aerobia?",options:["6CO₂ + 6H₂O → C₆H₁₂O₆ + 6O₂","C₆H₁₂O₆ + 6O₂ → 6CO₂ + 6H₂O + ATP","H₂O → O₂ + H₂","CO₂ → Glucosa"],a:1},
+  {q:"¿Reactivos de la fotosíntesis?",options:["Glucosa y O₂","CO₂ y H₂O","ATP y NADPH","Solo luz"],a:1},
+  {q:"¿Productos de la respiración?",options:["Glucosa y O₂","CO₂, H₂O y ATP","Solo O₂","Clorofila"],a:1}
+];
+
+const CHANCE = [
+  {t:"¡Día soleado! +100 créditos",e:"money",v:100},
+  {t:"Descubres un nuevo pigmento. +150",e:"money",v:150},
+  {t:"Ve al Laboratorio",e:"goto",v:19},
+  {t:"Conferencia de biología. Ve a INICIO +200",e:"goto",v:0},
+  {t:"Error en el experimento. -50",e:"money",v:-50},
+  {t:"Publicas un artículo. +120",e:"money",v:120}
+];
+const COMMUNITY = [
+  {t:"Se apaga la luz del lab. -50",e:"money",v:-50},
+  {t:"Contaminaste el cultivo. Pierdes el turno",e:"skip"},
+  {t:"Te confundes de orgánulo. Cárcel",e:"jail"},
+  {t:"Beca de investigación. +100",e:"money",v:100},
+  {t:"Se rompe el microscopio. -60",e:"money",v:-60}
+];
+
+const TOKEN_COLORS = ["#22c55e","#3b82f6","#f97316","#a855f7"];
+
+let players=[], currentPlayer=0, canRoll=true, doublesCount=0;
+let properties={}, turnNumber=1, maxTurns=20, busy=false;
+
+function $(id){return document.getElementById(id)}
+function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));$(id).classList.add('active')}
+function log(m){const el=$('log');const d=document.createElement('div');d.textContent=m;el.prepend(d);if(el.children.length>12)el.lastChild.remove()}
+function showModal(h){$('modal-content').innerHTML=h;$('modal').classList.remove('hidden')}
+function closeModal(){$('modal').classList.add('hidden')}
+function setGuide(t,w=false){$('guide').textContent=t;$('guide').className='guide'+(w?' wait':'')}
+function score(p){return p.money+(p.concepts.length*80)}
+
+function addPlayer(){
+  const c=$('players-setup');if(c.children.length>=4)return;
+  const d=document.createElement('div');d.className='player-setup';
+  d.innerHTML=`<input type="text" value="Jugador ${c.children.length+1}" maxlength="10"><button class="btn btn-danger btn-small" onclick="this.parentElement.remove()">✕</button>`;
+  c.appendChild(d);
+}
+
+function conceptCard(key){
+  const c=CONCEPTS[key];if(!c)return'';
+  return `<div class="concept-card"><div class="big-name">${c.name}</div>
+    <div class="props">
+      <div class="prop"><b>Proceso</b>${c.process}</div>
+      <div class="prop"><b>Función</b>${c.role}</div>
+      <div class="prop"><b>Lugar</b>${c.place}</div>
+      <div class="prop"><b>Dato</b>${c.fact}</div>
+    </div></div>`;
+}
+
+function buildBoard(){
+  const board=$('board');
+  board.querySelectorAll('.space,.token').forEach(el=>el.remove());
+  const gridPos=[];
+  gridPos[0]=[11,1];
+  for(let i=1;i<=9;i++) gridPos[i]=[11,i+1];
+  gridPos[10]=[11,11];
+  for(let i=11;i<=19;i++) gridPos[i]=[10-(i-11),11];
+  gridPos[20]=[1,11];
+  for(let i=21;i<=29;i++) gridPos[i]=[1,10-(i-21)];
+  gridPos[30]=[1,1];
+  for(let i=31;i<=39;i++) gridPos[i]=[2+(i-31),1];
+
+  BOARD.forEach((s,i)=>{
+    const el=document.createElement('div');
+    el.className='space';el.id='space-'+i;
+    if(['go','jail','free','gotojail'].includes(s.type)) el.classList.add('corner');
+    if(s.type==='chance') el.classList.add('chance');
+    if(s.type==='community') el.classList.add('community');
+    if(s.type==='station') el.classList.add('station');
+    if(s.type==='lab'||s.type==='equation') el.classList.add('lab');
+    if(s.group) el.classList.add(GROUP_CLASS[s.group]);
+    if(s.type==='property') el.innerHTML=`<span class="sym">${s.short}</span><span class="price">${s.price}</span>`;
+    else el.innerHTML=`<span class="sym">${s.short}</span>`;
+    const [r,c]=gridPos[i];
+    el.style.gridRow=r;el.style.gridColumn=c;
+    board.appendChild(el);
+  });
+}
+
+function updateTokens(){
+  document.querySelectorAll('.token').forEach(t=>t.remove());
+  players.forEach((p,pi)=>{
+    const sp=$('space-'+p.position);if(!sp)return;
+    const t=document.createElement('div');t.className='token';
+    t.style.background=TOKEN_COLORS[pi];t.textContent=p.name[0].toUpperCase();
+    const ox=(pi%2)*6-3,oy=Math.floor(pi/2)*6-3;
+    t.style.transform=`translate(calc(-50% + ${ox}px), calc(-50% + ${oy}px))`;
+    sp.appendChild(t);
+  });
+  document.querySelectorAll('.space').forEach(s=>s.classList.remove('current-highlight'));
+  const cur=$('space-'+players[currentPlayer].position);
+  if(cur){cur.classList.add('current-highlight');cur.scrollIntoView({behavior:'smooth',block:'center',inline:'center'})}
+}
+
+function updateAll(){
+  const sorted=[...players].sort((a,b)=>score(b)-score(a));
+  $('ranking').innerHTML=sorted.map((p,i)=>{
+    const idx=players.indexOf(p);
+    return `<div class="rank-chip ${idx===currentPlayer?'me':''}"><div>${i+1}. ${p.name}</div><div class="money">${p.money} ₡</div><div class="els">${p.concepts.length} conc. · ${score(p)} pts</div></div>`;
+  }).join('');
+  $('positions-list').innerHTML=players.map((p,i)=>`<div class="pos-row"><span>${i===currentPlayer?'👉 ':''}${p.name}${p.jail?' 🔒':''}</span><span class="pspace">${BOARD[p.position].name}</span></div>`).join('');
+  const p=players[currentPlayer],s=BOARD[p.position];
+  $('space-name').textContent=s.name;
+  let desc='';
+  if(s.type==='property'||s.type==='station'){const o=properties[p.position];desc=o!==undefined?`Dueño: ${players[o].name}`:'Libre · Responde para comprar'}
+  else if(s.type==='equation') desc='Balancea o identifica la ecuación';
+  else if(s.type==='lab') desc='Pregunta difícil';
+  $('space-desc').textContent=desc;
+  $('turn-info').textContent=p.jail?`${p.name} en Cárcel`:`Turno de ${p.name}`;
+  $('turn-count').textContent=turnNumber+(maxTurns?'/'+maxTurns:'');
+  updateTokens();
+}
+
+function startGame(){
+  const inputs=document.querySelectorAll('#players-setup input');
+  players=[];
+  inputs.forEach((inp,i)=>players.push({name:inp.value.trim()||`J${i+1}`,money:1500,position:0,jail:false,jailTurns:0,skip:false,properties:[],concepts:[],correct:0,wrong:0}));
+  if(players.length<2){alert('Mínimo 2 jugadores');return}
+  maxTurns=parseInt($('max-turns').value)||0;
+  properties={};currentPlayer=0;canRoll=true;doublesCount=0;turnNumber=1;busy=false;
+  buildBoard();showScreen('screen-game');updateAll();
+  setGuide(`Turno de ${players[0].name}: pulsa “Tirar dados”`);
+  log('Partida iniciada — Fotosíntesis y respiración');
+  setTimeout(()=>{const sc=$('board-scroll');sc.scrollLeft=(sc.scrollWidth-sc.clientWidth)/2;sc.scrollTop=(sc.scrollHeight-sc.clientHeight)/2},50);
+}
+
+function getQ(key){
+  if(key&&QUESTIONS[key]){const qs=QUESTIONS[key];return qs[Math.floor(Math.random()*qs.length)]}
+  return GENERAL_Q[Math.floor(Math.random()*GENERAL_Q.length)];
+}
+
+function rollDice(){
+  if(!canRoll||busy)return;
+  const p=players[currentPlayer];
+  if(p.skip){p.skip=false;log(`${p.name} pierde el turno`);endTurn();return}
+  const d1=1+Math.floor(Math.random()*6),d2=1+Math.floor(Math.random()*6);
+  $('die1').textContent=d1;$('die2').textContent=d2;
+  if(p.jail){
+    if(d1===d2){p.jail=false;p.jailTurns=0;log(`${p.name} sale con dobles`);canRoll=false;doMove(d1+d2)}
+    else{p.jailTurns++;if(p.jailTurns>=3){p.money-=50;p.jail=false;p.jailTurns=0;canRoll=false;doMove(d1+d2)}
+    else{canRoll=false;$('btn-roll').classList.add('hidden');$('btn-end').classList.remove('hidden');setGuide('Sigues en Cárcel.',true)}}
+    updateAll();return;
+  }
+  if(d1===d2){doublesCount++;if(doublesCount>=3){sendToJail(currentPlayer);canRoll=false;$('btn-roll').classList.add('hidden');$('btn-end').classList.remove('hidden');setGuide('Cárcel.',true);updateAll();return}}
+  else doublesCount=0;
+  canRoll=false;doMove(d1+d2);
+}
+
+function doMove(steps){
+  busy=true;
+  const p=players[currentPlayer];
+  let left=steps,total=steps;
+  function step(){
+    if(left<=0){
+      busy=false;updateAll();
+      log(`${p.name} cae en → ${BOARD[p.position].name}`);
+      handleSpace(p.position);return;
+    }
+    p.position=(p.position+1)%40;
+    if(p.position===0){p.money+=200;log(`${p.name} pasa INICIO +200`)}
+    updateTokens();
+    const cur=$('space-'+p.position);
+    if(cur){document.querySelectorAll('.space').forEach(s=>s.classList.remove('current-highlight'));cur.classList.add('current-highlight');cur.scrollIntoView({behavior:'smooth',block:'center',inline:'center'})}
+    left--;
+    setGuide(`Recorrido: ${total-left}/${total} · ${BOARD[p.position].name}`);
+    $('space-name').textContent=BOARD[p.position].name;
+    setTimeout(step,260);
+  }
+  step();
+}
+
+function handleSpace(pos){
+  const s=BOARD[pos];
+  switch(s.type){
+    case'go':case'free':case'jail':setGuide('Casilla especial. Termina el turno.',true);finishAction();break;
+    case'gotojail':sendToJail(currentPlayer);setGuide('Vas a la Cárcel.',true);finishAction();break;
+    case'chance':drawCard('chance');break;
+    case'community':drawCard('community');break;
+    case'lab':setGuide('Laboratorio: responde');askQuestion(true);break;
+    case'equation':setGuide('Identifica o balancea la ecuación');askEquation();break;
+    case'property':case'station':handleProperty(pos);break;
+    default:finishAction();
+  }
+}
+
+function handleProperty(pos){
+  const s=BOARD[pos],p=players[currentPlayer],owner=properties[pos];
+  if(owner===undefined){setGuide('Concepto libre. Responde para comprar');askQuestion(false,pos)}
+  else if(owner===currentPlayer){setGuide('Es tuyo. Termina el turno.',true);finishAction()}
+  else{
+    const rent=s.rent||25;
+    if(p.money>=rent){p.money-=rent;players[owner].money+=rent;log(`${p.name} paga ${rent} a ${players[owner].name}`);setGuide(`Pagaste ${rent} de renta.`,true)}
+    else{p.money=0;setGuide('No puedes pagar.',true)}
+    finishAction();
+  }
+}
+
+function askQuestion(isLab, propertyPos){
+  const s=propertyPos!=null?BOARD[propertyPos]:null;
+  const q=getQ(s&&s.key);
+  const title=isLab?'🧪 Laboratorio':'❓ '+(s?s.name:'Pregunta');
+  let html=`<h3>${title}</h3><p style="margin:10px 0;font-size:1.05rem">${q.q}</p><div class="options">`;
+  q.o.forEach((opt,i)=>html+=`<button class="option-btn" onclick="answerQ(${i},${q.a},${isLab},${propertyPos})">${opt}</button>`);
+  html+=`</div>`;showModal(html);
+}
+
+function askEquation(){
+  const eq=EQUATIONS[Math.floor(Math.random()*EQUATIONS.length)];
+  let html=`<h3>⚖️ Ecuación</h3><div class="eq-box">${eq.q}</div><div class="options">`;
+  eq.options.forEach((opt,i)=>html+=`<button class="option-btn" onclick="answerEq(${i},${eq.a})">${opt}</button>`);
+  html+=`</div>`;showModal(html);
+}
+
+function answerEq(sel,correct){
+  document.querySelectorAll('.option-btn').forEach((b,i)=>{b.disabled=true;if(i===correct)b.classList.add('correct');if(i===sel&&sel!==correct)b.classList.add('wrong')});
+  const p=players[currentPlayer];
+  p.correct=(p.correct||0)+(sel===correct?1:0);p.wrong=(p.wrong||0)+(sel===correct?0:1);
+  setTimeout(()=>{
+    closeModal();
+    if(sel===correct){p.money+=120;log(`${p.name} acertó la ecuación +120`);setGuide('+120',true)}
+    else{log(`${p.name} falló la ecuación`);setGuide('Fallaste. Mira la respuesta correcta.',true)}
+    finishAction();
+  },sel===correct?900:1600);
+}
+
+function answerQ(sel,correct,isLab,propertyPos){
+  document.querySelectorAll('.option-btn').forEach((b,i)=>{b.disabled=true;if(i===correct)b.classList.add('correct');if(i===sel&&sel!==correct)b.classList.add('wrong')});
+  const p=players[currentPlayer],ok=sel===correct,s=propertyPos!=null?BOARD[propertyPos]:null;
+  p.correct=(p.correct||0)+(ok?1:0);p.wrong=(p.wrong||0)+(ok?0:1);
+  setTimeout(()=>{
+    closeModal();
+    if(ok){
+      log(`${p.name} ¡acertó!`);
+      if(isLab){p.money+=150;setGuide('+150',true);finishAction()}
+      else if(propertyPos!=null){
+        if(p.money>=s.price){
+          const fact=s.key&&CONCEPTS[s.key]?`<div class="fact">💡 ${CONCEPTS[s.key].fact}</div>`:'';
+          showModal(`<h3>✅ Correcto</h3>${s.key?conceptCard(s.key):''}${fact}
+            <div class="info-box">Precio: <b>${s.price} ₡</b> · Renta: <b>${s.rent}</b></div>
+            <div class="flex mt-2">
+              <button class="btn btn-success" onclick="buyProp(${propertyPos})">Comprar</button>
+              <button class="btn btn-secondary" onclick="closeModal();finishAction()">No</button>
+            </div>`);
+        } else {setGuide('Acertaste pero no te alcanza.',true);finishAction()}
+      } else finishAction();
+    } else {
+      log(`${p.name} falló`);
+      if(isLab){sendToJail(currentPlayer);setGuide('Fallaste → Cárcel.',true)}
+      else setGuide('Fallaste. No puedes comprar.',true);
+      finishAction();
+    }
+  },ok?900:1600);
+}
+
+function buyProp(pos){
+  const s=BOARD[pos],p=players[currentPlayer];
+  p.money-=s.price;properties[pos]=currentPlayer;p.properties.push(pos);
+  if(s.key&&!p.concepts.includes(s.key)) p.concepts.push(s.key);
+  log(`${p.name} compró ${s.name}`);
+  closeModal();updateAll();
+  if(s.key){
+    showModal(`<h3>🎉 Concepto añadido</h3>${conceptCard(s.key)}
+      <p style="text-align:center;color:var(--muted);font-size:.85rem">${p.concepts.length} conceptos · ${score(p)} pts</p>
+      <button class="btn mt-2" onclick="closeModal();finishAction()">Continuar</button>`);
+  } else {setGuide('Comprado.',true);finishAction()}
+}
+
+function drawCard(type){
+  const deck=type==='chance'?CHANCE:COMMUNITY;
+  const c=deck[Math.floor(Math.random()*deck.length)];
+  showModal(`<h3>${type==='chance'?'✨ Descubrimiento':'⚠️ Accidente'}</h3>
+    <p style="margin:14px 0;font-size:1.05rem">${c.t}</p>
+    <button class="btn" onclick="applyCard('${c.e}',${c.v||0})">Continuar</button>`);
+}
+
+function applyCard(e,v){
+  const p=players[currentPlayer];closeModal();
+  if(e==='money'){p.money+=v;log(`${p.name} ${v>=0?'+':''}${v}`);setGuide(`${v>=0?'+':''}${v}`,true)}
+  else if(e==='goto'){if(v<p.position){p.money+=200;log(`${p.name} +200 por Inicio`)}p.position=v;updateAll();setTimeout(()=>handleSpace(v),200);return}
+  else if(e==='jail'){sendToJail(currentPlayer);setGuide('Cárcel.',true)}
+  else if(e==='skip'){p.skip=true;setGuide('Pierdes el próximo turno.',true)}
+  finishAction();
+}
+
+function sendToJail(i){players[i].position=10;players[i].jail=true;players[i].jailTurns=0;doublesCount=0;log(`${players[i].name} → Cárcel`);updateAll()}
+
+function finishAction(){
+  if(doublesCount>0&&!players[currentPlayer].jail){canRoll=true;$('btn-roll').classList.remove('hidden');$('btn-end').classList.add('hidden');setGuide('Dobles. Puedes tirar otra vez.')}
+  else{canRoll=false;$('btn-roll').classList.add('hidden');$('btn-end').classList.remove('hidden')}
+  updateAll();
+}
+
+function endTurn(){
+  if(busy)return;
+  doublesCount=0;
+  currentPlayer=(currentPlayer+1)%players.length;
+  if(currentPlayer===0) turnNumber++;
+  if(maxTurns&&turnNumber>maxTurns){endGame();return}
+  canRoll=true;$('btn-roll').classList.remove('hidden');$('btn-end').classList.add('hidden');
+  updateAll();
+  setGuide(`Turno de ${players[currentPlayer].name}: pulsa “Tirar dados”`);
+  log(`—— Turno de ${players[currentPlayer].name} ——`);
+}
+
+function endGame(){
+  const sorted=[...players].sort((a,b)=>score(b)-score(a));
+  if(sorted.length&&window.saasSubmitResult){const winner=sorted[0];window.saasSubmitResult({module:'Fotosintópolis · partida local',score:score(winner),level:1,meta:{mode:'local',players:sorted.map(p=>p.name),correct:winner.correct||0,wrong:winner.wrong||0}}).catch(()=>{});}
+  let html=`<h3>🏁 Fin de la partida</h3><div class="info-box">Puntaje = créditos + conceptos×80</div>`;
+  sorted.forEach((p,i)=>{
+    const tot=(p.correct||0)+(p.wrong||0);const pct=tot?Math.round(100*(p.correct||0)/tot):0;
+    html+=`<div style="padding:10px;margin:6px 0;background:#0f172a;border-radius:10px;${i===0?'border:2px solid #22c55e':''}">
+      <b>${i+1}. ${p.name}</b> ${i===0?'🏆':''}<br>${p.money} ₡ · ${p.concepts.length} conceptos · <b>${score(p)} pts</b><br>
+      <span style="font-size:.8rem;color:var(--muted)">Aciertos: ${p.correct||0} · Fallos: ${p.wrong||0} · ${pct}%</span></div>`;
+  });
+  html+=`<button class="btn mt-2" onclick="location.reload()">Nueva partida</button>`;
+  showModal(html);
+}
+
+function showMyTable(){
+  const p=players[currentPlayer];
+  let html=`<h3>Conceptos de ${p.name}</h3><p style="color:var(--muted);font-size:.85rem">${p.concepts.length} conceptos · ${score(p)} pts</p>`;
+  if(!p.concepts.length) html+=`<p style="text-align:center;color:var(--muted);padding:16px">Aún no has comprado ninguno.</p>`;
+  else{
+    html+=`<div class="mini-table">`;
+    p.concepts.forEach(key=>{
+      const c=CONCEPTS[key];
+      if(c) html+=`<div class="mini-el owned" onclick="showConcept('${key}')">${c.name}</div>`;
+    });
+    html+=`</div>`;
+  }
+  html+=`<h4 style="color:var(--accent);margin:12px 0 6px;font-size:.9rem">Progreso por grupos</h4>`;
+  const names={photo:'Fotosíntesis',resp:'Respiración',org:'Orgánulos',mol:'Moléculas'};
+  Object.keys(GROUPS).forEach(g=>{
+    const need=GROUPS[g];const have=need.filter(k=>p.concepts.includes(k)).length;
+    html+=`<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #1e293b;font-size:.82rem">
+      <span>${names[g]||g}</span><span style="color:${have===need.length?'var(--success)':'var(--muted)'}">${have}/${need.length}</span></div>`;
+  });
+  html+=`<button class="btn mt-2" onclick="closeModal()">Cerrar</button>`;
+  showModal(html);
+}
+
+function showConcept(key){
+  showModal(`<h3>${CONCEPTS[key].name}</h3>${conceptCard(key)}<button class="btn mt-2" onclick="showMyTable()">← Volver</button>`);
+}
+
+function saveGame(){
+  localStorage.setItem('fotosintopolis-individual',JSON.stringify({players,currentPlayer,properties,turnNumber,maxTurns}));
+  showModal(`<h3>💾 Guardado</h3><p>Puedes continuar después.</p><button class="btn mt-2" onclick="closeModal()">Ok</button>`);
+}
+
+function loadGame(){
+  const raw=localStorage.getItem('fotosintopolis-individual');
+  if(!raw){alert('No hay partida guardada');return}
+  try{
+    const d=JSON.parse(raw);
+    players=d.players;currentPlayer=d.currentPlayer;properties=d.properties||{};
+    turnNumber=d.turnNumber||1;maxTurns=d.maxTurns||0;canRoll=true;busy=false;
+    buildBoard();showScreen('screen-game');updateAll();
+    setGuide(`Turno de ${players[currentPlayer].name}`);log('Partida cargada');
+  }catch(e){alert('Error al cargar')}
+}
+</script>
+</body>
+</html>
