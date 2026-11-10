@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="es">
+<head><script id="SAAS_ACCESS_GUARD_V1">
+(async function(){
+  const code=(localStorage.getItem('saas_classCode')||'').trim().toUpperCase();
+  const name=(localStorage.getItem('saas_studentName')||'').trim();
+  const fail=function(){ ['saas_access_ok','saas_classCode','saas_studentName','saas_subjects','saas_student_token'].forEach(k=>localStorage.removeItem(k)); location.replace('/catalogo.html?access=expired'); };
+  if(!code||!name) return fail();
+  try{
+    const r=await fetch('/api/access/check?classCode='+encodeURIComponent(code),{cache:'no-store',headers:{Authorization:'Bearer '+(localStorage.getItem('saas_student_token')||'')}});
+    const d=await r.json();
+    if(!d.allowed || (Array.isArray(d.subjects)&&d.subjects.length&&!d.subjects.includes('quimica'))) return fail();
+    localStorage.setItem('saas_access_ok','1');
+    localStorage.setItem('saas_student_token',d.accessToken||localStorage.getItem('saas_student_token')||'');
+    localStorage.setItem('saas_subjects',JSON.stringify(d.subjects||[]));
+  }catch(e){ return fail(); }
+})();
+window.saasSubmitResult=async function(result){ const t=localStorage.getItem('saas_student_token')||''; if(!t) return {ok:false}; const r=await fetch('/api/results',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+t},body:JSON.stringify(result||{})}); return r.json(); };
+</script>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Juegos de Reto — Elementópolis multijugador</title>
+<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<style>
+:root{--bg:#0f172a;--card:#1e293b;--accent:#38bdf8;--success:#22c55e;--danger:#ef4444;--text:#f8fafc;--muted:#94a3b8}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100dvh}
+.screen{display:none;padding:12px;max-width:480px;margin:0 auto}.screen.active{display:block}
+h1{font-size:1.4rem;text-align:center;margin:6px 0;background:linear-gradient(90deg,#38bdf8,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.btn{display:block;width:100%;padding:13px;margin:6px 0;border:none;border-radius:12px;font-size:.95rem;font-weight:700;background:var(--accent);color:#0f172a;cursor:pointer}
+.btn:active{transform:scale(.97)}.btn:disabled{opacity:.4}
+.btn-secondary{background:var(--card);color:var(--text);border:1px solid #475569}
+.btn-success{background:var(--success);color:#fff}.btn-danger{background:var(--danger);color:#fff}
+.card{background:var(--card);border-radius:14px;padding:14px;margin:10px 0;border:1px solid #334155}
+input,select{width:100%;padding:12px;border-radius:10px;border:1px solid #334155;background:#0f172a;color:var(--text);font-size:1rem;margin:6px 0}
+.goal{background:linear-gradient(90deg,#0c4a6e,#1e3a5f);border:1px solid #38bdf8;border-radius:10px;padding:8px;text-align:center;font-size:.82rem;margin-bottom:6px}
+.ranking{display:flex;gap:5px;overflow-x:auto;padding:2px 0 6px}
+.rank-chip{flex-shrink:0;background:var(--card);border-radius:10px;padding:6px 10px;border:2px solid #334155;min-width:100px;text-align:center;font-size:.72rem}
+.rank-chip.me{border-color:var(--accent);background:#0c4a6e}
+.rank-chip .money{color:var(--success);font-weight:800}
+.guide{background:#14532d;border:1px solid #22c55e;border-radius:10px;padding:10px;text-align:center;font-weight:700;font-size:.88rem;margin-bottom:8px}
+.guide.wait{background:#1e293b;border-color:#475569;color:var(--muted)}
+.board-scroll{width:100%;overflow:auto;-webkit-overflow-scrolling:touch;border-radius:12px;border:3px solid #1e293b;background:#14532d;margin-bottom:8px;max-height:42vh}
+.board-container{display:grid;grid-template-columns:repeat(11,1fr);grid-template-rows:repeat(11,1fr);width:640px;height:640px;background:#166534;margin:0 auto}
+.board-center{grid-column:2/11;grid-row:2/11;background:linear-gradient(160deg,#0f172a,#1e293b);border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;border:2px solid #334155;z-index:2}
+.board-center .title{font-size:1rem;color:var(--accent);font-weight:800}
+.dice{display:inline-block;width:42px;height:42px;margin:0 3px;background:#fff;color:#0f172a;border-radius:9px;font-size:1.3rem;font-weight:800;line-height:42px}
+.space{background:#f8fafc;color:#0f172a;font-size:.6rem;font-weight:700;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;border:1px solid #64748b;overflow:hidden;position:relative;min-height:0}
+.space .sym{font-size:.78rem;font-weight:800}.space .price{font-size:.52rem;color:#475569}
+.space.corner{font-size:.62rem;font-weight:800;background:#e2e8f0}
+.space.chance{background:#fef3c7;color:#92400e}.space.community{background:#dbeafe;color:#1e40af}
+.space.station{background:#e0e7ff;color:#3730a3}.space.lab{background:#fce7f3;color:#9d174d}
+.space.current-highlight{box-shadow:inset 0 0 0 3px #38bdf8;background:#e0f2fe!important}
+.group-alkali{border-top:5px solid #ef4444}.group-alkaline{border-top:5px solid #f97316}.group-transition{border-top:5px solid #eab308}
+.group-nonmetal{border-top:5px solid #22c55e}.group-halogen{border-top:5px solid #3b82f6}.group-noble{border-top:5px solid #a855f7}.group-actinide{border-top:5px solid #64748b}
+.token{position:absolute;width:16px;height:16px;border-radius:50%;border:2px solid #fff;z-index:12;font-size:.55rem;font-weight:800;color:#fff;display:flex;align-items:center;justify-content:center;top:50%;left:50%;transform:translate(-50%,-50%)}
+.space-info{background:var(--card);border-radius:10px;padding:9px 11px;margin-bottom:6px;border:1px solid #334155;font-size:.82rem}
+.space-info .name{font-weight:800;color:var(--accent)}
+.positions{background:var(--card);border-radius:9px;padding:7px 9px;margin-bottom:6px;border:1px solid #334155;font-size:.78rem}
+.pos-row{display:flex;justify-content:space-between;padding:2px 0}.pos-row .pspace{color:var(--accent)}
+.log{background:#0f172a;border-radius:8px;padding:6px 8px;max-height:60px;overflow-y:auto;font-size:.7rem;color:var(--muted)}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.92);display:flex;align-items:flex-end;justify-content:center;z-index:100}
+.modal{background:var(--card);border-radius:16px 16px 0 0;padding:16px;width:100%;max-width:480px;max-height:88dvh;overflow-y:auto}
+.modal h3{color:var(--accent);margin-bottom:8px}
+.options{display:flex;flex-direction:column;gap:6px;margin-top:8px}
+.option-btn{padding:12px;border-radius:10px;border:2px solid #334155;background:#0f172a;color:var(--text);font-size:.9rem;text-align:left}
+.option-btn.correct{border-color:var(--success);background:#14532d}.option-btn.wrong{border-color:var(--danger);background:#7f1d1d}
+.hidden{display:none!important}.flex{display:flex;gap:8px}.flex>*{flex:1}.mt-2{margin-top:10px}
+.info-box{background:#0f172a;border-radius:9px;padding:9px;font-size:.82rem;margin:7px 0;border-left:4px solid var(--accent)}
+.room-code{font-size:2rem;font-weight:900;letter-spacing:6px;text-align:center;color:var(--accent);padding:12px;background:#0f172a;border-radius:12px;margin:10px 0}
+.player-list{margin:8px 0}.player-list div{padding:8px;background:#0f172a;border-radius:8px;margin:4px 0;font-size:.9rem}
+.status{text-align:center;font-size:.8rem;color:var(--muted);margin:6px 0}
+.hint{text-align:center;font-size:.7rem;color:var(--muted);margin:2px 0 6px}
+.element-card{background:linear-gradient(145deg,#1e293b,#0f172a);border:2px solid var(--accent);border-radius:12px;padding:12px;text-align:center;margin:8px 0}
+.element-card .big-sym{font-size:2.4rem;font-weight:900;color:var(--accent)}
+.element-card .big-name{font-size:1.1rem;font-weight:700}
+.fact{background:#14532d;border-radius:8px;padding:8px;margin:6px 0;font-size:.8rem;border-left:4px solid var(--success)}
+.eq-box{background:#0f172a;border-radius:10px;padding:12px;margin:8px 0;font-family:monospace;text-align:center}
+</style>
+</head>
+<body>
+
+<!-- LOBBY -->
+<div id="screen-lobby" class="screen active">
+  <h1>⚛️ Elementopolis</h1>
+  <p style="text-align:center;color:var(--muted);font-size:.85rem">Multijugador online</p>
+  <div class="card">
+    <button class="btn" onclick="showCreate()">Crear sala</button>
+    <button class="btn btn-secondary" onclick="showJoin()">Unirse a sala</button>
+  </div>
+  <div class="card" style="font-size:.85rem;line-height:1.45;color:var(--muted)">
+    <b style="color:var(--accent)">Cómo funciona</b><br>
+    1. Un jugador crea la sala y comparte el código<br>
+    2. Los demás se unen con ese código<br>
+    3. Todos juegan desde su propio dispositivo
+  </div>
+</div>
+
+<div id="screen-create" class="screen">
+  <h1>Crear sala</h1>
+  <div class="card">
+    <label>Tu nombre</label>
+    <input id="host-name" value="Anfitrión" maxlength="12">
+    <label>Turnos máximos (0 = sin límite)</label>
+    <input type="number" id="host-turns" value="20" min="0" max="40">
+    <button class="btn" id="btn-create" onclick="createRoom()">Crear y esperar jugadores</button>
+    <button class="btn btn-secondary" onclick="showLobby()">← Volver</button>
+  </div>
+  <div id="create-status" class="status"></div>
+  <div id="room-info" class="hidden">
+    <div class="card">
+      <p style="text-align:center;color:var(--muted);font-size:.85rem">Comparte este código:</p>
+      <div class="room-code" id="room-code">----</div>
+      <div class="player-list" id="host-players"></div>
+      <button class="btn btn-success" id="btn-start" onclick="hostStartGame()" disabled>Empezar partida</button>
+    </div>
+  </div>
+</div>
+
+<div id="screen-join" class="screen">
+  <h1>Unirse</h1>
+  <div class="card">
+    <label>Tu nombre</label>
+    <input id="join-name" value="Jugador" maxlength="12">
+    <label>Código de sala</label>
+    <input id="join-code" placeholder="Ej: AB12" maxlength="6" style="text-transform:uppercase;letter-spacing:3px;font-size:1.2rem;text-align:center">
+    <button class="btn" id="btn-join" onclick="joinRoom()">Unirse</button>
+    <button class="btn btn-secondary" onclick="showLobby()">← Volver</button>
+  </div>
+  <div id="join-status" class="status"></div>
+</div>
+
+<div id="screen-game" class="screen">
+  <h1 style="font-size:1.15rem">Elementopolis</h1>
+  <div class="goal">Sala <span id="g-room"></span> · Puntaje = créditos + el×80</div>
+  <div class="ranking" id="ranking"></div>
+  <div class="guide" id="guide">Esperando...</div>
+  <p class="hint">Turno <span id="turn-count">1</span></p>
+  <div class="board-scroll" id="board-scroll">
+    <div class="board-container" id="board">
+      <div class="board-center">
+        <div class="title">⚛️</div>
+        <div style="font-size:.75rem;color:var(--muted)" id="turn-info">—</div>
+        <div><span class="dice" id="die1">?</span><span class="dice" id="die2">?</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="space-info"><div class="name" id="space-name">—</div><div id="space-desc" style="color:var(--muted);font-size:.78rem"></div></div>
+  <div class="positions"><div id="positions-list"></div></div>
+  <button class="btn hidden" id="btn-roll" onclick="sendAction({type:'roll'})">🎲 Tirar dados</button>
+  <button class="btn btn-secondary hidden" id="btn-end" onclick="sendAction({type:'endTurn'})">Terminar turno</button>
+  <div class="log" id="log"></div>
+</div>
+
+<div id="modal" class="modal-overlay hidden"><div class="modal" id="modal-content"></div></div>
+
+<script>
+const ELEMENTS={
+Li:{name:"Litio",symbol:"Li",number:3,fact:"Metal más ligero."},Na:{name:"Sodio",symbol:"Na",number:11,fact:"Reacciona con agua."},
+K:{name:"Potasio",symbol:"K",number:19,fact:"Esencial para nervios."},Be:{name:"Berilio",symbol:"Be",number:4,fact:"Ligero y resistente."},
+Mg:{name:"Magnesio",symbol:"Mg",number:12,fact:"Llama blanca."},Ca:{name:"Calcio",symbol:"Ca",number:20,fact:"Huesos y dientes."},
+Al:{name:"Aluminio",symbol:"Al",number:13,fact:"Metal abundante."},Si:{name:"Silicio",symbol:"Si",number:14,fact:"Base de chips."},
+Fe:{name:"Hierro",symbol:"Fe",number:26,fact:"Núcleo de la Tierra."},Cu:{name:"Cobre",symbol:"Cu",number:29,fact:"Primer metal usado."},
+Zn:{name:"Zinc",symbol:"Zn",number:30,fact:"Galvanizado."},C:{name:"Carbono",symbol:"C",number:6,fact:"Diamante y grafito."},
+N:{name:"Nitrógeno",symbol:"N",number:7,fact:"78% del aire."},O:{name:"Oxígeno",symbol:"O",number:8,fact:"Respiración."},
+F:{name:"Flúor",symbol:"F",number:9,fact:"Más electronegativo."},Cl:{name:"Cloro",symbol:"Cl",number:17,fact:"Potabiliza agua."},
+Br:{name:"Bromo",symbol:"Br",number:35,fact:"No metal líquido."},He:{name:"Helio",symbol:"He",number:2,fact:"2º más abundante."},
+Ne:{name:"Neón",symbol:"Ne",number:10,fact:"Letreros luminosos."},Ar:{name:"Argón",symbol:"Ar",number:18,fact:"Gas noble común."},
+Ag:{name:"Plata",symbol:"Ag",number:47,fact:"Mejor conductor."},Au:{name:"Oro",symbol:"Au",number:79,fact:"1g = 2km de hilo."},
+U:{name:"Uranio",symbol:"U",number:92,fact:"Energía nuclear."},P:{name:"Fósforo",symbol:"P",number:15,fact:"ADN y fertilizantes."},
+S:{name:"Azufre",symbol:"S",number:16,fact:"Olor a huevo podrido."},I:{name:"Yodo",symbol:"I",number:53,fact:"Tiroides."},
+Ti:{name:"Titanio",symbol:"Ti",number:22,fact:"Aviones e implantes."},Sc:{name:"Escandio",symbol:"Sc",number:21,fact:"Lámparas de estadio."}
+};
+
+const BOARD=[
+{name:"INICIO",short:"INICIO",type:"go"},
+{name:"Litio (Li)",short:"Li",type:"property",group:"alkali",price:60,rent:12,symbol:"Li"},
+{name:"Sodio (Na)",short:"Na",type:"property",group:"alkali",price:60,rent:12,symbol:"Na"},
+{name:"Descubrimiento",short:"✨",type:"chance"},
+{name:"Potasio (K)",short:"K",type:"property",group:"alkali",price:80,rent:16,symbol:"K"},
+{name:"Acelerador 1",short:"AC1",type:"station",price:150,rent:25},
+{name:"Berilio (Be)",short:"Be",type:"property",group:"alkaline",price:100,rent:20,symbol:"Be"},
+{name:"Magnesio (Mg)",short:"Mg",type:"property",group:"alkaline",price:100,rent:20,symbol:"Mg"},
+{name:"Accidente",short:"⚠️",type:"community"},
+{name:"Calcio (Ca)",short:"Ca",type:"property",group:"alkaline",price:120,rent:24,symbol:"Ca"},
+{name:"CÁRCEL",short:"CÁRCEL",type:"jail"},
+{name:"Aluminio (Al)",short:"Al",type:"property",group:"nonmetal",price:140,rent:28,symbol:"Al"},
+{name:"Silicio (Si)",short:"Si",type:"property",group:"nonmetal",price:140,rent:28,symbol:"Si"},
+{name:"Descubrimiento",short:"✨",type:"chance"},
+{name:"Hierro (Fe)",short:"Fe",type:"property",group:"transition",price:160,rent:32,symbol:"Fe"},
+{name:"Escandio (Sc)",short:"Sc",type:"property",group:"transition",price:140,rent:28,symbol:"Sc"},
+{name:"Cobre (Cu)",short:"Cu",type:"property",group:"transition",price:180,rent:36,symbol:"Cu"},
+{name:"Azufre (S)",short:"S",type:"property",group:"nonmetal",price:180,rent:36,symbol:"S"},
+{name:"⚖️ Balanceo",short:"EQ",type:"equation"},
+{name:"LABORATORIO",short:"LAB",type:"lab"},
+{name:"PARQUEO",short:"LIBRE",type:"free"},
+{name:"Carbono (C)",short:"C",type:"property",group:"nonmetal",price:200,rent:40,symbol:"C"},
+{name:"Nitrógeno (N)",short:"N",type:"property",group:"nonmetal",price:200,rent:40,symbol:"N"},
+{name:"Descubrimiento",short:"✨",type:"chance"},
+{name:"Oxígeno (O)",short:"O",type:"property",group:"nonmetal",price:220,rent:44,symbol:"O"},
+{name:"Titanio (Ti)",short:"Ti",type:"property",group:"transition",price:160,rent:32,symbol:"Ti"},
+{name:"Flúor (F)",short:"F",type:"property",group:"halogen",price:240,rent:48,symbol:"F"},
+{name:"Cloro (Cl)",short:"Cl",type:"property",group:"halogen",price:240,rent:48,symbol:"Cl"},
+{name:"Accidente",short:"⚠️",type:"community"},
+{name:"Bromo (Br)",short:"Br",type:"property",group:"halogen",price:260,rent:52,symbol:"Br"},
+{name:"¡A LA CÁRCEL!",short:"CÁRCEL!",type:"gotojail"},
+{name:"Helio (He)",short:"He",type:"property",group:"noble",price:280,rent:60,symbol:"He"},
+{name:"Neón (Ne)",short:"Ne",type:"property",group:"noble",price:280,rent:60,symbol:"Ne"},
+{name:"Descubrimiento",short:"✨",type:"chance"},
+{name:"Argón (Ar)",short:"Ar",type:"property",group:"noble",price:300,rent:70,symbol:"Ar"},
+{name:"Fósforo (P)",short:"P",type:"property",group:"nonmetal",price:180,rent:36,symbol:"P"},
+{name:"Yodo (I)",short:"I",type:"property",group:"halogen",price:300,rent:70,symbol:"I"},
+{name:"Oro (Au)",short:"Au",type:"property",group:"transition",price:350,rent:90,symbol:"Au"},
+{name:"⚖️ Balanceo",short:"EQ",type:"equation"},
+{name:"Uranio (U)",short:"U",type:"property",group:"actinide",price:400,rent:100,symbol:"U"}
+];
+
+const GROUP_CLASS={alkali:"group-alkali",alkaline:"group-alkaline",transition:"group-transition",nonmetal:"group-nonmetal",halogen:"group-halogen",noble:"group-noble",actinide:"group-actinide"};
+const TOKEN_COLORS=["#ef4444","#3b82f6","#22c55e","#eab308"];
+
+const ELEMENT_Q={
+Li:[{q:"¿Nº atómico del Litio?",o:["1","2","3","4"],a:2},{q:"¿Símbolo del Litio?",o:["Lt","Li","L"],a:1}],
+Na:[{q:"¿Símbolo del Sodio?",o:["So","Na","S"],a:1},{q:"¿Familia del Sodio?",o:["Halógenos","Alcalinos","Nobles"],a:1}],
+K:[{q:"¿Símbolo del Potasio?",o:["P","K","Pt"],a:1}],O:[{q:"¿Símbolo del Oxígeno?",o:["O","Ox","Og"],a:0}],
+Fe:[{q:"¿Símbolo del Hierro?",o:["H","Fe","Fr"],a:1}],C:[{q:"¿Nº atómico del Carbono?",o:["4","6","8"],a:1}],
+Cl:[{q:"¿Símbolo del Cloro?",o:["C","Cl","Cr"],a:1}],He:[{q:"¿Símbolo del Helio?",o:["H","He","Hl"],a:1}],
+Au:[{q:"¿Símbolo del Oro?",o:["O","Au","Ag"],a:1}],U:[{q:"¿Símbolo del Uranio?",o:["Ur","U","Un"],a:1}]
+};
+const GENERAL_Q=[
+{q:"¿Cuántos periodos tiene la tabla?",o:["5","6","7","8"],a:2},
+{q:"¿Cómo se llaman las columnas?",o:["Periodos","Grupos","Bloques"],a:1},
+{q:"¿Qué determina el nº atómico?",o:["Neutrones","Electrones","Protones"],a:2},
+{q:"¿Grupo de los gases nobles?",o:["1","2","18"],a:2}
+];
+const EQUATIONS=[
+{q:"Balancea: H₂ + O₂ → H₂O",options:["2H₂ + O₂ → 2H₂O","H₂ + O₂ → H₂O"],a:0},
+{q:"Balancea: N₂ + H₂ → NH₃",options:["N₂ + 3H₂ → 2NH₃","N₂ + H₂ → NH₃"],a:0},
+{q:"Balancea: CH₄ + O₂ → CO₂ + H₂O",options:["CH₄ + 2O₂ → CO₂ + 2H₂O","CH₄ + O₂ → CO₂ + H₂O"],a:0}
+];
+const CHANCE=[{t:"+100 créditos",e:"money",v:100},{t:"Ve al Laboratorio",e:"goto",v:19},{t:"Ve a INICIO +200",e:"goto",v:0},{t:"-50 créditos",e:"money",v:-50}];
+const COMMUNITY=[{t:"-50 créditos",e:"money",v:-50},{t:"Pierdes el turno",e:"skip"},{t:"Cárcel",e:"jail"},{t:"+100 créditos",e:"money",v:100}];
+
+// ---- State ----
+let peer=null, conn=null, connections=[]; // host: connections[], client: conn
+let isHost=false, myId=null, myName='', roomCode='';
+let state=null; // full game state (host is authority)
+let myPlayerIndex=-1;
+let busy=false;
+
+function $(id){return document.getElementById(id)}
+function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));$(id).classList.add('active')}
+function showLobby(){show('screen-lobby')}
+function showCreate(){show('screen-create')}
+function showJoin(){show('screen-join')}
+function log(m){const el=$('log');if(!el)return;const d=document.createElement('div');d.textContent=m;el.prepend(d);if(el.children.length>10)el.lastChild.remove()}
+function showModal(h){$('modal-content').innerHTML=h;$('modal').classList.remove('hidden')}
+function closeModal(){$('modal').classList.add('hidden')}
+function setGuide(t,w){const g=$('guide');if(g){g.textContent=t;g.className='guide'+(w?' wait':'')}}
+function score(p){return p.money+(p.elements.length*80)}
+function genCode(){const c='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';let s='';for(let i=0;i<4;i++)s+=c[Math.floor(Math.random()*c.length)];return s}
+
+// ---- Networking ----
+function createRoom(){
+  myName=$('host-name').value.trim()||'Anfitrión';
+  roomCode=genCode();
+  isHost=true;
+  $('btn-create').disabled=true;
+  $('create-status').textContent='Conectando...';
+  peer=new Peer('elmp-'+roomCode,{debug:1});
+  peer.on('open', id=>{
+    myId=id;
+    $('create-status').textContent='Sala lista';
+    $('room-code').textContent=roomCode;
+    $('room-info').classList.remove('hidden');
+    // host as player 0
+    state={
+      players:[{name:myName,money:1500,position:0,jail:false,jailTurns:0,skip:false,elements:[],properties:[],peerId:id}],
+      currentPlayer:0,properties:{},turnNumber:1,maxTurns:parseInt($('host-turns').value)||0,
+      canRoll:true,doublesCount:0,phase:'lobby',dice:[0,0],log:[]
+    };
+    updateHostPlayerList();
+  });
+  peer.on('connection', c=>{
+    connections.push(c);
+    c.on('data', data=>onHostData(c, data));
+    c.on('close', ()=>{
+      connections=connections.filter(x=>x!==c);
+      // mark player disconnected optional
+      updateHostPlayerList();
+    });
+  });
+  peer.on('error', e=>{
+    $('create-status').textContent='Error: '+e.type+'. Prueba otro código o recarga.';
+    $('btn-create').disabled=false;
+  });
+}
+
+function updateHostPlayerList(){
+  const el=$('host-players');
+  el.innerHTML=state.players.map((p,i)=>`<div>${i+1}. ${p.name}${i===0?' (tú)':''}</div>`).join('');
+  $('btn-start').disabled=state.players.length<2;
+}
+
+function onHostData(c, data){
+  if(data.type==='join'){
+    if(state.phase!=='lobby'){c.send({type:'err',msg:'La partida ya empezó'});return}
+    if(state.players.length>=4){c.send({type:'err',msg:'Sala llena'});return}
+    const idx=state.players.length;
+    state.players.push({name:data.name,money:1500,position:0,jail:false,jailTurns:0,skip:false,elements:[],properties:[],peerId:c.peer});
+    c.send({type:'joined',playerIndex:idx,roomCode,players:state.players.map(p=>p.name)});
+    broadcast({type:'lobbyUpdate',players:state.players.map(p=>p.name)});
+    updateHostPlayerList();
+  } else if(data.type==='action'){
+    handleHostAction(data.playerIndex, data.action);
+  }
+}
+
+function broadcast(msg){
+  connections.forEach(c=>{try{c.send(msg)}catch(e){}});
+}
+
+function joinRoom(){
+  myName=$('join-name').value.trim()||'Jugador';
+  roomCode=$('join-code').value.trim().toUpperCase();
+  if(roomCode.length<4){alert('Código inválido');return}
+  isHost=false;
+  $('btn-join').disabled=true;
+  $('join-status').textContent='Conectando...';
+  peer=new Peer({debug:1});
+  peer.on('open', id=>{
+    myId=id;
+    conn=peer.connect('elmp-'+roomCode,{reliable:true});
+    conn.on('open', ()=>{
+      conn.send({type:'join',name:myName});
+      $('join-status').textContent='Esperando confirmación...';
+    });
+    conn.on('data', onClientData);
+    conn.on('close', ()=>{$('join-status').textContent='Desconectado del anfitrión'});
+  });
+  peer.on('error', e=>{
+    $('join-status').textContent='Error: no se encontró la sala. Revisa el código.';
+    $('btn-join').disabled=false;
+  });
+}
+
+function onClientData(data){
+  if(data.type==='joined'){
+    myPlayerIndex=data.playerIndex;
+    $('join-status').textContent='¡Conectado! Esperando que empiece la partida...';
+  } else if(data.type==='err'){
+    alert(data.msg);$('btn-join').disabled=false;
+  } else if(data.type==='lobbyUpdate'){
+    $('join-status').textContent='Jugadores: '+data.players.join(', ')+'. Esperando inicio...';
+  } else if(data.type==='state'){
+    applyState(data.state);
+  } else if(data.type==='question'){
+    showQuestionModal(data);
+  } else if(data.type==='equation'){
+    showEquationModal(data);
+  } else if(data.type==='card'){
+    showModal(`<h3>${data.title}</h3><p style="margin:12px 0">${data.text}</p><button class="btn" onclick="closeModal()">Ok</button>`);
+  } else if(data.type==='buyOffer'){
+    showBuyOffer(data);
+  } else if(data.type==='gameOver'){
+    showGameOver(data.ranking);
+  }
+}
+
+function hostStartGame(){
+  if(state.players.length<2)return;
+  state.phase='playing';
+  state.currentPlayer=0;
+  state.canRoll=true;
+  buildBoard();
+  show('screen-game');
+  $('g-room').textContent=roomCode;
+  myPlayerIndex=0;
+  broadcastState();
+  renderGame();
+  setGuide(`Turno de ${state.players[0].name}`);
+}
+
+function broadcastState(){
+  const payload={type:'state',state:JSON.parse(JSON.stringify(state))};
+  broadcast(payload);
+}
+
+function applyState(s){
+  const wasPlaying=state&&state.phase==='playing';
+  state=s;
+  if(state.phase==='playing'){
+    if(!wasPlaying){buildBoard();show('screen-game');$('g-room').textContent=roomCode}
+    renderGame();
+  }
+}
+
+function sendAction(action){
+  if(isHost){
+    handleHostAction(myPlayerIndex, action);
+  } else if(conn){
+    conn.send({type:'action',playerIndex:myPlayerIndex,action});
+  }
+}
+
+// ---- Host game logic ----
+function handleHostAction(pi, action){
+  if(state.phase!=='playing')return;
+  if(pi!==state.currentPlayer && action.type!=='answer' && action.type!=='buy' && action.type!=='skipBuy')return;
+
+  if(action.type==='roll'){
+    if(!state.canRoll||busy)return;
+    doHostRoll();
+  } else if(action.type==='endTurn'){
+    hostEndTurn();
+  } else if(action.type==='answer'){
+    hostResolveAnswer(pi, action);
+  } else if(action.type==='buy'){
+    hostBuy(pi, action.pos);
+  } else if(action.type==='skipBuy'){
+    finishHostAction();
+  }
+}
+
+function doHostRoll(){
+  const p=state.players[state.currentPlayer];
+  if(p.skip){p.skip=false;hostEndTurn();return}
+  const d1=1+Math.floor(Math.random()*6), d2=1+Math.floor(Math.random()*6);
+  state.dice=[d1,d2];
+  if(p.jail){
+    if(d1===d2){p.jail=false;p.jailTurns=0;state.canRoll=false;hostMove(d1+d2)}
+    else{p.jailTurns++;if(p.jailTurns>=3){p.money-=50;p.jail=false;p.jailTurns=0;state.canRoll=false;hostMove(d1+d2)}
+    else{state.canRoll=false;finishHostAction()}}
+    broadcastState();renderGame();return;
+  }
+  if(d1===d2){state.doublesCount++;if(state.doublesCount>=3){hostSendToJail(state.currentPlayer);state.canRoll=false;finishHostAction();broadcastState();renderGame();return}}
+  else state.doublesCount=0;
+  state.canRoll=false;
+  hostMove(d1+d2);
+}
+
+function hostMove(steps){
+  busy=true;
+  const p=state.players[state.currentPlayer];
+  let left=steps;
+  function step(){
+    if(left<=0){
+      busy=false;
+      broadcastState();renderGame();
+      hostHandleSpace(p.position);
+      return;
+    }
+    p.position=(p.position+1)%40;
+    if(p.position===0){p.money+=200}
+    left--;
+    broadcastState();renderGame();
+    setTimeout(step, 250);
+  }
+  step();
+}
+
+function hostHandleSpace(pos){
+  const s=BOARD[pos];
+  const p=state.players[state.currentPlayer];
+  if(s.type==='gotojail'){hostSendToJail(state.currentPlayer);finishHostAction();broadcastState();renderGame();return}
+  if(s.type==='chance'||s.type==='community'){
+    const deck=s.type==='chance'?CHANCE:COMMUNITY;
+    const card=deck[Math.floor(Math.random()*deck.length)];
+    broadcast({type:'card',title:s.type==='chance'?'✨ Descubrimiento':'⚠️ Accidente',text:card.t});
+    if(isHost) showModal(`<h3>${s.type==='chance'?'✨ Descubrimiento':'⚠️ Accidente'}</h3><p style="margin:12px 0">${card.t}</p><button class="btn" onclick="closeModal()">Ok</button>`);
+    applyCardEffect(card);
+    finishHostAction();broadcastState();renderGame();return;
+  }
+  if(s.type==='lab'||s.type==='equation'||((s.type==='property'||s.type==='station')&&state.properties[pos]===undefined)){
+    // need answer from current player
+    if(s.type==='equation'){
+      const eq=EQUATIONS[Math.floor(Math.random()*EQUATIONS.length)];
+      const payload={type:'equation',q:eq.q,options:eq.options,a:eq.a,pos};
+      broadcast(payload);
+      if(state.currentPlayer===myPlayerIndex) showEquationModal(payload);
+      else setGuide('Esperando respuesta del jugador...');
+    } else {
+      const q=getQ(s.symbol);
+      const payload={type:'question',q:q.q,options:q.o,a:q.a,isLab:s.type==='lab',pos:s.type==='lab'?null:pos,symbol:s.symbol};
+      broadcast(payload);
+      if(state.currentPlayer===myPlayerIndex) showQuestionModal(payload);
+      else setGuide('Esperando respuesta del jugador...');
+    }
+    return;
+  }
+  if((s.type==='property'||s.type==='station')&&state.properties[pos]!==undefined&&state.properties[pos]!==state.currentPlayer){
+    const rent=s.rent||25;
+    const owner=state.properties[pos];
+    if(p.money>=rent){p.money-=rent;state.players[owner].money+=rent}
+    else p.money=0;
+    finishHostAction();broadcastState();renderGame();return;
+  }
+  finishHostAction();broadcastState();renderGame();
+}
+
+function applyCardEffect(card){
+  const p=state.players[state.currentPlayer];
+  if(card.e==='money') p.money+=card.v;
+  else if(card.e==='goto'){if(card.v<p.position)p.money+=200;p.position=card.v}
+  else if(card.e==='jail') hostSendToJail(state.currentPlayer);
+  else if(card.e==='skip') p.skip=true;
+}
+
+function getQ(sym){
+  if(sym&&ELEMENT_Q[sym]) return ELEMENT_Q[sym][Math.floor(Math.random()*ELEMENT_Q[sym].length)];
+  return GENERAL_Q[Math.floor(Math.random()*GENERAL_Q.length)];
+}
+
+function hostResolveAnswer(pi, action){
+  if(pi!==state.currentPlayer)return;
+  const ok=action.selected===action.correct;
+  const p=state.players[pi];
+  if(action.isLab){
+    if(ok) p.money+=150;
+    else hostSendToJail(pi);
+    finishHostAction();broadcastState();renderGame();return;
+  }
+  if(action.isEq){
+    if(ok) p.money+=120;
+    finishHostAction();broadcastState();renderGame();return;
+  }
+  // property question
+  if(ok && action.pos!=null){
+    const s=BOARD[action.pos];
+    if(p.money>=s.price){
+      // offer buy only to current player
+      const payload={type:'buyOffer',pos:action.pos,price:s.price,rent:s.rent,name:s.name,symbol:s.symbol};
+      if(pi===myPlayerIndex) showBuyOffer(payload);
+      else {
+        // send only to that player - broadcast is ok, others ignore
+        broadcast(payload);
+        // host waits
+      }
+      // if host is not the player, still wait for buy/skipBuy
+      if(pi!==myPlayerIndex) setGuide('Esperando decisión de compra...');
+      return;
+    }
+  }
+  finishHostAction();broadcastState();renderGame();
+}
+
+function hostBuy(pi, pos){
+  const p=state.players[pi];
+  const s=BOARD[pos];
+  if(p.money<s.price) {finishHostAction();broadcastState();renderGame();return}
+  p.money-=s.price;
+  state.properties[pos]=pi;
+  p.properties.push(pos);
+  if(s.symbol&&!p.elements.includes(s.symbol)) p.elements.push(s.symbol);
+  finishHostAction();broadcastState();renderGame();
+}
+
+function hostSendToJail(i){
+  state.players[i].position=10;
+  state.players[i].jail=true;
+  state.players[i].jailTurns=0;
+  state.doublesCount=0;
+}
+
+function finishHostAction(){
+  if(state.doublesCount>0&&!state.players[state.currentPlayer].jail){
+    state.canRoll=true;
+  } else {
+    state.canRoll=false;
+  }
+  broadcastState();renderGame();
+}
+
+function hostEndTurn(){
+  state.doublesCount=0;
+  state.currentPlayer=(state.currentPlayer+1)%state.players.length;
+  if(state.currentPlayer===0) state.turnNumber++;
+  if(state.maxTurns&&state.turnNumber>state.maxTurns){
+    endHostGame();return;
+  }
+  state.canRoll=true;
+  broadcastState();renderGame();
+}
+
+function endHostGame(){
+  const ranking=[...state.players].map((p,i)=>({...p,idx:i,sc:score(p)})).sort((a,b)=>b.sc-a.sc);
+  broadcast({type:'gameOver',ranking});
+  showGameOver(ranking);
+}
+
+// ---- UI helpers ----
+function showQuestionModal(data){
+  if(state.currentPlayer!==myPlayerIndex)return;
+  let html=`<h3>❓ Pregunta</h3><p style="margin:10px 0">${data.q}</p><div class="options">`;
+  data.options.forEach((opt,i)=>{
+    html+=`<button class="option-btn" onclick="submitAnswer(${i},${data.a},${data.isLab?1:0},${data.pos==null?'null':data.pos},0)">${opt}</button>`;
+  });
+  html+=`</div>`;
+  showModal(html);
+}
+
+function showEquationModal(data){
+  if(state.currentPlayer!==myPlayerIndex)return;
+  let html=`<h3>⚖️ Balanceo</h3><div class="eq-box">${data.q}</div><div class="options">`;
+  data.options.forEach((opt,i)=>{
+    html+=`<button class="option-btn" onclick="submitAnswer(${i},${data.a},0,null,1)">${opt}</button>`;
+  });
+  html+=`</div>`;
+  showModal(html);
+}
+
+function submitAnswer(selected, correct, isLab, pos, isEq){
+  const btns=document.querySelectorAll('.option-btn');
+  btns.forEach((b,i)=>{b.disabled=true;if(i===correct)b.classList.add('correct');if(i===selected&&selected!==correct)b.classList.add('wrong')});
+  setTimeout(()=>{
+    closeModal();
+    sendAction({type:'answer',selected,correct,isLab:!!isLab,pos:pos,isEq:!!isEq});
+  }, selected===correct?800:1400);
+}
+
+function showBuyOffer(data){
+  if(state.currentPlayer!==myPlayerIndex)return;
+  const fact=data.symbol&&ELEMENTS[data.symbol]?`<div class="fact">💡 ${ELEMENTS[data.symbol].fact}</div>`:'';
+  showModal(`<h3>✅ Correcto — ¿Comprar?</h3>
+    <p><b>${data.name}</b></p>${fact}
+    <div class="info-box">Precio: ${data.price} ₡ · Renta: ${data.rent}</div>
+    <div class="flex mt-2">
+      <button class="btn btn-success" onclick="closeModal();sendAction({type:'buy',pos:${data.pos}})">Comprar</button>
+      <button class="btn btn-secondary" onclick="closeModal();sendAction({type:'skipBuy'})">No</button>
+    </div>`);
+}
+
+function showGameOver(ranking){
+  if(ranking&&ranking.length&&window.saasSubmitResult){const winner=ranking[0];window.saasSubmitResult({module:'Elementópolis multijugador',score:winner.sc,level:1,meta:{mode:'multijugador',players:ranking.map(p=>p.name),ranking:ranking.map(p=>({name:p.name,score:p.sc}))}}).catch(()=>{});}
+  let html=`<h3>🏁 Fin de partida</h3>`;
+  ranking.forEach((p,i)=>{
+    html+=`<div style="padding:8px;margin:4px 0;background:#0f172a;border-radius:8px;${i===0?'border:2px solid #22c55e':''}">
+      <b>${i+1}. ${p.name}</b> ${i===0?'🏆':''}<br>${p.money} ₡ · ${p.elements.length} el · <b>${p.sc} pts</b></div>`;
+  });
+  html+=`<button class="btn mt-2" onclick="location.reload()">Salir</button>`;
+  showModal(html);
+}
+
+function buildBoard(){
+  const board=$('board');
+  board.querySelectorAll('.space,.token').forEach(el=>el.remove());
+  const gridPos=[];
+  gridPos[0]=[11,1];
+  for(let i=1;i<=9;i++) gridPos[i]=[11,i+1];
+  gridPos[10]=[11,11];
+  for(let i=11;i<=19;i++) gridPos[i]=[10-(i-11),11];
+  gridPos[20]=[1,11];
+  for(let i=21;i<=29;i++) gridPos[i]=[1,10-(i-21)];
+  gridPos[30]=[1,1];
+  for(let i=31;i<=39;i++) gridPos[i]=[2+(i-31),1];
+  BOARD.forEach((s,i)=>{
+    const el=document.createElement('div');
+    el.className='space';el.id='space-'+i;
+    if(['go','jail','free','gotojail'].includes(s.type)) el.classList.add('corner');
+    if(s.type==='chance') el.classList.add('chance');
+    if(s.type==='community') el.classList.add('community');
+    if(s.type==='station') el.classList.add('station');
+    if(s.type==='lab'||s.type==='equation') el.classList.add('lab');
+    if(s.group) el.classList.add(GROUP_CLASS[s.group]);
+    el.innerHTML=s.type==='property'?`<span class="sym">${s.short}</span><span class="price">${s.price}</span>`:`<span class="sym">${s.short}</span>`;
+    const [r,c]=gridPos[i];
+    el.style.gridRow=r;el.style.gridColumn=c;
+    board.appendChild(el);
+  });
+}
+
+function renderGame(){
+  if(!state)return;
+  const sorted=[...state.players].map((p,i)=>({...p,i})).sort((a,b)=>score(b)-score(a));
+  $('ranking').innerHTML=sorted.map((p,idx)=>`<div class="rank-chip ${p.i===state.currentPlayer?'me':''}"><div>${idx+1}. ${p.name}</div><div class="money">${p.money} ₡</div><div style="font-size:.65rem;color:var(--muted)">${p.elements.length} el · ${score(p)} pts</div></div>`).join('');
+  $('positions-list').innerHTML=state.players.map((p,i)=>`<div class="pos-row"><span>${i===state.currentPlayer?'👉 ':''}${p.name}${p.jail?' 🔒':''}</span><span class="pspace">${BOARD[p.position].name}</span></div>`).join('');
+  const p=state.players[state.currentPlayer];
+  const s=BOARD[p.position];
+  $('space-name').textContent=s.name;
+  $('space-desc').textContent='';
+  $('turn-info').textContent=`Turno de ${p.name}`;
+  $('turn-count').textContent=state.turnNumber+(state.maxTurns?'/'+state.maxTurns:'');
+  if(state.dice){$('die1').textContent=state.dice[0]||'?';$('die2').textContent=state.dice[1]||'?'}
+  // tokens
+  document.querySelectorAll('.token').forEach(t=>t.remove());
+  state.players.forEach((pl,pi)=>{
+    const sp=$('space-'+pl.position);if(!sp)return;
+    const t=document.createElement('div');t.className='token';t.style.background=TOKEN_COLORS[pi];
+    t.textContent=pl.name[0].toUpperCase();
+    const ox=(pi%2)*5-2,oy=Math.floor(pi/2)*5-2;
+    t.style.transform=`translate(calc(-50% + ${ox}px), calc(-50% + ${oy}px))`;
+    sp.appendChild(t);
+  });
+  document.querySelectorAll('.space').forEach(s=>s.classList.remove('current-highlight'));
+  const cur=$('space-'+p.position);
+  if(cur){cur.classList.add('current-highlight');cur.scrollIntoView({behavior:'smooth',block:'center',inline:'center'})}
+
+  // buttons: only current player on their device
+  const isMyTurn=state.currentPlayer===myPlayerIndex;
+  $('btn-roll').classList.toggle('hidden', !(isMyTurn&&state.canRoll));
+  $('btn-end').classList.toggle('hidden', !(isMyTurn&&!state.canRoll));
+  if(isMyTurn&&state.canRoll) setGuide(`Tu turno: tira los dados`);
+  else if(isMyTurn) setGuide(`Tu turno: termina cuando puedas`);
+  else setGuide(`Turno de ${p.name}...`, true);
+}
+</script>
+</body>
+</html>
