@@ -9,7 +9,7 @@
   try{
     const r=await fetch('/api/access/check?classCode='+encodeURIComponent(code),{cache:'no-store',headers:{Authorization:'Bearer '+(localStorage.getItem('saas_student_token')||'')}});
     const d=await r.json();
-    if(!d.allowed || (Array.isArray(d.subjects)&&d.subjects.length&&!d.subjects.includes('fisica'))) return fail();
+    if(!d.allowed || (Array.isArray(d.subjects)&&d.subjects.length&&!d.subjects.includes('biologia'))) return fail();
     localStorage.setItem('saas_access_ok','1');
     localStorage.setItem('saas_student_token',d.accessToken||localStorage.getItem('saas_student_token')||'');
     localStorage.setItem('saas_subjects',JSON.stringify(d.subjects||[]));
