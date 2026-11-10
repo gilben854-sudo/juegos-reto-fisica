@@ -1,0 +1,1160 @@
+<!DOCTYPE html>
+<html lang="es">
+<head><script id="SAAS_ACCESS_GUARD_V1">
+(async function(){
+  const code=(localStorage.getItem('saas_classCode')||'').trim().toUpperCase();
+  const name=(localStorage.getItem('saas_studentName')||'').trim();
+  const fail=function(){ ['saas_access_ok','saas_classCode','saas_studentName','saas_subjects','saas_student_token'].forEach(k=>localStorage.removeItem(k)); location.replace('/catalogo.html?access=expired'); };
+  if(!code||!name) return fail();
+  try{
+    const r=await fetch('/api/access/check?classCode='+encodeURIComponent(code),{cache:'no-store',headers:{Authorization:'Bearer '+(localStorage.getItem('saas_student_token')||'')}});
+    const d=await r.json();
+    if(!d.allowed || (Array.isArray(d.subjects)&&d.subjects.length&&!d.subjects.includes('quimica'))) return fail();
+    localStorage.setItem('saas_access_ok','1');
+    localStorage.setItem('saas_student_token',d.accessToken||localStorage.getItem('saas_student_token')||'');
+    localStorage.setItem('saas_subjects',JSON.stringify(d.subjects||[]));
+  }catch(e){ return fail(); }
+})();
+window.saasSubmitResult=async function(result){ const t=localStorage.getItem('saas_student_token')||''; if(!t) return {ok:false}; const r=await fetch('/api/results',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+t},body:JSON.stringify(result||{})}); return r.json(); };
+</script>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Juegos de Reto — Elementópolis</title>
+<style>
+:root{--bg:#0f172a;--card:#1e293b;--accent:#38bdf8;--success:#22c55e;--danger:#ef4444;--text:#f8fafc;--muted:#94a3b8}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100dvh}
+.screen{display:none;padding:10px;max-width:480px;margin:0 auto}.screen.active{display:block}
+h1{font-size:1.35rem;text-align:center;margin:4px 0;background:linear-gradient(90deg,#38bdf8,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.btn{display:block;width:100%;padding:13px;margin:6px 0;border:none;border-radius:12px;font-size:.95rem;font-weight:700;background:var(--accent);color:#0f172a;cursor:pointer}
+.btn:active{transform:scale(.97)}.btn:disabled{opacity:.4}
+.btn-secondary{background:var(--card);color:var(--text);border:1px solid #475569}
+.btn-success{background:var(--success);color:#fff}.btn-danger{background:var(--danger);color:#fff}
+.btn-small{padding:7px 11px;font-size:.8rem;width:auto}
+.card{background:var(--card);border-radius:14px;padding:12px;margin:8px 0;border:1px solid #334155}
+.player-setup{display:flex;gap:8px;margin:7px 0;align-items:center}
+.player-setup input{flex:1;padding:11px;border-radius:10px;border:1px solid #334155;background:#0f172a;color:var(--text);font-size:.95rem}
+.goal{background:linear-gradient(90deg,#0c4a6e,#1e3a5f);border:1px solid #38bdf8;border-radius:10px;padding:8px;text-align:center;font-size:.82rem;margin-bottom:6px}
+.goal strong{color:#7dd3fc}
+.ranking{display:flex;gap:5px;overflow-x:auto;padding:2px 0 6px}
+.rank-chip{flex-shrink:0;background:var(--card);border-radius:10px;padding:6px 10px;border:2px solid #334155;min-width:105px;text-align:center;font-size:.72rem}
+.rank-chip.me{border-color:var(--accent);background:#0c4a6e}
+.rank-chip .money{color:var(--success);font-weight:800}.rank-chip .els{color:var(--muted);font-size:.65rem}
+.guide{background:#14532d;border:1px solid #22c55e;border-radius:10px;padding:10px;text-align:center;font-weight:700;font-size:.9rem;margin-bottom:8px}
+.guide.wait{background:#1e293b;border-color:#475569;color:var(--muted)}
+.board-scroll{width:100%;overflow:auto;-webkit-overflow-scrolling:touch;border-radius:12px;border:3px solid #1e293b;background:#14532d;margin-bottom:8px;max-height:48vh}
+.board-container{display:grid;grid-template-columns:repeat(11,1fr);grid-template-rows:repeat(11,1fr);width:660px;height:660px;background:#166534;margin:0 auto;gap:0}
+.board-center{grid-column:2/11;grid-row:2/11;background:linear-gradient(160deg,#0f172a,#1e293b);border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;border:2px solid #334155;z-index:2}
+.board-center .title{font-size:1.05rem;color:var(--accent);font-weight:800}
+.board-center .turn-info{font-size:.75rem;color:var(--muted);margin:3px 0}
+.dice{display:inline-block;width:44px;height:44px;margin:0 4px;background:#fff;color:#0f172a;border-radius:10px;font-size:1.35rem;font-weight:800;line-height:44px;box-shadow:0 2px 6px rgba(0,0,0,.4)}
+.space{background:#f8fafc;color:#0f172a;font-size:.62rem;font-weight:700;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;border:1px solid #64748b;overflow:hidden;line-height:1.05;position:relative;min-height:0;min-width:0}
+.space .sym{font-size:.8rem;font-weight:800}.space .price{font-size:.55rem;color:#475569}
+.space.corner{font-size:.65rem;font-weight:800;background:#e2e8f0}
+.space.chance{background:#fef3c7;color:#92400e}.space.community{background:#dbeafe;color:#1e40af}
+.space.station{background:#e0e7ff;color:#3730a3}.space.lab,.space.equation{background:#fce7f3;color:#9d174d}
+.space.current-highlight{box-shadow:inset 0 0 0 3px #38bdf8;z-index:6;background:#e0f2fe!important}
+.group-alkali{border-top:6px solid #ef4444}.group-alkaline{border-top:6px solid #f97316}.group-transition{border-top:6px solid #eab308}
+.group-nonmetal{border-top:6px solid #22c55e}.group-halogen{border-top:6px solid #3b82f6}.group-noble{border-top:6px solid #a855f7}.group-actinide{border-top:6px solid #64748b}
+.token{position:absolute;width:18px;height:18px;border-radius:50%;border:2px solid #fff;box-shadow:0 2px 4px rgba(0,0,0,.5);z-index:12;font-size:.6rem;font-weight:800;color:#fff;display:flex;align-items:center;justify-content:center;top:50%;left:50%;transform:translate(-50%,-50%)}
+.space-info{background:var(--card);border-radius:12px;padding:10px 12px;margin-bottom:6px;border:1px solid #334155;font-size:.85rem}
+.space-info .name{font-weight:800;color:var(--accent);font-size:1rem}.space-info .desc{color:var(--muted);font-size:.78rem;margin-top:2px}
+.positions{background:var(--card);border-radius:10px;padding:8px 10px;margin-bottom:6px;border:1px solid #334155;font-size:.8rem}
+.pos-row{display:flex;justify-content:space-between;padding:3px 0}.pos-row .pspace{color:var(--accent)}
+.log{background:#0f172a;border-radius:8px;padding:6px 8px;max-height:70px;overflow-y:auto;font-size:.72rem;color:var(--muted)}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.9);display:flex;align-items:flex-end;justify-content:center;z-index:100}
+.modal{background:var(--card);border-radius:18px 18px 0 0;padding:18px;width:100%;max-width:480px;max-height:88dvh;overflow-y:auto}
+.modal h3{color:var(--accent);margin-bottom:8px}
+.options{display:flex;flex-direction:column;gap:7px;margin-top:10px}
+.option-btn{padding:12px;border-radius:11px;border:2px solid #334155;background:#0f172a;color:var(--text);font-size:.92rem;text-align:left}
+.option-btn.correct{border-color:var(--success);background:#14532d}.option-btn.wrong{border-color:var(--danger);background:#7f1d1d}
+.hidden{display:none!important}.flex{display:flex;gap:8px}.flex>*{flex:1}.mt-2{margin-top:10px}
+.info-box{background:#0f172a;border-radius:10px;padding:10px;font-size:.85rem;margin:8px 0;border-left:4px solid var(--accent)}
+.hint{text-align:center;font-size:.7rem;color:var(--muted);margin:2px 0 6px}
+.element-card{background:linear-gradient(145deg,#1e293b,#0f172a);border:2px solid var(--accent);border-radius:14px;padding:14px;text-align:center;margin:8px 0}
+.element-card .big-sym{font-size:2.6rem;font-weight:900;color:var(--accent);line-height:1}
+.element-card .big-name{font-size:1.15rem;font-weight:700;margin:3px 0}
+.element-card .big-num{font-size:.95rem;color:var(--muted)}
+.element-card .props{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-top:10px;text-align:left}
+.element-card .prop{background:#0f172a;border-radius:8px;padding:7px 9px;font-size:.75rem}
+.element-card .prop b{color:var(--accent);display:block;font-size:.62rem}
+.mini-table{display:grid;grid-template-columns:repeat(auto-fill,minmax(48px,1fr));gap:4px;margin:8px 0}
+.mini-el{background:#0f172a;border-radius:8px;padding:5px 3px;text-align:center;border:1px solid #334155;font-size:.7rem}
+.mini-el.owned{border-color:var(--accent);background:#0c4a6e}
+.mini-el .msym{font-size:.9rem;font-weight:800;color:var(--accent)}.mini-el .mnum{font-size:.58rem;color:var(--muted)}
+.fact{background:#14532d;border-radius:10px;padding:9px;margin:7px 0;font-size:.82rem;border-left:4px solid var(--success)}
+.eq-box{background:#0f172a;border-radius:10px;padding:12px;margin:8px 0;font-family:monospace;font-size:1rem;text-align:center;border:1px solid #334155}
+</style>
+</head>
+<body>
+<div id="screen-start" class="screen active">
+  <h1>⚛️ Elementopolis</h1>
+  <p style="text-align:center;color:var(--muted);font-size:.85rem;margin-bottom:10px">Monopoly de la Tabla Periódica</p>
+  <div class="card">
+    <div style="font-size:.9rem;line-height:1.5">
+      <b style="color:var(--accent)">Objetivo:</b> Tener el mayor puntaje.<br>
+      Puntaje = créditos + (elementos × 80) + (labs × 50)<br><br>
+      Compra elementos, completa grupos y construye laboratorios.
+    </div>
+  </div>
+  <div class="card">
+    <h2 style="font-size:1rem;color:var(--accent);margin-bottom:6px">Jugadores (2-4)</h2>
+    <div id="players-setup">
+      <div class="player-setup"><input type="text" value="Ana" maxlength="10"></div>
+      <div class="player-setup"><input type="text" value="Luis" maxlength="10"></div>
+    </div>
+    <button class="btn btn-secondary" onclick="addPlayer()">+ Añadir jugador</button>
+  </div>
+  <div class="card">
+    <label style="font-size:.85rem;color:var(--muted)">Turnos máximos (0 = sin límite)</label>
+    <input type="number" id="max-turns" value="20" min="0" max="40" style="width:100%;padding:10px;border-radius:10px;border:1px solid #334155;background:#0f172a;color:var(--text);margin-top:4px">
+  </div>
+  <button class="btn" onclick="startGame()">¡Empezar partida!</button>
+  <button class="btn btn-secondary" onclick="loadGame()">Cargar partida</button>
+</div>
+
+<div id="screen-game" class="screen">
+  <h1 style="font-size:1.2rem">Elementopolis</h1>
+  <div class="goal"><strong>Puntaje</strong> = créditos + el×80 + labs×50</div>
+  <div class="ranking" id="ranking"></div>
+  <div class="guide" id="guide">Pulsa “Tirar dados”</div>
+  <p class="hint">Turno <span id="turn-count">1</span> · ↔️ Desliza el tablero</p>
+  <div class="board-scroll" id="board-scroll">
+    <div class="board-container" id="board">
+      <div class="board-center">
+        <div class="title">⚛️</div>
+        <div class="turn-info" id="turn-info">Turno</div>
+        <div><span class="dice" id="die1">?</span><span class="dice" id="die2">?</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="space-info">
+    <div class="name" id="space-name">INICIO</div>
+    <div class="desc" id="space-desc">Casilla de salida</div>
+  </div>
+  <div class="positions"><div id="positions-list"></div></div>
+  <button class="btn" id="btn-roll" onclick="rollDice()">🎲 Tirar dados</button>
+  <button class="btn btn-secondary hidden" id="btn-end" onclick="endTurn()">Terminar turno → Siguiente</button>
+  <div class="flex">
+    <button class="btn btn-secondary" onclick="showMyTable()">📋 Mi tabla</button>
+    <button class="btn btn-secondary" onclick="showTrade()">🔄 Intercambiar</button>
+  </div>
+  <div class="flex">
+    <button class="btn btn-secondary" onclick="saveGame()">💾 Guardar</button>
+    <button class="btn btn-secondary" id="btn-sound" onclick="toggleSound()">🔊 Sonido</button>
+  </div>
+  <div class="log" id="log"></div>
+</div>
+
+<div id="modal" class="modal-overlay hidden"><div class="modal" id="modal-content"></div></div>
+
+<script>
+const ELEMENTS = {
+  Li:{name:"Litio",symbol:"Li",number:3,mass:"6.94",group:"1 Alcalinos",period:2,block:"s",state:"Sólido",electron:"[He] 2s¹",use:"Baterías",fact:"Metal más ligero."},
+  Na:{name:"Sodio",symbol:"Na",number:11,mass:"22.99",group:"1 Alcalinos",period:3,block:"s",state:"Sólido",electron:"[Ne] 3s¹",use:"Sal",fact:"Reacciona con agua."},
+  K:{name:"Potasio",symbol:"K",number:19,mass:"39.10",group:"1 Alcalinos",period:4,block:"s",state:"Sólido",electron:"[Ar] 4s¹",use:"Fertilizantes",fact:"Esencial para nervios."},
+  Be:{name:"Berilio",symbol:"Be",number:4,mass:"9.01",group:"2 Alcalinotérreos",period:2,block:"s",state:"Sólido",electron:"[He] 2s²",use:"Aeroespacial",fact:"Ligero y resistente."},
+  Mg:{name:"Magnesio",symbol:"Mg",number:12,mass:"24.31",group:"2 Alcalinotérreos",period:3,block:"s",state:"Sólido",electron:"[Ne] 3s²",use:"Aleaciones",fact:"Llama blanca brillante."},
+  Ca:{name:"Calcio",symbol:"Ca",number:20,mass:"40.08",group:"2 Alcalinotérreos",period:4,block:"s",state:"Sólido",electron:"[Ar] 4s²",use:"Huesos",fact:"Más de 1 kg en el cuerpo."},
+  Al:{name:"Aluminio",symbol:"Al",number:13,mass:"26.98",group:"13",period:3,block:"p",state:"Sólido",electron:"[Ne] 3s² 3p¹",use:"Latas",fact:"Metal más abundante en corteza."},
+  Si:{name:"Silicio",symbol:"Si",number:14,mass:"28.09",group:"14 Metaloides",period:3,block:"p",state:"Sólido",electron:"[Ne] 3s² 3p²",use:"Chips",fact:"Base de la electrónica."},
+  Fe:{name:"Hierro",symbol:"Fe",number:26,mass:"55.85",group:"8 Transición",period:4,block:"d",state:"Sólido",electron:"[Ar] 3d⁶ 4s²",use:"Acero",fact:"Núcleo de la Tierra."},
+  Cu:{name:"Cobre",symbol:"Cu",number:29,mass:"63.55",group:"11 Transición",period:4,block:"d",state:"Sólido",electron:"[Ar] 3d¹⁰ 4s¹",use:"Cables",fact:"Primer metal usado."},
+  Zn:{name:"Zinc",symbol:"Zn",number:30,mass:"65.38",group:"12 Transición",period:4,block:"d",state:"Sólido",electron:"[Ar] 3d¹⁰ 4s²",use:"Galvanizado",fact:"Protege el acero."},
+  C:{name:"Carbono",symbol:"C",number:6,mass:"12.01",group:"14 No metales",period:2,block:"p",state:"Sólido",electron:"[He] 2s² 2p²",use:"Vida",fact:"Diamante y grafito son carbono."},
+  N:{name:"Nitrógeno",symbol:"N",number:7,mass:"14.01",group:"15 No metales",period:2,block:"p",state:"Gas",electron:"[He] 2s² 2p³",use:"78% aire",fact:"Inerte."},
+  O:{name:"Oxígeno",symbol:"O",number:8,mass:"16.00",group:"16 No metales",period:2,block:"p",state:"Gas",electron:"[He] 2s² 2p⁴",use:"Respiración",fact:"Necesario para el fuego."},
+  F:{name:"Flúor",symbol:"F",number:9,mass:"19.00",group:"17 Halógenos",period:2,block:"p",state:"Gas",electron:"[He] 2s² 2p⁵",use:"Pasta dental",fact:"Más electronegativo."},
+  Cl:{name:"Cloro",symbol:"Cl",number:17,mass:"35.45",group:"17 Halógenos",period:3,block:"p",state:"Gas",electron:"[Ne] 3s² 3p⁵",use:"Desinfectante",fact:"Potabiliza el agua."},
+  Br:{name:"Bromo",symbol:"Br",number:35,mass:"79.90",group:"17 Halógenos",period:4,block:"p",state:"Líquido",electron:"[Ar] 4s² 4p⁵",use:"Retardantes",fact:"Único no metal líquido a T. ambiente."},
+  He:{name:"Helio",symbol:"He",number:2,mass:"4.00",group:"18 Gases nobles",period:1,block:"s",state:"Gas",electron:"1s²",use:"Globos",fact:"2º más abundante del universo."},
+  Ne:{name:"Neón",symbol:"Ne",number:10,mass:"20.18",group:"18 Gases nobles",period:2,block:"p",state:"Gas",electron:"[He] 2s² 2p⁶",use:"Letreros",fact:"Nombre del griego 'nuevo'."},
+  Ar:{name:"Argón",symbol:"Ar",number:18,mass:"39.95",group:"18 Gases nobles",period:3,block:"p",state:"Gas",electron:"[Ne] 3s² 3p⁶",use:"Soldadura",fact:"Gas noble más abundante en atmósfera."},
+  Ag:{name:"Plata",symbol:"Ag",number:47,mass:"107.87",group:"11 Transición",period:5,block:"d",state:"Sólido",electron:"[Kr] 4d¹⁰ 5s¹",use:"Joyería",fact:"Mejor conductor eléctrico."},
+  Au:{name:"Oro",symbol:"Au",number:79,mass:"196.97",group:"11 Transición",period:6,block:"d",state:"Sólido",electron:"[Xe] 5d¹⁰ 6s¹",use:"Joyería",fact:"1 g se estira 2 km."},
+  U:{name:"Uranio",symbol:"U",number:92,mass:"238.03",group:"Actínidos",period:7,block:"f",state:"Sólido",electron:"[Rn] 5f³ 6d¹ 7s²",use:"Nuclear",fact:"Todos sus isótopos son radiactivos."},
+  P:{name:"Fósforo",symbol:"P",number:15,mass:"30.97",group:"15 No metales",period:3,block:"p",state:"Sólido",electron:"[Ne] 3s² 3p³",use:"Fertilizantes y ADN",fact:"Existe en formas blanca, roja y negra."},
+  S:{name:"Azufre",symbol:"S",number:16,mass:"32.07",group:"16 No metales",period:3,block:"p",state:"Sólido",electron:"[Ne] 3s² 3p⁴",use:"Ácido sulfúrico",fact:"Se encuentra en volcanes; huele a huevo podrido."},
+  I:{name:"Yodo",symbol:"I",number:53,mass:"126.90",group:"17 Halógenos",period:5,block:"p",state:"Sólido",electron:"[Kr] 5s² 5p⁵",use:"Antiséptico y tiroides",fact:"Esencial para la glándula tiroides."},
+  Ti:{name:"Titanio",symbol:"Ti",number:22,mass:"47.87",group:"4 Transición",period:4,block:"d",state:"Sólido",electron:"[Ar] 3d² 4s²",use:"Aviones e implantes",fact:"Tan fuerte como el acero pero más ligero."},
+  Sc:{name:"Escandio",symbol:"Sc",number:21,mass:"44.96",group:"3 Transición",period:4,block:"d",state:"Sólido",electron:"[Ar] 3d¹ 4s²",use:"Aleaciones",fact:"Se usa en lámparas de estadio."}
+};
+
+const BOARD = [
+  {name:"INICIO", short:"INICIO", type:"go"},
+  {name:"Litio (Li)", short:"Li", type:"property", group:"alkali", price:60, rent:12, symbol:"Li"},
+  {name:"Sodio (Na)", short:"Na", type:"property", group:"alkali", price:60, rent:12, symbol:"Na"},
+  {name:"Descubrimiento", short:"✨", type:"chance"},
+  {name:"Potasio (K)", short:"K", type:"property", group:"alkali", price:80, rent:16, symbol:"K"},
+  {name:"Acelerador 1", short:"AC1", type:"station", price:150, rent:25},
+  {name:"Berilio (Be)", short:"Be", type:"property", group:"alkaline", price:100, rent:20, symbol:"Be"},
+  {name:"Magnesio (Mg)", short:"Mg", type:"property", group:"alkaline", price:100, rent:20, symbol:"Mg"},
+  {name:"Accidente", short:"⚠️", type:"community"},
+  {name:"Calcio (Ca)", short:"Ca", type:"property", group:"alkaline", price:120, rent:24, symbol:"Ca"},
+  {name:"CÁRCEL", short:"CÁRCEL", type:"jail"},
+  {name:"Aluminio (Al)", short:"Al", type:"property", group:"nonmetal", price:140, rent:28, symbol:"Al"},
+  {name:"Silicio (Si)", short:"Si", type:"property", group:"nonmetal", price:140, rent:28, symbol:"Si"},
+  {name:"Descubrimiento", short:"✨", type:"chance"},
+  {name:"Hierro (Fe)", short:"Fe", type:"property", group:"transition", price:160, rent:32, symbol:"Fe"},
+  {name:"Escandio (Sc)", short:"Sc", type:"property", group:"transition", price:140, rent:28, symbol:"Sc"},
+  {name:"Cobre (Cu)", short:"Cu", type:"property", group:"transition", price:180, rent:36, symbol:"Cu"},
+  {name:"Azufre (S)", short:"S", type:"property", group:"nonmetal", price:180, rent:36, symbol:"S"},
+  {name:"⚖️ Balanceo", short:"EQ", type:"equation"},
+  {name:"LABORATORIO", short:"LAB", type:"lab"},
+  {name:"PARQUEO", short:"LIBRE", type:"free"},
+  {name:"Carbono (C)", short:"C", type:"property", group:"nonmetal", price:200, rent:40, symbol:"C"},
+  {name:"Nitrógeno (N)", short:"N", type:"property", group:"nonmetal", price:200, rent:40, symbol:"N"},
+  {name:"Descubrimiento", short:"✨", type:"chance"},
+  {name:"Oxígeno (O)", short:"O", type:"property", group:"nonmetal", price:220, rent:44, symbol:"O"},
+  {name:"Titanio (Ti)", short:"Ti", type:"property", group:"transition", price:160, rent:32, symbol:"Ti"},
+  {name:"Flúor (F)", short:"F", type:"property", group:"halogen", price:240, rent:48, symbol:"F"},
+  {name:"Cloro (Cl)", short:"Cl", type:"property", group:"halogen", price:240, rent:48, symbol:"Cl"},
+  {name:"Accidente", short:"⚠️", type:"community"},
+  {name:"Bromo (Br)", short:"Br", type:"property", group:"halogen", price:260, rent:52, symbol:"Br"},
+  {name:"¡A LA CÁRCEL!", short:"CÁRCEL!", type:"gotojail"},
+  {name:"Helio (He)", short:"He", type:"property", group:"noble", price:280, rent:60, symbol:"He"},
+  {name:"Neón (Ne)", short:"Ne", type:"property", group:"noble", price:280, rent:60, symbol:"Ne"},
+  {name:"Descubrimiento", short:"✨", type:"chance"},
+  {name:"Argón (Ar)", short:"Ar", type:"property", group:"noble", price:300, rent:70, symbol:"Ar"},
+  {name:"Fósforo (P)", short:"P", type:"property", group:"nonmetal", price:180, rent:36, symbol:"P"},
+  {name:"Yodo (I)", short:"I", type:"property", group:"halogen", price:300, rent:70, symbol:"I"},
+  {name:"Oro (Au)", short:"Au", type:"property", group:"transition", price:350, rent:90, symbol:"Au"},
+  {name:"⚖️ Balanceo", short:"EQ", type:"equation"},
+  {name:"Uranio (U)", short:"U", type:"property", group:"actinide", price:400, rent:100, symbol:"U"}
+];
+
+const GROUP_CLASS = {alkali:"group-alkali",alkaline:"group-alkaline",transition:"group-transition",nonmetal:"group-nonmetal",halogen:"group-halogen",noble:"group-noble",actinide:"group-actinide"};
+const GROUPS = {alkali:["Li","Na","K"], alkaline:["Be","Mg","Ca"], transition:["Fe","Cu","Sc","Ti","Au"], nonmetal:["Al","Si","C","N","O","P","S"], halogen:["F","Cl","Br","I"], noble:["He","Ne","Ar"]};
+
+const ELEMENT_QUESTIONS = {
+  Li:[
+    {q:"¿Nº atómico del Litio?",o:["1","2","3","4"],a:2},
+    {q:"¿Símbolo del Litio?",o:["Lt","Li","L","Lm"],a:1},
+    {q:"¿El Litio se usa principalmente en...?",o:["Fertilizantes","Baterías","Letreros","Sal"],a:1},
+    {q:"¿El Litio es un metal...?",o:["Alcalino","Alcalinotérreo","Halógeno","Noble"],a:0}
+  ],
+  Na:[
+    {q:"¿Símbolo del Sodio?",o:["So","Na","S","Sd"],a:1},
+    {q:"¿Familia del Sodio?",o:["Halógenos","Alcalinos","Nobles","Transición"],a:1},
+    {q:"¿El Sodio reacciona violentamente con...?",o:["Aceite","Agua","Arena","Nitrógeno"],a:1},
+    {q:"¿Nº atómico del Sodio?",o:["10","11","12","19"],a:1}
+  ],
+  K:[
+    {q:"¿Símbolo del Potasio?",o:["P","Po","K","Pt"],a:2},
+    {q:"¿El Potasio es esencial para...?",o:["Huesos","Nervios","Piel","Vista"],a:1},
+    {q:"¿Nº atómico del Potasio?",o:["11","17","19","20"],a:2}
+  ],
+  Be:[
+    {q:"¿Nº atómico del Berilio?",o:["2","3","4","5"],a:2},
+    {q:"¿Símbolo del Berilio?",o:["B","Be","Br","Ba"],a:1},
+    {q:"¿El Berilio pertenece a...?",o:["Alcalinos","Alcalinotérreos","Halógenos","Nobles"],a:1}
+  ],
+  Mg:[
+    {q:"¿Símbolo del Magnesio?",o:["M","Ma","Mg","Mn"],a:2},
+    {q:"¿El Magnesio arde con llama...?",o:["Roja","Azul","Blanca","Verde"],a:2},
+    {q:"¿Nº atómico del Magnesio?",o:["11","12","13","20"],a:1}
+  ],
+  Ca:[
+    {q:"¿Símbolo del Calcio?",o:["C","Ca","Cl","Cu"],a:1},
+    {q:"¿El Calcio es importante para...?",o:["Sangre","Huesos","Nervios","Piel"],a:1},
+    {q:"¿Nº atómico del Calcio?",o:["12","19","20","26"],a:2}
+  ],
+  Al:[
+    {q:"¿Símbolo del Aluminio?",o:["A","Al","Am","Au"],a:1},
+    {q:"¿Metal más abundante en la corteza?",o:["Hierro","Aluminio","Calcio","Sodio"],a:1},
+    {q:"¿Nº atómico del Aluminio?",o:["12","13","14","26"],a:1}
+  ],
+  Si:[
+    {q:"¿Símbolo del Silicio?",o:["S","Si","Sl","Sc"],a:1},
+    {q:"¿Base de la electrónica moderna?",o:["Hierro","Silicio","Cobre","Carbono"],a:1},
+    {q:"¿El Silicio es un...?",o:["Metal","No metal","Metaloide","Gas"],a:2}
+  ],
+  Fe:[
+    {q:"¿Símbolo del Hierro?",o:["H","Hi","Fe","Fr"],a:2},
+    {q:"¿Núcleo de la Tierra tiene mucho...?",o:["Oro","Hierro","Carbono","Uranio"],a:1},
+    {q:"¿Nº atómico del Hierro?",o:["24","26","28","29"],a:1}
+  ],
+  Cu:[
+    {q:"¿Símbolo del Cobre?",o:["Co","Cu","Cr","Cb"],a:1},
+    {q:"¿Primer metal usado por humanos?",o:["Hierro","Cobre","Oro","Plata"],a:1},
+    {q:"¿Nº atómico del Cobre?",o:["26","28","29","30"],a:2}
+  ],
+  Zn:[
+    {q:"¿Símbolo del Zinc?",o:["Z","Zn","Zi","Zh"],a:1},
+    {q:"¿El Zinc se usa para...?",o:["Galvanizar","Letreros","Baterías de litio","Globos"],a:0},
+    {q:"¿Nº atómico del Zinc?",o:["28","29","30","35"],a:2}
+  ],
+  C:[
+    {q:"¿Nº atómico del Carbono?",o:["4","6","8","12"],a:1},
+    {q:"¿Diamante y grafito son formas de...?",o:["Silicio","Carbono","Hierro","Azufre"],a:1},
+    {q:"¿Símbolo del Carbono?",o:["Ca","C","Co","Cr"],a:1}
+  ],
+  N:[
+    {q:"¿Símbolo del Nitrógeno?",o:["Ni","N","Nt","Ng"],a:1},
+    {q:"¿Qué % del aire es nitrógeno?",o:["21","50","78","90"],a:2},
+    {q:"¿Nº atómico del Nitrógeno?",o:["6","7","8","14"],a:1}
+  ],
+  O:[
+    {q:"¿Símbolo del Oxígeno?",o:["O","Ox","Og","Om"],a:0},
+    {q:"¿Nº atómico del Oxígeno?",o:["6","7","8","16"],a:2},
+    {q:"¿El Oxígeno es necesario para...?",o:["Solo plantas","La combustión y respiración","Solo metales","Nada"],a:1}
+  ],
+  F:[
+    {q:"¿Símbolo del Flúor?",o:["Fl","F","Fo","Fr"],a:1},
+    {q:"¿Elemento más electronegativo?",o:["Oxígeno","Cloro","Flúor","Nitrógeno"],a:2},
+    {q:"¿Nº atómico del Flúor?",o:["8","9","10","17"],a:1}
+  ],
+  Cl:[
+    {q:"¿Símbolo del Cloro?",o:["C","Cl","Cr","Co"],a:1},
+    {q:"¿Se usa para potabilizar el agua?",o:["Flúor","Cloro","Bromo","Yodo"],a:1},
+    {q:"¿Nº atómico del Cloro?",o:["9","16","17","18"],a:2}
+  ],
+  Br:[
+    {q:"¿Símbolo del Bromo?",o:["B","Br","Bm","Bo"],a:1},
+    {q:"¿Único no metal líquido a T. ambiente?",o:["Mercurio","Bromo","Galio","Cloro"],a:1},
+    {q:"¿Nº atómico del Bromo?",o:["17","35","53","80"],a:1}
+  ],
+  He:[
+    {q:"¿Símbolo del Helio?",o:["H","He","Hl","Ho"],a:1},
+    {q:"¿2º elemento más abundante del universo?",o:["Hidrógeno","Helio","Oxígeno","Carbono"],a:1},
+    {q:"¿Nº atómico del Helio?",o:["1","2","3","4"],a:1}
+  ],
+  Ne:[
+    {q:"¿Símbolo del Neón?",o:["N","Ne","No","Nn"],a:1},
+    {q:"¿El Neón se usa en...?",o:["Baterías","Letreros luminosos","Fertilizantes","Acero"],a:1},
+    {q:"¿Nº atómico del Neón?",o:["8","9","10","18"],a:2}
+  ],
+  Ar:[
+    {q:"¿Símbolo del Argón?",o:["A","Ar","Ag","An"],a:1},
+    {q:"¿Gas noble más abundante en la atmósfera?",o:["Helio","Neón","Argón","Xenón"],a:2},
+    {q:"¿Nº atómico del Argón?",o:["10","17","18","19"],a:2}
+  ],
+  Ag:[
+    {q:"¿Símbolo de la Plata?",o:["P","Pl","Ag","Pt"],a:2},
+    {q:"¿Mejor conductor eléctrico de todos?",o:["Cobre","Oro","Plata","Aluminio"],a:2},
+    {q:"¿Nº atómico de la Plata?",o:["29","47","79","82"],a:1}
+  ],
+  Au:[
+    {q:"¿Símbolo del Oro?",o:["O","Or","Au","Ag"],a:2},
+    {q:"¿Nº atómico del Oro?",o:["47","79","82","29"],a:1},
+    {q:"¿1 gramo de oro se puede estirar...?",o:["10 cm","2 m","2 km","20 km"],a:2}
+  ],
+  U:[
+    {q:"¿Símbolo del Uranio?",o:["Ur","U","Un","Um"],a:1},
+    {q:"¿Nº atómico del Uranio?",o:["90","92","94","238"],a:1},
+    {q:"¿El Uranio se usa en...?",o:["Joyería","Energía nuclear","Letreros","Sal"],a:1}
+  ],
+  P:[
+    {q:"¿Símbolo del Fósforo?",o:["F","Fo","P","Ph"],a:2},
+    {q:"¿Nº atómico del Fósforo?",o:["14","15","16","17"],a:1},
+    {q:"¿El Fósforo es importante en...?",o:["Solo metales","ADN y fertilizantes","Letreros","Globos"],a:1}
+  ],
+  S:[
+    {q:"¿Símbolo del Azufre?",o:["A","Az","S","Su"],a:2},
+    {q:"¿Nº atómico del Azufre?",o:["14","15","16","17"],a:2},
+    {q:"¿El Azufre se asocia con olor a...?",o:["Flores","Huevo podrido","Menta","Limón"],a:1}
+  ],
+  I:[
+    {q:"¿Símbolo del Yodo?",o:["Y","Yo","I","Io"],a:2},
+    {q:"¿Nº atómico del Yodo?",o:["35","53","17","9"],a:1},
+    {q:"¿El Yodo es esencial para...?",o:["Los huesos","La tiroides","La piel","Los nervios"],a:1}
+  ],
+  Ti:[
+    {q:"¿Símbolo del Titanio?",o:["T","Ti","Tn","Tt"],a:1},
+    {q:"¿Nº atómico del Titanio?",o:["20","21","22","26"],a:2},
+    {q:"¿El Titanio se usa en...?",o:["Sal","Aviones e implantes","Letreros","Fertilizantes"],a:1}
+  ],
+  Sc:[
+    {q:"¿Símbolo del Escandio?",o:["E","Es","Sc","Sk"],a:2},
+    {q:"¿Nº atómico del Escandio?",o:["20","21","22","23"],a:1}
+  ]
+};
+
+const EQUATIONS = [
+  {q:"Balancea: H₂ + O₂ → H₂O", options:["2H₂ + O₂ → 2H₂O","H₂ + O₂ → H₂O","2H₂ + 2O₂ → 2H₂O"], a:0},
+  {q:"Balancea: Fe + O₂ → Fe₂O₃", options:["4Fe + 3O₂ → 2Fe₂O₃","2Fe + O₂ → Fe₂O₃","Fe + O₂ → Fe₂O₃"], a:0},
+  {q:"Balancea: N₂ + H₂ → NH₃", options:["N₂ + 3H₂ → 2NH₃","N₂ + H₂ → NH₃","2N₂ + 3H₂ → 2NH₃"], a:0},
+  {q:"Balancea: CH₄ + O₂ → CO₂ + H₂O", options:["CH₄ + 2O₂ → CO₂ + 2H₂O","CH₄ + O₂ → CO₂ + H₂O","CH₄ + 3O₂ → CO₂ + 2H₂O"], a:0},
+  {q:"Balancea: Al + HCl → AlCl₃ + H₂", options:["2Al + 6HCl → 2AlCl₃ + 3H₂","Al + 3HCl → AlCl₃ + H₂","Al + HCl → AlCl₃ + H₂"], a:0},
+  {q:"Balancea: C₃H₈ + O₂ → CO₂ + H₂O", options:["C₃H₈ + 5O₂ → 3CO₂ + 4H₂O","C₃H₈ + O₂ → 3CO₂ + 4H₂O","C₃H₈ + 3O₂ → 3CO₂ + 4H₂O"], a:0},
+  {q:"Balancea: Na + H₂O → NaOH + H₂", options:["2Na + 2H₂O → 2NaOH + H₂","Na + H₂O → NaOH + H₂","2Na + H₂O → 2NaOH + H₂"], a:0},
+  {q:"Balancea: Ca + O₂ → CaO", options:["2Ca + O₂ → 2CaO","Ca + O₂ → CaO","Ca + 2O₂ → CaO"], a:0},
+  {q:"Balancea: KClO₃ → KCl + O₂", options:["2KClO₃ → 2KCl + 3O₂","KClO₃ → KCl + O₂","2KClO₃ → 2KCl + O₂"], a:0},
+  {q:"Balancea: Mg + HCl → MgCl₂ + H₂", options:["Mg + 2HCl → MgCl₂ + H₂","Mg + HCl → MgCl₂ + H₂","2Mg + 2HCl → MgCl₂ + H₂"], a:0}
+];
+
+const GENERAL_Q = [
+  {q:"¿Cuántos periodos tiene la tabla?",o:["5","6","7","8"],a:2},
+  {q:"¿Cómo se llaman las columnas?",o:["Periodos","Grupos","Bloques","Series"],a:1},
+  {q:"¿Qué determina el nº atómico?",o:["Neutrones","Electrones","Protones","Positrones"],a:2},
+  {q:"¿Quién creó la tabla moderna?",o:["Dalton","Mendeleev","Bohr","Rutherford"],a:1},
+  {q:"¿Grupo de los gases nobles?",o:["1","2","17","18"],a:3},
+  {q:"¿Grupo de los alcalinos?",o:["1","2","17","18"],a:0}
+];
+
+const CHANCE = [
+  {t:"¡Isótopo nuevo! +100", e:"money", v:100},
+  {t:"Artículo. Todos te pagan 25", e:"all", v:25},
+  {t:"Beca. Ve al Laboratorio", e:"goto", v:19},
+  {t:"Compuesto sintetizado. +150", e:"money", v:150},
+  {t:"Conferencia. Ve a INICIO +200", e:"goto", v:0},
+  {t:"Error de cálculo. -50", e:"money", v:-50}
+];
+const COMMUNITY = [
+  {t:"Explosión. -50", e:"money", v:-50},
+  {t:"Muestra contaminada. Pierdes turno", e:"skip"},
+  {t:"Reactivo equivocado. Cárcel", e:"jail"},
+  {t:"Fondos de emergencia. +100", e:"money", v:100},
+  {t:"Material roto. -60", e:"money", v:-60}
+];
+
+const TOKEN_COLORS = ["#ef4444","#3b82f6","#22c55e","#eab308"];
+
+let players = [], currentPlayer = 0, canRoll = true, doublesCount = 0;
+let properties = {}, labs = {}, turnNumber = 1, maxTurns = 20;
+let busy = false;
+let soundEnabled = localStorage.getItem('el_sound') !== '0';
+
+function $(id){ return document.getElementById(id); }
+function showScreen(id){ document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active')); $(id).classList.add('active'); }
+function log(m){ const el=$('log'); const d=document.createElement('div'); d.textContent=m; el.prepend(d); if(el.children.length>12) el.lastChild.remove(); }
+function showModal(h){ $('modal-content').innerHTML=h; $('modal').classList.remove('hidden'); }
+function closeModal(){ $('modal').classList.add('hidden'); }
+function setGuide(t, wait=false){ $('guide').textContent=t; $('guide').className='guide'+(wait?' wait':''); }
+function score(p){ return p.money + (p.elements.length*80) + ((p.labs||0)*50); }
+
+
+function playSound(type){
+  if (!soundEnabled) return;
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const o = ctx.createOscillator();
+    const g = ctx.createGain();
+    o.connect(g); g.connect(ctx.destination);
+    g.gain.value = 0.1;
+    if (type === 'dice') { o.frequency.value = 380; o.start(); o.stop(ctx.currentTime + 0.07); }
+    else if (type === 'ok') { o.frequency.value = 520; o.start(); o.frequency.linearRampToValueAtTime(780, ctx.currentTime + 0.12); o.stop(ctx.currentTime + 0.15); }
+    else if (type === 'bad') { o.frequency.value = 180; o.start(); o.stop(ctx.currentTime + 0.18); }
+    else if (type === 'buy') { o.frequency.value = 440; o.start(); o.frequency.linearRampToValueAtTime(660, ctx.currentTime + 0.15); o.stop(ctx.currentTime + 0.18); }
+  } catch(e) {}
+}
+function toggleSound(){
+  soundEnabled = !soundEnabled;
+  localStorage.setItem('el_sound', soundEnabled ? '1' : '0');
+  const btn = $('btn-sound');
+  if (btn) btn.textContent = soundEnabled ? '🔊 Sonido' : '🔇 Silencio';
+}
+function addPlayer(){
+  const c=$('players-setup'); if(c.children.length>=4) return;
+  const d=document.createElement('div'); d.className='player-setup';
+  d.innerHTML=`<input type="text" value="Jugador ${c.children.length+1}" maxlength="10"><button class="btn btn-danger btn-small" onclick="this.parentElement.remove()">✕</button>`;
+  c.appendChild(d);
+}
+
+function elementCard(sym){
+  const e=ELEMENTS[sym]; if(!e) return '';
+  return `<div class="element-card"><div class="big-num">Nº ${e.number}</div><div class="big-sym">${e.symbol}</div><div class="big-name">${e.name}</div>
+    <div class="props"><div class="prop"><b>Masa</b>${e.mass}</div><div class="prop"><b>Grupo</b>${e.group}</div>
+    <div class="prop"><b>Periodo</b>${e.period}</div><div class="prop"><b>Bloque</b>${e.block}</div>
+    <div class="prop"><b>Estado</b>${e.state}</div><div class="prop"><b>Config</b>${e.electron}</div></div>
+    <div class="prop" style="margin-top:6px;text-align:center"><b>Uso</b>${e.use}</div></div>`;
+}
+
+function buildBoard(){
+  const board = $('board');
+  // limpiar casillas y fichas, conservar el centro
+  board.querySelectorAll('.space, .token').forEach(el => el.remove());
+
+  // Mapa: índice del tablero (0-39) → celda de la grilla 11x11 (fila, col) 1-based
+  // Inferior (izq→der): fila 11, cols 1..11
+  // Derecho (abajo→arriba): col 11, filas 10..2
+  // Superior (der→izq): fila 1, cols 10..2
+  // Izquierdo (arriba→abajo): col 1, filas 2..10
+  const gridPos = [];
+  // 0 = esquina inferior izquierda
+  gridPos[0] = [11, 1];
+  for (let i = 1; i <= 9; i++) gridPos[i] = [11, i + 1]; // 1..9
+  gridPos[10] = [11, 11]; // esquina inferior derecha
+  for (let i = 11; i <= 19; i++) gridPos[i] = [10 - (i - 11), 11]; // 11..19 subiendo
+  gridPos[20] = [1, 11]; // esquina superior derecha
+  for (let i = 21; i <= 29; i++) gridPos[i] = [1, 10 - (i - 21)]; // 21..29 hacia la izquierda
+  gridPos[30] = [1, 1]; // esquina superior izquierda
+  for (let i = 31; i <= 39; i++) gridPos[i] = [2 + (i - 31), 1]; // 31..39 bajando
+
+  BOARD.forEach((s, i) => {
+    const el = document.createElement('div');
+    el.className = 'space';
+    el.id = 'space-' + i;
+
+    if (['go','jail','free','gotojail'].includes(s.type)) el.classList.add('corner');
+    if (s.type === 'chance') el.classList.add('chance');
+    if (s.type === 'community') el.classList.add('community');
+    if (s.type === 'station') el.classList.add('station');
+    if (s.type === 'lab' || s.type === 'equation') el.classList.add('lab');
+    if (s.group) el.classList.add(GROUP_CLASS[s.group]);
+
+    if (s.type === 'property') {
+      el.innerHTML = `<span class="sym">${s.short}</span><span class="price">${s.price}</span>`;
+    } else {
+      el.innerHTML = `<span class="sym">${s.short}</span>`;
+    }
+
+    const [row, col] = gridPos[i];
+    el.style.gridRow = row;
+    el.style.gridColumn = col;
+    board.appendChild(el);
+  });
+}
+
+function updateTokens(){
+  document.querySelectorAll('.token').forEach(t => t.remove());
+  players.forEach((p, pi) => {
+    const sp = $('space-' + p.position);
+    if (!sp) return;
+    const t = document.createElement('div');
+    t.className = 'token';
+    t.style.background = TOKEN_COLORS[pi];
+    t.textContent = p.name[0].toUpperCase();
+    // pequeños offsets si hay varios jugadores en la misma casilla
+    const ox = (pi % 2) * 6 - 3;
+    const oy = Math.floor(pi / 2) * 6 - 3;
+    t.style.transform = `translate(calc(-50% + ${ox}px), calc(-50% + ${oy}px))`;
+    sp.appendChild(t);
+  });
+  document.querySelectorAll('.space').forEach(s => s.classList.remove('current-highlight'));
+  const cur = $('space-' + players[currentPlayer].position);
+  if (cur) {
+    cur.classList.add('current-highlight');
+    cur.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+  }
+}
+
+function updateAll(){
+  const sorted = [...players].sort((a,b) => score(b) - score(a));
+  $('ranking').innerHTML = sorted.map((p,i) => {
+    const idx = players.indexOf(p);
+    return `<div class="rank-chip ${idx===currentPlayer?'me':''}">
+      <div>${i+1}. ${p.name}</div>
+      <div class="money">${p.money} ₡</div>
+      <div class="els">${p.elements.length} el · ${p.labs||0} lab · ${score(p)} pts</div>
+    </div>`;
+  }).join('');
+
+  $('positions-list').innerHTML = players.map((p,i) =>
+    `<div class="pos-row"><span>${i===currentPlayer?'👉 ':''}${p.name}${p.jail?' 🔒':''}</span><span class="pspace">${BOARD[p.position].name}</span></div>`
+  ).join('');
+
+  const p = players[currentPlayer];
+  const s = BOARD[p.position];
+  $('space-name').textContent = s.name;
+  let desc = '';
+  if (s.type === 'property' || s.type === 'station') {
+    const o = properties[p.position];
+    desc = o !== undefined ? `Dueño: ${players[o].name}` : 'Libre · Responde para comprar';
+  } else if (s.type === 'equation') desc = 'Balancea la ecuación';
+  else if (s.type === 'lab') desc = 'Pregunta difícil';
+  else if (s.type === 'chance') desc = 'Carta de Descubrimiento';
+  else if (s.type === 'community') desc = 'Carta de Accidente';
+  $('space-desc').textContent = desc;
+  $('turn-info').textContent = p.jail ? `${p.name} en Cárcel` : `Turno de ${p.name}`;
+  $('turn-count').textContent = turnNumber + (maxTurns ? '/' + maxTurns : '');
+  updateTokens();
+}
+
+function startGame(){
+  const inputs = document.querySelectorAll('#players-setup input');
+  players = [];
+  inputs.forEach((inp,i) => players.push({
+    name: inp.value.trim() || `J${i+1}`, money: 1500, position: 0,
+    jail: false, jailTurns: 0, skip: false, properties: [], elements: [], labs: 0, correct: 0, wrong: 0
+  }));
+  if (players.length < 2) { alert('Mínimo 2 jugadores'); return; }
+  maxTurns = parseInt($('max-turns').value) || 0;
+  properties = {}; labs = {}; currentPlayer = 0; canRoll = true; doublesCount = 0; turnNumber = 1; busy = false;
+  buildBoard();
+  showScreen('screen-game');
+  updateAll();
+  const sb=$('btn-sound'); if(sb) sb.textContent=soundEnabled?'🔊 Sonido':'🔇 Silencio';
+  setGuide(`Turno de ${players[0].name}: pulsa “Tirar dados”`);
+  log('Partida iniciada');
+  if (!localStorage.getItem('el_tutorial')) { localStorage.setItem('el_tutorial','1'); setTimeout(showTutorial, 400); }
+  setTimeout(() => {
+    const sc = $('board-scroll');
+    sc.scrollLeft = (sc.scrollWidth - sc.clientWidth) / 2;
+    sc.scrollTop = (sc.scrollHeight - sc.clientHeight) / 2;
+  }, 50);
+}
+
+function getQ(sym){
+  if (sym && ELEMENT_QUESTIONS[sym]) {
+    const qs = ELEMENT_QUESTIONS[sym];
+    return qs[Math.floor(Math.random() * qs.length)];
+  }
+  return GENERAL_Q[Math.floor(Math.random() * GENERAL_Q.length)];
+}
+
+function rollDice(){
+  if (!canRoll || busy) return;
+  const p = players[currentPlayer];
+  if (p.skip) { p.skip = false; log(`${p.name} pierde el turno`); endTurn(); return; }
+
+  const d1 = 1 + Math.floor(Math.random()*6);
+  const d2 = 1 + Math.floor(Math.random()*6);
+  playSound('dice');
+  $('die1').textContent = d1;
+  $('die2').textContent = d2;
+
+  if (p.jail) {
+    if (d1 === d2) {
+      p.jail = false; p.jailTurns = 0;
+      log(`${p.name} sale con dobles`);
+      canRoll = false;
+      doMove(d1 + d2);
+    } else {
+      p.jailTurns++;
+      log(`${p.name} no dobles (${p.jailTurns}/3)`);
+      if (p.jailTurns >= 3) {
+        p.money -= 50; p.jail = false; p.jailTurns = 0;
+        log(`${p.name} paga 50 y sale`);
+        canRoll = false;
+        doMove(d1 + d2);
+      } else {
+        canRoll = false;
+        $('btn-roll').classList.add('hidden');
+        $('btn-end').classList.remove('hidden');
+        setGuide('Sigues en Cárcel. Termina el turno.', true);
+      }
+    }
+    updateAll();
+    return;
+  }
+
+  if (d1 === d2) {
+    doublesCount++;
+    if (doublesCount >= 3) {
+      log(`${p.name} 3 dobles → Cárcel`);
+      sendToJail(currentPlayer);
+      canRoll = false;
+      $('btn-roll').classList.add('hidden');
+      $('btn-end').classList.remove('hidden');
+      setGuide('Cárcel. Termina el turno.', true);
+      updateAll();
+      return;
+    }
+    log(`${p.name} dobles`);
+  } else doublesCount = 0;
+
+  canRoll = false;
+  doMove(d1 + d2);
+}
+
+function doMove(steps){
+  busy = true;
+  const p = players[currentPlayer];
+  let left = steps;
+  const total = steps;
+
+  // Quitar resaltado anterior y preparar recorrido
+  document.querySelectorAll('.space').forEach(s => s.classList.remove('current-highlight'));
+
+  function step(){
+    if (left <= 0) {
+      busy = false;
+      updateAll();
+      log(`${p.name} cae en → ${BOARD[p.position].name}`);
+      setGuide(`Llegaste a ${BOARD[p.position].name}`);
+      handleSpace(p.position);
+      return;
+    }
+
+    // Avanzar una casilla
+    p.position = (p.position + 1) % 40;
+    if (p.position === 0) {
+      p.money += 200;
+      log(`${p.name} pasa por INICIO +200`);
+    }
+
+    // Actualizar fichas y resaltar la casilla actual del recorrido
+    updateTokens();
+    const cur = document.getElementById('space-' + p.position);
+    if (cur) {
+      document.querySelectorAll('.space').forEach(s => s.classList.remove('current-highlight'));
+      cur.classList.add('current-highlight');
+      cur.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+    }
+
+    left--;
+    const avanzadas = total - left;
+    setGuide(`Recorrido: ${avanzadas}/${total} · ${BOARD[p.position].name}`);
+    $('space-name').textContent = BOARD[p.position].name;
+    $('space-desc').textContent = `Avanzando... (${avanzadas} de ${total})`;
+
+    // Velocidad: un poco más lenta para que se vea bien el recorrido
+    setTimeout(step, 280);
+  }
+  step();
+}
+
+function handleSpace(pos){
+  const s = BOARD[pos];
+  switch (s.type) {
+    case 'go': case 'free': case 'jail':
+      setGuide('Casilla especial. Termina el turno.', true);
+      finishAction();
+      break;
+    case 'gotojail':
+      sendToJail(currentPlayer);
+      setGuide('Vas a la Cárcel.', true);
+      finishAction();
+      break;
+    case 'chance':
+      drawCard('chance');
+      break;
+    case 'community':
+      drawCard('community');
+      break;
+    case 'lab':
+      setGuide('Laboratorio: responde la pregunta');
+      askQuestion(true);
+      break;
+    case 'equation':
+      setGuide('Balancea la ecuación');
+      askEquation();
+      break;
+    case 'property': case 'station':
+      handleProperty(pos);
+      break;
+    default:
+      finishAction();
+  }
+}
+
+function handleProperty(pos){
+  const s = BOARD[pos];
+  const p = players[currentPlayer];
+  const owner = properties[pos];
+
+  if (owner === undefined) {
+    setGuide('Elemento libre. Responde para poder comprar');
+    askQuestion(false, pos);
+  } else if (owner === currentPlayer) {
+    if (s.group && canBuild(p, s.group)) {
+      showModal(`<h3>¿Construir Laboratorio?</h3>
+        <p>Tienes el grupo completo. Costo 100 ₡.</p>
+        <div class="flex mt-2">
+          <button class="btn btn-success" onclick="buildLab('${s.group}')">Construir</button>
+          <button class="btn btn-secondary" onclick="closeModal();finishAction()">No</button>
+        </div>`);
+    } else {
+      setGuide('Es tuyo. Termina el turno.', true);
+      finishAction();
+    }
+  } else {
+    let rent = s.rent || 25;
+    if (labs[s.group] === owner) rent = Math.floor(rent * 1.8);
+    if (p.money >= rent) {
+      p.money -= rent;
+      players[owner].money += rent;
+      log(`${p.name} paga ${rent} a ${players[owner].name}`);
+      setGuide(`Pagaste ${rent} de renta.`, true);
+    } else {
+      p.money = 0;
+      setGuide('No puedes pagar.', true);
+    }
+    finishAction();
+  }
+}
+
+function canBuild(p, group){
+  const need = GROUPS[group];
+  if (!need) return false;
+  return need.every(sym => p.elements.includes(sym)) && p.money >= 100 && labs[group] !== currentPlayer;
+}
+
+function buildLab(group){
+  const p = players[currentPlayer];
+  p.money -= 100;
+  p.labs = (p.labs || 0) + 1;
+  labs[group] = currentPlayer;
+  log(`${p.name} construye laboratorio`);
+  closeModal();
+  updateAll();
+  setGuide('Laboratorio construido.', true);
+  finishAction();
+}
+
+function askQuestion(isLab, propertyPos){
+  const s = propertyPos != null ? BOARD[propertyPos] : null;
+  const q = getQ(s && s.symbol);
+  const title = isLab ? '🧪 Laboratorio' : ('❓ ' + (s ? s.name : 'Pregunta'));
+  let html = `<h3>${title}</h3><p style="margin:10px 0;font-size:1.05rem">${q.q}</p><div class="options">`;
+  q.o.forEach((opt,i) => html += `<button class="option-btn" onclick="answerQ(${i},${q.a},${isLab},${propertyPos})">${opt}</button>`);
+  html += `</div>`;
+  showModal(html);
+}
+
+function askEquation(){
+  const eq = EQUATIONS[Math.floor(Math.random()*EQUATIONS.length)];
+  let html = `<h3>⚖️ Balanceo</h3><div class="eq-box">${eq.q}</div><div class="options">`;
+  eq.options.forEach((opt,i) => html += `<button class="option-btn" onclick="answerEq(${i},${eq.a})">${opt}</button>`);
+  html += `</div>`;
+  showModal(html);
+}
+
+function answerEq(sel, correct){
+  document.querySelectorAll('.option-btn').forEach((b,i) => {
+    b.disabled = true;
+    if (i === correct) b.classList.add('correct');
+    if (i === sel && sel !== correct) b.classList.add('wrong');
+  });
+  const p = players[currentPlayer];
+  p.correct = (p.correct||0) + (sel===correct?1:0);
+  p.wrong = (p.wrong||0) + (sel===correct?0:1);
+  const delay = sel === correct ? 900 : 1600;
+  setTimeout(() => {
+    closeModal();
+    if (sel === correct) {
+      p.money += 120;
+      log(`${p.name} balanceó bien +120`);
+      setGuide('+120 por balancear.', true);
+    } else {
+      log(`${p.name} falló el balanceo`);
+      setGuide('Fallaste el balanceo. Mira la respuesta correcta.', true);
+    }
+    finishAction();
+  }, delay);
+}
+
+function answerQ(sel, correct, isLab, propertyPos){
+  const btns = document.querySelectorAll('.option-btn');
+  btns.forEach((b,i) => {
+    b.disabled = true;
+    if (i === correct) b.classList.add('correct');
+    if (i === sel && sel !== correct) b.classList.add('wrong');
+  });
+  const p = players[currentPlayer];
+  const ok = sel === correct;
+  const s = propertyPos != null ? BOARD[propertyPos] : null;
+  // Track stats
+  p.correct = (p.correct||0) + (ok?1:0);
+  p.wrong = (p.wrong||0) + (ok?0:1);
+
+  const delay = ok ? 900 : 1600; // más tiempo si falló para ver la correcta
+  setTimeout(() => {
+    closeModal();
+    if (ok) {
+      playSound('ok');
+      log(`${p.name} ¡acertó!`);
+      if (isLab) {
+        p.money += 150;
+        setGuide('+150 del Laboratorio.', true);
+        finishAction();
+      } else if (propertyPos != null) {
+        if (p.money >= s.price) {
+          const fact = s.symbol && ELEMENTS[s.symbol] ? `<div class="fact">💡 ${ELEMENTS[s.symbol].fact}</div>` : '';
+          showModal(`<h3>✅ Correcto</h3>${s.symbol ? elementCard(s.symbol) : ''}${fact}
+            <div class="info-box">Precio: <b>${s.price} ₡</b> · Renta: <b>${s.rent}</b></div>
+            <div class="flex mt-2">
+              <button class="btn btn-success" onclick="buyProp(${propertyPos})">Comprar</button>
+              <button class="btn btn-secondary" onclick="closeModal();finishAction()">No</button>
+            </div>`);
+        } else {
+          setGuide('Acertaste pero no te alcanza.', true);
+          finishAction();
+        }
+      } else finishAction();
+    } else {
+      playSound('bad');
+      log(`${p.name} falló`);
+      if (isLab) {
+        sendToJail(currentPlayer);
+        setGuide('Fallaste → Cárcel.', true);
+      } else setGuide('Fallaste. No puedes comprar.', true);
+      finishAction();
+    }
+  }, delay);
+}
+
+function buyProp(pos){
+  const s = BOARD[pos];
+  const p = players[currentPlayer];
+  p.money -= s.price;
+  properties[pos] = currentPlayer;
+  p.properties.push(pos);
+  if (s.symbol && !p.elements.includes(s.symbol)) p.elements.push(s.symbol);
+  playSound('buy');
+  log(`${p.name} compró ${s.name}`);
+  closeModal();
+  updateAll();
+  if (s.symbol) {
+    showModal(`<h3>🎉 Añadido a tu tabla</h3>${elementCard(s.symbol)}
+      <p style="text-align:center;color:var(--muted);font-size:.85rem">${p.elements.length} elementos · ${score(p)} pts</p>
+      <button class="btn mt-2" onclick="closeModal();finishAction()">Continuar</button>`);
+  } else {
+    setGuide('Comprado.', true);
+    finishAction();
+  }
+}
+
+function drawCard(type){
+  const deck = type === 'chance' ? CHANCE : COMMUNITY;
+  const c = deck[Math.floor(Math.random()*deck.length)];
+  showModal(`<h3>${type==='chance'?'✨ Descubrimiento':'⚠️ Accidente'}</h3>
+    <p style="margin:14px 0;font-size:1.05rem">${c.t}</p>
+    <button class="btn" onclick="applyCard('${c.e}',${c.v||0})">Continuar</button>`);
+}
+
+function applyCard(e, v){
+  const p = players[currentPlayer];
+  closeModal();
+  if (e === 'money') {
+    p.money += v;
+    log(`${p.name} ${v>=0?'+':''}${v}`);
+    setGuide(`${v>=0?'+':''}${v}`, true);
+  } else if (e === 'all') {
+    players.forEach((o,i) => { if (i !== currentPlayer) { o.money -= v; p.money += v; } });
+    log(`${p.name} cobra ${v} de cada uno`);
+    setGuide(`+${v} de cada uno`, true);
+  } else if (e === 'goto') {
+    if (v < p.position) { p.money += 200; log(`${p.name} +200 por Inicio`); }
+    p.position = v;
+    updateAll();
+    setTimeout(() => handleSpace(v), 200);
+    return;
+  } else if (e === 'jail') {
+    sendToJail(currentPlayer);
+    setGuide('Cárcel.', true);
+  } else if (e === 'skip') {
+    p.skip = true;
+    setGuide('Pierdes el próximo turno.', true);
+  }
+  finishAction();
+}
+
+function sendToJail(i){
+  players[i].position = 10;
+  players[i].jail = true;
+  players[i].jailTurns = 0;
+  doublesCount = 0;
+  log(`${players[i].name} → Cárcel`);
+  updateAll();
+}
+
+function finishAction(){
+  if (doublesCount > 0 && !players[currentPlayer].jail) {
+    canRoll = true;
+    $('btn-roll').classList.remove('hidden');
+    $('btn-end').classList.add('hidden');
+    setGuide('Dobles. Puedes tirar otra vez.');
+  } else {
+    canRoll = false;
+    $('btn-roll').classList.add('hidden');
+    $('btn-end').classList.remove('hidden');
+  }
+  updateAll();
+}
+
+function endTurn(){
+  if (busy) return;
+  doublesCount = 0;
+  currentPlayer = (currentPlayer + 1) % players.length;
+  if (currentPlayer === 0) turnNumber++;
+  if (maxTurns && turnNumber > maxTurns) { endGame(); return; }
+  canRoll = true;
+  $('btn-roll').classList.remove('hidden');
+  $('btn-end').classList.add('hidden');
+  updateAll();
+  let guideMsg = `Turno de ${players[currentPlayer].name}: pulsa “Tirar dados”`;
+  if (pendingTrade && pendingTrade.to === currentPlayer) {
+    guideMsg = `¡${players[pendingTrade.from].name} te ofreció un elemento! Pulsa Intercambiar`;
+  }
+  setGuide(guideMsg);
+  log(`—— Turno de ${players[currentPlayer].name} ——`);
+}
+
+function endGame(){
+  const sorted = [...players].sort((a,b) => score(b) - score(a));
+  if(sorted.length&&window.saasSubmitResult){const winner=sorted[0];window.saasSubmitResult({module:'Elementópolis · partida local',score:score(winner),level:1,meta:{mode:'local',players:sorted.map(p=>p.name),elements:winner.elements.length,labs:winner.labs||0}}).catch(()=>{});}
+  let html = `<h3>🏁 Fin de la partida</h3><div class="info-box">Puntaje = créditos + el×80 + labs×50</div>`;
+  sorted.forEach((p,i) => {
+    const tot = (p.correct||0)+(p.wrong||0);
+    const pct = tot ? Math.round(100*(p.correct||0)/tot) : 0;
+    html += `<div style="padding:10px;margin:6px 0;background:#0f172a;border-radius:10px;${i===0?'border:2px solid #22c55e':''}">
+      <b style="font-size:1.05rem">${i+1}. ${p.name}</b> ${i===0?'🏆':''}<br>
+      <span style="color:var(--success)">${p.money} ₡</span> · ${p.elements.length} elementos · ${p.labs||0} labs<br>
+      <b style="color:var(--accent)">${score(p)} puntos</b><br>
+      <span style="font-size:.8rem;color:var(--muted)">Aciertos: ${p.correct||0} · Fallos: ${p.wrong||0} · ${pct}% acierto</span>
+    </div>`;
+  });
+  html += `<button class="btn mt-2" onclick="location.reload()">Nueva partida</button>`;
+  showModal(html);
+}
+
+function showMyTable(){
+  const p = players[currentPlayer];
+  const all = Object.keys(ELEMENTS).sort((a,b) => ELEMENTS[a].number - ELEMENTS[b].number);
+  let html = `<h3>Tabla de ${p.name}</h3>
+    <p style="color:var(--muted);font-size:.85rem">${p.elements.length} elementos · ${score(p)} pts</p>
+    <div class="mini-table">`;
+  all.forEach(sym => {
+    const e = ELEMENTS[sym];
+    const own = p.elements.includes(sym);
+    html += `<div class="mini-el ${own?'owned':''}" style="${own?'':'opacity:.35'}" ${own?`onclick="showEl('${sym}')"`:''}>
+      <div class="mnum">${e.number}</div><div class="msym">${e.symbol}</div></div>`;
+  });
+  html += `</div><h4 style="color:var(--accent);margin:12px 0 6px;font-size:.9rem">Progreso por grupos</h4>`;
+  const groupNames = {alkali:'Alcalinos',alkaline:'Alcalinotérreos',transition:'Transición',nonmetal:'No metales / Al',halogen:'Halógenos',noble:'Gases nobles'};
+  Object.keys(GROUPS).forEach(g => {
+    const need = GROUPS[g];
+    const have = need.filter(s => p.elements.includes(s)).length;
+    const done = have === need.length;
+    html += `<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #1e293b;font-size:.82rem">
+      <span>${groupNames[g]||g}</span>
+      <span style="color:${done?'var(--success)':'var(--muted)'}">${have}/${need.length} ${done?'✓ Lab posible':''}</span>
+    </div>`;
+  });
+  html += `<button class="btn mt-2" onclick="closeModal()">Cerrar</button>`;
+  showModal(html);
+}
+
+function showEl(sym){
+  showModal(`<h3>${ELEMENTS[sym].name}</h3>${elementCard(sym)}
+    <div class="fact">💡 ${ELEMENTS[sym].fact}</div>
+    <button class="btn mt-2" onclick="showMyTable()">← Volver</button>`);
+}
+
+
+
+let pendingTrade = null; // {from, to, symbol}
+
+function showTrade(){
+  const p = players[currentPlayer];
+  // Si hay oferta pendiente para mí, mostrar aceptar/rechazar
+  if (pendingTrade && pendingTrade.to === currentPlayer) {
+    const from = players[pendingTrade.from];
+    const sym = pendingTrade.symbol;
+    const e = ELEMENTS[sym];
+    showModal(`<h3>🔄 Oferta de intercambio</h3>
+      <p><b>${from.name}</b> te ofrece <b>${e.name} (${sym})</b></p>
+      <div class="info-box">Si aceptas, el elemento pasa a ti. ${from.name} paga 30 ₡ de gestión.</div>
+      <div class="flex mt-2">
+        <button class="btn btn-success" onclick="acceptTrade()">Aceptar</button>
+        <button class="btn btn-danger" onclick="rejectTrade()">Rechazar</button>
+      </div>`);
+    return;
+  }
+  if (pendingTrade) {
+    showModal(`<h3>🔄 Intercambio</h3><p style="color:var(--muted)">Hay una oferta pendiente de ${players[pendingTrade.from].name}. Espera a que ${players[pendingTrade.to].name} responda.</p><button class="btn mt-2" onclick="closeModal()">Ok</button>`);
+    return;
+  }
+  if (p.elements.length === 0) {
+    showModal(`<h3>🔄 Intercambiar</h3><p style="color:var(--muted);text-align:center;padding:12px">No tienes elementos para ofrecer.</p><button class="btn mt-2" onclick="closeModal()">Cerrar</button>`);
+    return;
+  }
+  const others = players.map((o,i)=>({o,i})).filter(x => x.i !== currentPlayer);
+  let html = `<h3>🔄 Ofrecer intercambio</h3>
+    <p style="font-size:.85rem;color:var(--muted);margin-bottom:8px">Ofreces un elemento. El otro jugador aceptará o rechazará en su turno.</p>
+    <label style="font-size:.8rem;color:var(--muted)">Tu elemento</label>
+    <select id="trade-el" style="width:100%;padding:10px;margin:4px 0 10px;border-radius:8px;background:#0f172a;color:var(--text);border:1px solid #334155">`;
+  p.elements.forEach(sym => {
+    html += `<option value="${sym}">${ELEMENTS[sym].name} (${sym})</option>`;
+  });
+  html += `</select>
+    <label style="font-size:.8rem;color:var(--muted)">Ofrecer a</label>
+    <select id="trade-to" style="width:100%;padding:10px;margin:4px 0 10px;border-radius:8px;background:#0f172a;color:var(--text);border:1px solid #334155">`;
+  others.forEach(({o,i}) => {
+    html += `<option value="${i}">${o.name}</option>`;
+  });
+  html += `</select>
+    <div class="info-box">Al aceptar, pagas 30 ₡ de gestión y el elemento cambia de dueño.</div>
+    <div class="flex mt-2">
+      <button class="btn btn-success" onclick="offerTrade()">Enviar oferta</button>
+      <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
+    </div>`;
+  showModal(html);
+}
+
+function offerTrade(){
+  const sym = document.getElementById('trade-el').value;
+  const toIdx = parseInt(document.getElementById('trade-to').value);
+  pendingTrade = { from: currentPlayer, to: toIdx, symbol: sym };
+  log(`${players[currentPlayer].name} ofrece ${sym} a ${players[toIdx].name}`);
+  closeModal();
+  setGuide(`Oferta enviada a ${players[toIdx].name}. Esperando respuesta.`, true);
+}
+
+function acceptTrade(){
+  if (!pendingTrade) return;
+  const from = players[pendingTrade.from];
+  const to = players[pendingTrade.to];
+  const sym = pendingTrade.symbol;
+  if (!from.elements.includes(sym)) {
+    pendingTrade = null;
+    closeModal();
+    setGuide('La oferta ya no es válida.', true);
+    return;
+  }
+  if (from.money < 30) {
+    alert(`${from.name} no tiene 30 ₡ para la gestión`);
+    return;
+  }
+  from.elements = from.elements.filter(s => s !== sym);
+  // Quitar del tablero si era propiedad
+  Object.keys(properties).forEach(pos => {
+    if (properties[pos] === pendingTrade.from && BOARD[pos].symbol === sym) {
+      delete properties[pos];
+      from.properties = from.properties.filter(x => x != pos);
+    }
+  });
+  if (!to.elements.includes(sym)) to.elements.push(sym);
+  from.money -= 30;
+  log(`${to.name} aceptó ${sym} de ${from.name}`);
+  pendingTrade = null;
+  closeModal();
+  updateAll();
+  setGuide(`¡Aceptaste ${sym}!`, true);
+}
+
+function rejectTrade(){
+  if (!pendingTrade) return;
+  log(`${players[pendingTrade.to].name} rechazó el intercambio`);
+  pendingTrade = null;
+  closeModal();
+  setGuide('Oferta rechazada.', true);
+}
+
+function showTutorial(){
+  showModal(`<h3>👋 Cómo jugar</h3>
+    <div style="font-size:.9rem;line-height:1.5;color:var(--muted)">
+      <p style="margin-bottom:8px"><b style="color:var(--accent)">1.</b> Tira los dados y avanza casilla por casilla.</p>
+      <p style="margin-bottom:8px"><b style="color:var(--accent)">2.</b> Si caes en un elemento libre → responde una pregunta. Si aciertas puedes comprarlo.</p>
+      <p style="margin-bottom:8px"><b style="color:var(--accent)">3.</b> Cada elemento comprado se añade a tu tabla periódica.</p>
+      <p style="margin-bottom:8px"><b style="color:var(--accent)">4.</b> Completa un grupo y construye un laboratorio para subir la renta.</p>
+      <p style="margin-bottom:8px"><b style="color:var(--accent)">5.</b> Casillas ⚖️ = balancea ecuaciones (+120).</p>
+      <p style="margin-bottom:8px"><b style="color:var(--accent)">Gana</b> quien tenga más puntaje: créditos + elementos×80 + labs×50.</p>
+    </div>
+    <button class="btn mt-2" onclick="closeModal()">¡Entendido!</button>`);
+}
+
+function saveGame(){
+  localStorage.setItem('elementopolis-quimica', JSON.stringify({players, currentPlayer, properties, labs, turnNumber, maxTurns}));
+  showModal(`<h3>💾 Guardado</h3><p>Puedes continuar después.</p><button class="btn mt-2" onclick="closeModal()">Ok</button>`);
+}
+
+function loadGame(){
+  const raw = localStorage.getItem('elementopolis-quimica');
+  if (!raw) { alert('No hay partida guardada'); return; }
+  try {
+    const d = JSON.parse(raw);
+    players = d.players; currentPlayer = d.currentPlayer; properties = d.properties || {};
+    labs = d.labs || {}; turnNumber = d.turnNumber || 1; maxTurns = d.maxTurns || 0;
+    canRoll = true; busy = false;
+    buildBoard(); showScreen('screen-game'); updateAll();
+    setGuide(`Turno de ${players[currentPlayer].name}`);
+    log('Partida cargada');
+  } catch(e) { alert('Error al cargar'); }
+}
+</script>
+</body>
+</html>
