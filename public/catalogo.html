@@ -179,7 +179,7 @@ footer{text-align:center;color:#64748b;font-size:.8rem;padding:24px 12px}
 <footer>Juegos de Reto · Física, Química, Biología y Matemáticas · Aprende jugando · <a href="/terminos.html">Términos</a> · <a href="/privacidad.html">Privacidad</a></footer>
 <script>
 // API base: same origin when served by saas-platform; override if games on another host
-const API_BASE = localStorage.getItem('saas_api_base') || '';
+const API_BASE = location.origin;
 
 function show(el, msg){ el.style.display='block'; el.textContent=msg; }
 function hide(el){ el.style.display='none'; }

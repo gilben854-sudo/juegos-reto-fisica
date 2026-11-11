@@ -1380,7 +1380,7 @@ function backToLevels() {
 </script>
 <script>
 (function(){
-  var SAAS_API = localStorage.getItem('saas_api_base') || '';
+  var SAAS_API = location.origin;
   async function saasCheckAccess(){
     var gate = document.getElementById('licenseGate');
     var st = document.getElementById('licenseStatus');
