@@ -517,12 +517,22 @@ updateLevelButtons(); if(typeof simReset==='function') simReset(); refreshCert()
     var code = localStorage.getItem('saas_classCode') || '';
     if(!code){ if(st) st.innerHTML='<b style="color:#fca5a5">Sin código de clase.</b> Vuelve al catálogo.'; if(gate) gate.className='license-gate blocked'; return false; }
     try{
-      var r = await fetch(SAAS_API + '/api/access/check?classCode=' + encodeURIComponent(code));
+      var controller = new AbortController();
+      var timeout = setTimeout(function(){ controller.abort(); }, 8000);
+      var studentName = localStorage.getItem('saas_studentName') || '';
+      var studentToken = localStorage.getItem('saas_student_token') || '';
+      var url = SAAS_API + '/api/access/check?classCode=' + encodeURIComponent(code) + '&studentName=' + encodeURIComponent(studentName);
+      var r = await fetch(url, { cache:'no-store', signal:controller.signal, headers:{Authorization:'Bearer ' + studentToken} });
+      clearTimeout(timeout);
       var data = await r.json();
       if(!data.allowed){ if(st) st.innerHTML='<b style="color:#fca5a5">Acceso bloqueado.</b>'; if(gate) gate.className='license-gate blocked'; return false; }
       if(st) st.innerHTML='<b style="color:#86efac">Licencia activa.</b> '+(data.teacherName||'');
       if(gate) gate.className='license-gate ok';
-      try{ localStorage.setItem('saas_access_ok','1'); }catch(e){}
+      try{
+        localStorage.setItem('saas_access_ok','1');
+        if(data.accessToken) localStorage.setItem('saas_student_token',data.accessToken);
+        localStorage.setItem('saas_subjects',JSON.stringify(data.subjects||[]));
+      }catch(e){}
       return true;
     }catch(e){ if(st) st.innerHTML='Sin servidor: '+e.message; if(gate) gate.className='license-gate blocked'; return false; }
   }
